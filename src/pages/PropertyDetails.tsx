@@ -62,45 +62,54 @@ export default function PropertyDetails() {
   const totalPrice = accommodationTotal + experiencesTotal + serviceFee;
 
   const handleBooking = async () => {
-    if (!user) {
-      navigate('/auth?redirect=' + encodeURIComponent(window.location.pathname));
-      return;
-    }
     if (!dateRange.from || !dateRange.to || !property) return;
 
     setIsBooking(true);
     try {
-      const { data: booking, error } = await supabase
-        .from('bookings')
-        .insert({
-          guest_id: user.id,
-          property_id: property.id,
-          check_in: format(dateRange.from, 'yyyy-MM-dd'),
-          check_out: format(dateRange.to, 'yyyy-MM-dd'),
-          guests_count: guestCount,
-          total_price: totalPrice,
-        })
-        .select()
-        .single();
+      // If user is logged in, save to database
+      if (user) {
+        const { data: booking, error } = await supabase
+          .from('bookings')
+          .insert({
+            guest_id: user.id,
+            property_id: property.id,
+            check_in: format(dateRange.from, 'yyyy-MM-dd'),
+            check_out: format(dateRange.to, 'yyyy-MM-dd'),
+            guests_count: guestCount,
+            total_price: totalPrice,
+          })
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (selectedExperiences.length > 0 && booking) {
-        const expInserts = selectedExperiences.map(expId => {
-          const exp = property.experiences?.find(e => e.id === expId);
-          return {
-            booking_id: booking.id,
-            experience_id: expId,
-            scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
-            participants: guestCount,
-            price_at_booking: exp?.price || 0,
-          };
+        if (selectedExperiences.length > 0 && booking) {
+          const expInserts = selectedExperiences.map(expId => {
+            const exp = property.experiences?.find(e => e.id === expId);
+            return {
+              booking_id: booking.id,
+              experience_id: expId,
+              scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
+              participants: guestCount,
+              price_at_booking: exp?.price || 0,
+            };
+          });
+          await supabase.from('booking_experiences').insert(expInserts);
+        }
+
+        toast({ 
+          title: 'Booking confirmed! 🎉', 
+          description: 'Check your trips for details.' 
         });
-        await supabase.from('booking_experiences').insert(expInserts);
+        navigate('/bookings');
+      } else {
+        // Mock booking for non-authenticated users
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+        toast({ 
+          title: 'Demo booking successful! 🎉', 
+          description: `${property.name} reserved for ${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}. Sign up to save your bookings!` 
+        });
       }
-
-      toast({ title: 'Booking confirmed!', description: 'Check your trips for details.' });
-      navigate('/bookings');
     } catch (error: any) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
     } finally {
