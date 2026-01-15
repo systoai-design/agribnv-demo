@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import PropertyDetails from "./pages/PropertyDetails";
+import Bookings from "./pages/Bookings";
+import HostDashboard from "./pages/HostDashboard";
+import NewProperty from "./pages/NewProperty";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +25,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/properties/:id" element={<PropertyDetails />} />
+            <Route path="/bookings" element={<Bookings />} />
+            <Route path="/host" element={<HostDashboard />} />
+            <Route path="/host/properties/new" element={<NewProperty />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
