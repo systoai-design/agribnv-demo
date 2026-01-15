@@ -1,6 +1,6 @@
+import { motion } from 'framer-motion';
 import { Property } from '@/types/database';
 import { PropertyCard } from './PropertyCard';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface PropertyGridProps {
   properties: Property[];
@@ -10,9 +10,9 @@ interface PropertyGridProps {
 export function PropertyGrid({ properties, isLoading }: PropertyGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <PropertyCardSkeleton key={i} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <PropertyCardSkeleton key={i} index={i} />
         ))}
       </div>
     );
@@ -20,38 +20,47 @@ export function PropertyGrid({ properties, isLoading }: PropertyGridProps) {
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center py-20 text-center"
+      >
         <div className="text-6xl mb-4">🌾</div>
-        <h3 className="text-xl font-display font-semibold mb-2">No farm stays found</h3>
+        <h3 className="text-xl font-semibold mb-2">No exact matches</h3>
         <p className="text-muted-foreground max-w-md">
-          Try adjusting your search or filters to find the perfect agritourism experience.
+          Try changing or removing some of your filters or adjusting your search area.
         </p>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {properties.map((property) => (
-        <PropertyCard key={property.id} property={property} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10">
+      {properties.map((property, index) => (
+        <PropertyCard key={property.id} property={property} index={index} />
       ))}
     </div>
   );
 }
 
-function PropertyCardSkeleton() {
+function PropertyCardSkeleton({ index }: { index: number }) {
   return (
-    <div className="rounded-xl overflow-hidden bg-card shadow-card">
-      <Skeleton className="aspect-[4/3] w-full" />
-      <div className="p-4 space-y-3">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-full" />
-        <div className="flex justify-between pt-2 border-t">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-5 w-24" />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: index * 0.05 }}
+      className="space-y-3"
+    >
+      <div className="aspect-square rounded-xl bg-muted animate-pulse" />
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-10 bg-muted rounded animate-pulse" />
         </div>
+        <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-28 bg-muted rounded animate-pulse" />
       </div>
-    </div>
+    </motion.div>
   );
 }

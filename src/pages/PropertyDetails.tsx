@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { format, differenceInDays, addDays } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,19 +13,12 @@ import { Layout } from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Property, Experience, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/database';
+import { Property, Experience, CATEGORY_LABELS } from '@/types/database';
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine,
-  Clock, ChevronLeft, ChevronRight, Loader2, Calendar as CalendarIcon
+  Clock, ChevronLeft, ChevronRight, Loader2, Star, Share, Heart, Grid3X3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const AMENITY_ICONS: Record<string, React.ElementType> = {
-  WiFi: Wifi,
-  'Free Parking': Car,
-  Kitchen: Utensils,
-  Garden: TreePine,
-};
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -39,6 +33,7 @@ export default function PropertyDetails() {
   const [guestCount, setGuestCount] = useState(1);
   const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
   const [isBooking, setIsBooking] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     if (id) fetchProperty();
@@ -63,7 +58,8 @@ export default function PropertyDetails() {
     const exp = property?.experiences?.find(e => e.id === expId);
     return sum + (exp?.price || 0);
   }, 0);
-  const totalPrice = accommodationTotal + experiencesTotal;
+  const serviceFee = Math.round(accommodationTotal * 0.12);
+  const totalPrice = accommodationTotal + experiencesTotal + serviceFee;
 
   const handleBooking = async () => {
     if (!user) {
@@ -89,7 +85,6 @@ export default function PropertyDetails() {
 
       if (error) throw error;
 
-      // Add selected experiences
       if (selectedExperiences.length > 0 && booking) {
         const expInserts = selectedExperiences.map(expId => {
           const exp = property.experiences?.find(e => e.id === expId);
@@ -104,7 +99,7 @@ export default function PropertyDetails() {
         await supabase.from('booking_experiences').insert(expInserts);
       }
 
-      toast({ title: 'Booking confirmed!', description: 'Check your bookings page for details.' });
+      toast({ title: 'Booking confirmed!', description: 'Check your trips for details.' });
       navigate('/bookings');
     } catch (error: any) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
@@ -127,116 +122,165 @@ export default function PropertyDetails() {
     return (
       <Layout>
         <div className="container py-16 text-center">
-          <h1 className="text-2xl font-bold">Property not found</h1>
-          <Button onClick={() => navigate('/')} className="mt-4">Back to Explore</Button>
+          <h1 className="text-2xl font-semibold">Property not found</h1>
+          <Button onClick={() => navigate('/')} className="mt-4 rounded-lg">Back to Explore</Button>
         </div>
       </Layout>
     );
   }
 
   const images = property.images?.sort((a, b) => a.display_order - b.display_order) || [];
-  const currentImage = images[currentImageIndex]?.image_url || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800';
+  const imageUrls = images.length > 0 
+    ? images.map(img => img.image_url) 
+    : ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'];
 
   return (
-    <Layout>
-      <div className="container py-6">
-        {/* Image Gallery */}
-        <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden mb-6">
-          <img src={currentImage} alt={property.name} className="w-full h-full object-cover" />
-          {images.length > 1 && (
-            <>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2"
-                onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
-              >
-                <ChevronLeft className="h-5 w-5" />
+    <Layout showMobileNav={false}>
+      <div className="container py-6 max-w-6xl">
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-semibold mb-2">{property.name}</h1>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1 font-medium">
+                <Star className="h-4 w-4 fill-current" /> 4.95 · 128 reviews
+              </span>
+              <span className="underline font-medium">{property.location}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" className="gap-2 rounded-lg">
+                <Share className="h-4 w-4" /> Share
               </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2"
-                onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 rounded-lg"
+                onClick={() => setIsLiked(!isLiked)}
               >
-                <ChevronRight className="h-5 w-5" />
+                <Heart className={cn('h-4 w-4', isLiked && 'fill-primary text-primary')} /> Save
               </Button>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {images.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={cn('w-2 h-2 rounded-full transition-colors', idx === currentImageIndex ? 'bg-white' : 'bg-white/50')}
-                    onClick={() => setCurrentImageIndex(idx)}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-          <Badge className="absolute top-4 left-4 bg-card/90 text-foreground backdrop-blur">
-            {CATEGORY_ICONS[property.category]} {CATEGORY_LABELS[property.category]}
-          </Badge>
-        </div>
+            </div>
+          </div>
+        </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* Image Gallery */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="relative rounded-2xl overflow-hidden mb-8"
+        >
+          <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[400px] md:h-[500px]">
+            <div className="col-span-2 row-span-2 relative">
+              <img src={imageUrls[0]} alt={property.name} className="w-full h-full object-cover" />
+            </div>
+            {imageUrls.slice(1, 5).map((img, idx) => (
+              <div key={idx} className="relative hidden md:block">
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="absolute bottom-4 right-4 gap-2 bg-white rounded-lg shadow-soft"
+          >
+            <Grid3X3 className="h-4 w-4" /> Show all photos
+          </Button>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-3 gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <div>
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <MapPin className="h-4 w-4" />
-                <span>{property.location}</span>
+            {/* Host Info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center justify-between"
+            >
+              <div>
+                <h2 className="text-xl font-semibold">
+                  {CATEGORY_LABELS[property.category]} hosted by {property.host?.full_name}
+                </h2>
+                <p className="text-muted-foreground">
+                  {property.max_guests} guests · {property.bedrooms} bedrooms · {property.bathrooms} baths
+                </p>
               </div>
-              <h1 className="font-display text-3xl font-bold mb-4">{property.name}</h1>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><Users className="h-4 w-4" /> Up to {property.max_guests} guests</span>
-                <span className="flex items-center gap-1"><BedDouble className="h-4 w-4" /> {property.bedrooms} bedrooms</span>
-                <span className="flex items-center gap-1"><Bath className="h-4 w-4" /> {property.bathrooms} bathrooms</span>
-              </div>
-            </div>
+              <Avatar className="h-14 w-14">
+                <AvatarImage src={property.host?.avatar_url || undefined} />
+                <AvatarFallback className="bg-gray-800 text-white text-lg">
+                  {property.host?.full_name?.charAt(0) || 'H'}
+                </AvatarFallback>
+              </Avatar>
+            </motion.div>
 
             <Separator />
 
-            {/* Host */}
-            {property.host && (
-              <div className="flex items-center gap-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={property.host.avatar_url || undefined} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {property.host.full_name?.charAt(0) || 'H'}
-                  </AvatarFallback>
-                </Avatar>
+            {/* Highlights */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-6"
+            >
+              {property.experiences && property.experiences.length > 0 && (
+                <div className="flex gap-6">
+                  <div className="text-2xl">🌾</div>
+                  <div>
+                    <p className="font-semibold">Hands-on experiences included</p>
+                    <p className="text-muted-foreground text-sm">This farm offers {property.experiences.length} unique activities</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-6">
+                <div className="text-2xl">📍</div>
                 <div>
-                  <p className="font-medium">Hosted by {property.host.full_name}</p>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{property.host.bio}</p>
+                  <p className="font-semibold">Great location</p>
+                  <p className="text-muted-foreground text-sm">95% of recent guests gave the location a 5-star rating</p>
                 </div>
               </div>
-            )}
+            </motion.div>
 
             <Separator />
 
             {/* Description */}
-            <div>
-              <h2 className="font-display text-xl font-semibold mb-3">About this place</h2>
-              <p className="text-muted-foreground leading-relaxed">{property.description}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <p className="text-foreground leading-relaxed">{property.description}</p>
+            </motion.div>
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
               <>
                 <Separator />
-                <div>
-                  <h2 className="font-display text-xl font-semibold mb-4">Amenities</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {property.amenities.map((amenity) => {
-                      const Icon = AMENITY_ICONS[amenity] || TreePine;
-                      return (
-                        <div key={amenity} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <Icon className="h-5 w-5 text-primary" />
-                          <span className="text-sm">{amenity}</span>
-                        </div>
-                      );
-                    })}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <h3 className="text-xl font-semibold mb-6">What this place offers</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {property.amenities.slice(0, 8).map((amenity) => (
+                      <div key={amenity} className="flex items-center gap-4 py-2">
+                        <span className="text-lg">✓</span>
+                        <span>{amenity}</span>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                  {property.amenities.length > 8 && (
+                    <Button variant="outline" className="mt-4 rounded-lg">
+                      Show all {property.amenities.length} amenities
+                    </Button>
+                  )}
+                </motion.div>
               </>
             )}
 
@@ -244,100 +288,123 @@ export default function PropertyDetails() {
             {property.experiences && property.experiences.length > 0 && (
               <>
                 <Separator />
-                <div>
-                  <h2 className="font-display text-xl font-semibold mb-4">Add Experiences</h2>
-                  <div className="grid gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <h3 className="text-xl font-semibold mb-6">Add experiences</h3>
+                  <div className="space-y-4">
                     {property.experiences.filter(e => e.is_active).map((exp) => (
-                      <Card key={exp.id} className={cn('cursor-pointer transition-colors', selectedExperiences.includes(exp.id) && 'ring-2 ring-primary')}>
-                        <CardContent className="p-4 flex items-start gap-4">
-                          <Checkbox
-                            checked={selectedExperiences.includes(exp.id)}
-                            onCheckedChange={(checked) => {
-                              setSelectedExperiences(prev => 
-                                checked ? [...prev, exp.id] : prev.filter(id => id !== exp.id)
-                              );
-                            }}
-                          />
+                      <motion.div
+                        key={exp.id}
+                        whileHover={{ scale: 1.01 }}
+                        className={cn(
+                          'p-4 border rounded-xl cursor-pointer transition-colors',
+                          selectedExperiences.includes(exp.id) && 'border-foreground bg-muted/30'
+                        )}
+                        onClick={() => {
+                          setSelectedExperiences(prev => 
+                            prev.includes(exp.id) ? prev.filter(id => id !== exp.id) : [...prev, exp.id]
+                          );
+                        }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <Checkbox checked={selectedExperiences.includes(exp.id)} />
                           <div className="flex-1">
-                            <h3 className="font-medium">{exp.name}</h3>
+                            <h4 className="font-semibold">{exp.name}</h4>
                             <p className="text-sm text-muted-foreground mt-1">{exp.description}</p>
                             <div className="flex items-center gap-4 mt-2 text-sm">
                               <span className="flex items-center gap-1 text-muted-foreground">
                                 <Clock className="h-4 w-4" /> {exp.duration_hours}h
                               </span>
-                              <span className="font-semibold text-primary">₱{exp.price.toLocaleString()}</span>
+                              <span className="font-semibold">₱{exp.price.toLocaleString()}</span>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </motion.div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               </>
             )}
           </div>
 
           {/* Booking Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 shadow-card">
-              <CardHeader>
-                <CardTitle className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">₱{property.price_per_night.toLocaleString()}</span>
-                  <span className="text-base font-normal text-muted-foreground">/ night</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Select Dates</label>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="sticky top-24"
+            >
+              <Card className="shadow-card border rounded-xl">
+                <CardContent className="p-6 space-y-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-semibold">₱{property.price_per_night.toLocaleString()}</span>
+                    <span className="text-muted-foreground">night</span>
+                  </div>
+
+                  <div className="border rounded-xl overflow-hidden">
+                    <div className="grid grid-cols-2 border-b">
+                      <div className="p-3 border-r">
+                        <p className="text-[10px] font-semibold uppercase">Check-in</p>
+                        <p className="text-sm">{dateRange.from ? format(dateRange.from, 'MMM d, yyyy') : 'Add date'}</p>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-[10px] font-semibold uppercase">Checkout</p>
+                        <p className="text-sm">{dateRange.to ? format(dateRange.to, 'MMM d, yyyy') : 'Add date'}</p>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-[10px] font-semibold uppercase">Guests</p>
+                      <p className="text-sm">{guestCount} guest{guestCount > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+
                   <Calendar
                     mode="range"
                     selected={dateRange}
                     onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
                     disabled={{ before: new Date() }}
-                    className="rounded-lg border"
+                    className="rounded-xl border p-3"
+                    numberOfMonths={1}
                   />
-                </div>
 
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Guests</label>
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" size="icon" onClick={() => setGuestCount(Math.max(1, guestCount - 1))} disabled={guestCount <= 1}>-</Button>
-                    <span className="w-8 text-center">{guestCount}</span>
-                    <Button variant="outline" size="icon" onClick={() => setGuestCount(Math.min(property.max_guests, guestCount + 1))} disabled={guestCount >= property.max_guests}>+</Button>
-                  </div>
-                </div>
+                  <Button 
+                    className="w-full h-12 rounded-lg text-base font-semibold bg-gradient-to-r from-[#E61E4D] to-[#D70466]"
+                    disabled={!dateRange.from || !dateRange.to || isBooking}
+                    onClick={handleBooking}
+                  >
+                    {isBooking ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Reserve'}
+                  </Button>
 
-                {nights > 0 && (
-                  <div className="pt-4 border-t space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>₱{property.price_per_night.toLocaleString()} × {nights} nights</span>
-                      <span>₱{accommodationTotal.toLocaleString()}</span>
-                    </div>
-                    {experiencesTotal > 0 && (
+                  {nights > 0 && (
+                    <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span>Experiences ({selectedExperiences.length})</span>
-                        <span>₱{experiencesTotal.toLocaleString()}</span>
+                        <span className="underline">₱{property.price_per_night.toLocaleString()} × {nights} nights</span>
+                        <span>₱{accommodationTotal.toLocaleString()}</span>
                       </div>
-                    )}
-                    <Separator />
-                    <div className="flex justify-between font-bold text-base">
-                      <span>Total</span>
-                      <span>₱{totalPrice.toLocaleString()}</span>
+                      {experiencesTotal > 0 && (
+                        <div className="flex justify-between">
+                          <span className="underline">Experiences</span>
+                          <span>₱{experiencesTotal.toLocaleString()}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="underline">Service fee</span>
+                        <span>₱{serviceFee.toLocaleString()}</span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between font-semibold pt-2">
+                        <span>Total</span>
+                        <span>₱{totalPrice.toLocaleString()}</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                <Button 
-                  className="w-full" 
-                  size="lg" 
-                  disabled={!dateRange.from || !dateRange.to || isBooking}
-                  onClick={handleBooking}
-                >
-                  {isBooking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {user ? 'Book Now' : 'Sign in to Book'}
-                </Button>
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </div>

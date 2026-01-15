@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X, User, LogOut, Home, Calendar, Plus, LayoutDashboard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, User, LogOut, Calendar, Plus, LayoutDashboard, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,194 +25,141 @@ export function Navbar() {
     navigate('/');
   };
 
-  const navLinks = [
-    { href: '/', label: 'Explore', icon: Home },
-    ...(user ? [{ href: '/bookings', label: 'My Bookings', icon: Calendar }] : []),
-    ...(isHost ? [{ href: '/host', label: 'Host Dashboard', icon: LayoutDashboard }] : []),
-  ];
-
-  const isActive = (path: string) => location.pathname === path;
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border/50">
+      <div className="container flex h-20 items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-display font-bold text-lg">
-            A
-          </div>
-          <span className="hidden font-display text-xl font-bold text-foreground sm:inline-block">
-            Agribnv
-          </span>
+        <Link to="/" className="flex items-center gap-2 group">
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center"
+          >
+            <svg className="h-8 w-8 text-primary" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M16 1c-5.5 0-10 4.5-10 10 0 7.5 10 20 10 20s10-12.5 10-20c0-5.5-4.5-10-10-10zm0 14c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+              <circle cx="16" cy="11" r="2.5"/>
+            </svg>
+            <span className="hidden sm:block ml-2 text-xl font-bold text-primary">
+              agribnv
+            </span>
+          </motion.div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                isActive(link.href)
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              )}
-            >
-              <link.icon className="h-4 w-4" />
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Center Search - Desktop */}
+        <div className="hidden md:flex flex-1 justify-center px-8">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="flex items-center gap-4 px-4 py-2 rounded-full border shadow-soft hover:shadow-soft-lg transition-shadow cursor-pointer"
+            onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <span className="text-sm font-semibold border-r pr-4">Anywhere</span>
+            <span className="text-sm font-semibold border-r pr-4">Any week</span>
+            <span className="text-sm text-muted-foreground">Add guests</span>
+            <div className="bg-primary text-primary-foreground p-2 rounded-full">
+              <Search className="h-4 w-4" />
+            </div>
+          </motion.div>
+        </div>
 
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-3">
-          {user ? (
-            <>
-              {isHost && (
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/host/properties/new">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Property
-                  </Link>
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
+          {isHost && (
+            <Button 
+              variant="ghost" 
+              className="hidden md:flex rounded-full font-semibold"
+              asChild
+            >
+              <Link to="/host">Switch to hosting</Link>
+            </Button>
+          )}
+
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <Globe className="h-5 w-5" />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-3 rounded-full pl-3 pr-2 py-6 border-border hover:shadow-soft transition-shadow"
+                >
+                  <Menu className="h-4 w-4" />
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-gray-500 text-white text-sm">
+                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      {profile?.full_name && (
-                        <p className="font-medium">{profile.full_name}</p>
-                      )}
+              </motion.div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 rounded-xl shadow-card mt-2" align="end">
+              <AnimatePresence>
+                {user ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <div className="p-3 border-b">
+                      <p className="font-semibold">{profile?.full_name || 'Welcome!'}</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/bookings" className="cursor-pointer">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      My Bookings
-                    </Link>
-                  </DropdownMenuItem>
-                  {isHost && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/host" className="cursor-pointer">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Host Dashboard
+                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                      <Link to="/bookings">
+                        <Calendar className="mr-3 h-4 w-4" />
+                        Trips
                       </Link>
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="ghost">
-                <Link to="/auth">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/auth?mode=signup">Get Started</Link>
-              </Button>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="border-t md:hidden">
-          <nav className="container py-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                  isActive(link.href)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                      <Link to="/profile">
+                        <User className="mr-3 h-4 w-4" />
+                        Account
+                      </Link>
+                    </DropdownMenuItem>
+                    {isHost && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                          <Link to="/host">
+                            <LayoutDashboard className="mr-3 h-4 w-4" />
+                            Manage listings
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                          <Link to="/host/properties/new">
+                            <Plus className="mr-3 h-4 w-4" />
+                            Create new listing
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="py-3 cursor-pointer text-foreground">
+                      <LogOut className="mr-3 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <DropdownMenuItem asChild className="py-3 cursor-pointer font-semibold">
+                      <Link to="/auth?mode=signup">Sign up</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                      <Link to="/auth">Log in</Link>
+                    </DropdownMenuItem>
+                  </motion.div>
                 )}
-              >
-                <link.icon className="h-5 w-5" />
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-4 border-t space-y-2">
-              {user ? (
-                <>
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted"
-                  >
-                    <User className="h-5 w-5" />
-                    Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleSignOut();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/auth"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-center py-3 rounded-lg text-sm font-medium border hover:bg-muted"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/auth?mode=signup"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-center py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
+              </AnimatePresence>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      )}
+      </div>
     </header>
   );
 }

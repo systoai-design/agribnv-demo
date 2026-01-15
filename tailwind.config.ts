@@ -7,9 +7,13 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1.5rem",
       screens: {
-        "2xl": "1400px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
       },
     },
     extend: {
@@ -57,21 +61,24 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Agribnv custom colors
-        forest: {
-          DEFAULT: "hsl(var(--forest))",
-          light: "hsl(var(--forest-light))",
+        // Custom colors
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          light: "hsl(var(--coral-light))",
+          dark: "hsl(var(--coral-dark))",
         },
-        earth: {
-          DEFAULT: "hsl(var(--earth))",
-          light: "hsl(var(--earth-light))",
+        gray: {
+          50: "hsl(var(--gray-50))",
+          100: "hsl(var(--gray-100))",
+          200: "hsl(var(--gray-200))",
+          300: "hsl(var(--gray-300))",
+          400: "hsl(var(--gray-400))",
+          500: "hsl(var(--gray-500))",
+          600: "hsl(var(--gray-600))",
+          700: "hsl(var(--gray-700))",
+          800: "hsl(var(--gray-800))",
+          900: "hsl(var(--gray-900))",
         },
-        cream: {
-          DEFAULT: "hsl(var(--cream))",
-          dark: "hsl(var(--cream-dark))",
-        },
-        sage: "hsl(var(--sage))",
-        harvest: "hsl(var(--harvest))",
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
       },
@@ -79,10 +86,13 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "1rem",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Montserrat", "Inter", "system-ui", "sans-serif"],
+        sans: ['"Nunito Sans"', '"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Nunito Sans"', '"Inter"', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -94,29 +104,47 @@ export default {
           to: { height: "0" },
         },
         "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
-        },
-        "slide-up": {
-          from: { opacity: "0", transform: "translateY(10px)" },
+          from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-down": {
-          from: { opacity: "0", transform: "translateY(-10px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+        "fade-out": {
+          from: { opacity: "1", transform: "translateY(0)" },
+          to: { opacity: "0", transform: "translateY(8px)" },
         },
         "scale-in": {
-          from: { opacity: "0", transform: "scale(0.95)" },
+          from: { opacity: "0", transform: "scale(0.96)" },
           to: { opacity: "1", transform: "scale(1)" },
+        },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "slide-in-left": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
-        "slide-down": "slide-down 0.3s ease-out",
-        "scale-in": "scale-in 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out forwards",
+        "fade-out": "fade-out 0.3s ease-out forwards",
+        "scale-in": "scale-in 0.2s ease-out forwards",
+        "slide-in-right": "slide-in-right 0.3s ease-out",
+        "slide-in-left": "slide-in-left 0.3s ease-out",
+        shimmer: "shimmer 2s infinite",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      transitionDuration: {
+        DEFAULT: "200ms",
       },
     },
   },
