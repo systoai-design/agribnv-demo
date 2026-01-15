@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Calendar, Plus, LayoutDashboard, Globe, Search } from 'lucide-react';
+import { Menu, User, LogOut, Calendar, Plus, LayoutDashboard, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,13 +12,32 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
+import { SearchBar } from '@/components/search/SearchBar';
 
-export function Navbar() {
+interface NavbarProps {
+  searchLocation?: string;
+  onSearchLocationChange?: (location: string) => void;
+  searchDateRange?: { from: Date | undefined; to: Date | undefined };
+  onSearchDateRangeChange?: (range: { from: Date | undefined; to: Date | undefined }) => void;
+  searchGuestCount?: number;
+  onSearchGuestCountChange?: (count: number) => void;
+  onSearch?: () => void;
+  showSearch?: boolean;
+}
+
+export function Navbar({
+  searchLocation = '',
+  onSearchLocationChange,
+  searchDateRange = { from: undefined, to: undefined },
+  onSearchDateRangeChange,
+  searchGuestCount = 1,
+  onSearchGuestCountChange,
+  onSearch,
+  showSearch = true,
+}: NavbarProps) {
   const { user, profile, isHost, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,20 +65,19 @@ export function Navbar() {
         </Link>
 
         {/* Center Search - Desktop */}
-        <div className="hidden md:flex flex-1 justify-center px-8">
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="flex items-center gap-4 px-4 py-2 rounded-full border shadow-soft hover:shadow-soft-lg transition-shadow cursor-pointer"
-            onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            <span className="text-sm font-semibold border-r pr-4">Anywhere</span>
-            <span className="text-sm font-semibold border-r pr-4">Any week</span>
-            <span className="text-sm text-muted-foreground">Add guests</span>
-            <div className="bg-primary text-primary-foreground p-2 rounded-full">
-              <Search className="h-4 w-4" />
-            </div>
-          </motion.div>
-        </div>
+        {showSearch && (
+          <div className="hidden md:flex flex-1 justify-center px-8">
+            <SearchBar
+              location={searchLocation}
+              onLocationChange={onSearchLocationChange || (() => {})}
+              dateRange={searchDateRange}
+              onDateRangeChange={onSearchDateRangeChange || (() => {})}
+              guestCount={searchGuestCount}
+              onGuestCountChange={onSearchGuestCountChange || (() => {})}
+              onSearch={onSearch}
+            />
+          </div>
+        )}
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
 import {
   Sheet,
   SheetContent,
@@ -25,6 +24,11 @@ export default function Index() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [guestCount, setGuestCount] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  
+  // Search bar state
+  const [searchLocation, setSearchLocation] = useState('');
+  const [searchDateRange, setSearchDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [searchGuestCount, setSearchGuestCount] = useState(1);
 
   useEffect(() => {
     fetchProperties();
@@ -44,27 +48,45 @@ export default function Index() {
     setIsLoading(false);
   };
 
+  // Sync search location to filter
+  const handleSearch = () => {
+    setSearchQuery(searchLocation);
+    setGuestCount(searchGuestCount);
+  };
+
   const filteredProperties = properties.filter((property) => {
-    const matchesSearch = !searchQuery || 
-      property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchTerm = searchQuery || searchLocation;
+    const matchesSearch = !searchTerm || 
+      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(property.category);
     const matchesPrice = property.price_per_night >= priceRange[0] && property.price_per_night <= priceRange[1];
-    const matchesGuests = property.max_guests >= guestCount;
+    const matchesGuests = property.max_guests >= Math.max(guestCount, searchGuestCount);
     return matchesSearch && matchesCategory && matchesPrice && matchesGuests;
   });
 
   const clearFilters = () => {
     setSearchQuery('');
+    setSearchLocation('');
     setSelectedCategories([]);
     setPriceRange([0, 10000]);
     setGuestCount(1);
+    setSearchGuestCount(1);
+    setSearchDateRange({ from: undefined, to: undefined });
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1;
+  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation;
 
   return (
-    <Layout>
+    <Layout
+      searchLocation={searchLocation}
+      onSearchLocationChange={setSearchLocation}
+      searchDateRange={searchDateRange}
+      onSearchDateRangeChange={setSearchDateRange}
+      searchGuestCount={searchGuestCount}
+      onSearchGuestCountChange={setSearchGuestCount}
+      onSearch={handleSearch}
+    >
       {/* Category Filter */}
       <CategoryFilter
         selectedCategories={selectedCategories}
@@ -84,8 +106,11 @@ export default function Index() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search destinations"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery || searchLocation}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchLocation(e.target.value);
+              }}
               className="pl-12 h-14 rounded-full border-2 text-base shadow-soft"
             />
           </div>
