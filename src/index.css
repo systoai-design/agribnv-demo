@@ -1,122 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Agribnv Design System - Agritourism Booking Platform
-   Color palette inspired by nature: Deep Forest Green, Earthy Brown, Soft Cream
+/* Agribnv Design System - Modern Airbnb-inspired
+   Clean, minimal, with coral accent
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Soft cream background for warm, inviting feel */
-    --background: 45 33% 97%;
-    --foreground: 24 10% 15%;
+    /* Pure white background for clean look */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%;
 
-    /* Card styling with subtle warmth */
+    /* Card styling */
     --card: 0 0% 100%;
-    --card-foreground: 24 10% 15%;
+    --card-foreground: 0 0% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 24 10% 15%;
+    --popover-foreground: 0 0% 13%;
 
-    /* Deep Forest Green - Primary brand color */
-    --primary: 110 38% 24%;
-    --primary-foreground: 45 33% 97%;
+    /* Coral/Rose - Primary brand color (Airbnb-inspired) */
+    --primary: 356 100% 66%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Earthy Brown - Secondary color */
-    --secondary: 24 30% 40%;
-    --secondary-foreground: 45 33% 97%;
+    /* Neutral gray secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
 
-    /* Muted sage tones */
-    --muted: 100 15% 92%;
-    --muted-foreground: 24 10% 45%;
+    /* Muted tones */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Fresh green accent for CTAs and highlights */
-    --accent: 85 45% 45%;
+    /* Accent - matching primary */
+    --accent: 356 100% 66%;
     --accent-foreground: 0 0% 100%;
 
     /* Warning/error states */
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 30 15% 85%;
-    --input: 30 15% 85%;
-    --ring: 110 38% 24%;
+    /* Borders and inputs - very subtle */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 356 100% 66%;
 
     --radius: 0.75rem;
 
     /* Sidebar styling */
-    --sidebar-background: 110 38% 24%;
-    --sidebar-foreground: 45 33% 97%;
-    --sidebar-primary: 45 33% 97%;
-    --sidebar-primary-foreground: 110 38% 24%;
-    --sidebar-accent: 110 35% 30%;
-    --sidebar-accent-foreground: 45 33% 97%;
-    --sidebar-border: 110 30% 20%;
-    --sidebar-ring: 85 45% 45%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 13%;
+    --sidebar-primary: 356 100% 66%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 356 100% 66%;
 
-    /* Custom Agribnv tokens */
-    --forest: 110 38% 24%;
-    --forest-light: 110 30% 35%;
-    --earth: 24 30% 40%;
-    --earth-light: 24 25% 55%;
-    --cream: 45 33% 97%;
-    --cream-dark: 40 20% 90%;
-    --sage: 100 20% 75%;
-    --harvest: 42 90% 55%;
-    --success: 142 70% 40%;
+    /* Custom tokens */
+    --coral: 356 100% 66%;
+    --coral-light: 356 90% 75%;
+    --coral-dark: 356 85% 55%;
+    --gray-50: 0 0% 98%;
+    --gray-100: 0 0% 96%;
+    --gray-200: 0 0% 90%;
+    --gray-300: 0 0% 83%;
+    --gray-400: 0 0% 64%;
+    --gray-500: 0 0% 45%;
+    --gray-600: 0 0% 32%;
+    --gray-700: 0 0% 25%;
+    --gray-800: 0 0% 15%;
+    --gray-900: 0 0% 9%;
+    --success: 160 84% 39%;
     --warning: 38 92% 50%;
   }
 
   .dark {
-    --background: 24 10% 10%;
-    --foreground: 45 33% 97%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 95%;
 
-    --card: 24 10% 12%;
-    --card-foreground: 45 33% 97%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 24 10% 12%;
-    --popover-foreground: 45 33% 97%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 110 45% 50%;
-    --primary-foreground: 24 10% 10%;
+    --primary: 356 100% 66%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 24 25% 50%;
-    --secondary-foreground: 45 33% 97%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 24 10% 20%;
-    --muted-foreground: 45 20% 65%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 85 50% 55%;
-    --accent-foreground: 24 10% 10%;
+    --accent: 356 100% 66%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 45 33% 97%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 24 10% 20%;
-    --input: 24 10% 20%;
-    --ring: 110 45% 50%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 356 100% 66%;
 
-    --sidebar-background: 24 10% 8%;
-    --sidebar-foreground: 45 33% 97%;
-    --sidebar-primary: 110 45% 50%;
-    --sidebar-primary-foreground: 24 10% 10%;
-    --sidebar-accent: 24 10% 15%;
-    --sidebar-accent-foreground: 45 33% 97%;
-    --sidebar-border: 24 10% 15%;
-    --sidebar-ring: 85 50% 55%;
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 356 100% 66%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 356 100% 66%;
 
-    --forest: 110 45% 50%;
-    --forest-light: 110 40% 60%;
-    --earth: 24 25% 50%;
-    --earth-light: 24 20% 60%;
-    --cream: 45 20% 90%;
-    --cream-dark: 40 15% 80%;
-    --sage: 100 15% 40%;
-    --harvest: 42 85% 60%;
-    --success: 142 60% 50%;
+    --coral: 356 100% 66%;
+    --coral-light: 356 90% 75%;
+    --coral-dark: 356 85% 55%;
+    --gray-50: 0 0% 12%;
+    --gray-100: 0 0% 15%;
+    --gray-200: 0 0% 20%;
+    --gray-300: 0 0% 30%;
+    --gray-400: 0 0% 45%;
+    --gray-500: 0 0% 55%;
+    --gray-600: 0 0% 70%;
+    --gray-700: 0 0% 80%;
+    --gray-800: 0 0% 90%;
+    --gray-900: 0 0% 95%;
+    --success: 160 70% 45%;
     --warning: 38 85% 55%;
   }
 }
@@ -126,81 +138,120 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+  html {
+    scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar styling */
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Nunito Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth scrollbar for other areas */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    @apply bg-gray-300 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-gray-400;
   }
 }
 
 @layer utilities {
-  /* Gradient utilities */
-  .gradient-forest {
-    background: linear-gradient(135deg, hsl(var(--forest)) 0%, hsl(var(--forest-light)) 100%);
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
   }
 
-  .gradient-earth {
-    background: linear-gradient(135deg, hsl(var(--earth)) 0%, hsl(var(--earth-light)) 100%);
+  /* Gradient overlays */
+  .gradient-fade-r {
+    background: linear-gradient(to right, transparent, hsl(var(--background)));
   }
 
-  .gradient-hero {
-    background: linear-gradient(180deg, hsl(var(--forest)) 0%, hsl(var(--forest-light)) 50%, hsl(var(--sage)) 100%);
+  .gradient-fade-l {
+    background: linear-gradient(to left, transparent, hsl(var(--background)));
   }
 
-  /* Text gradient */
-  .text-gradient-forest {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--forest)) 0%, hsl(var(--accent)) 100%);
+  /* Subtle shadow */
+  .shadow-soft {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
-  /* Shadow utilities */
+  .shadow-soft-lg {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
   .shadow-card {
-    box-shadow: 0 4px 20px -5px hsl(var(--forest) / 0.1), 0 2px 8px -3px hsl(var(--earth) / 0.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
 
   .shadow-card-hover {
-    box-shadow: 0 8px 30px -5px hsl(var(--forest) / 0.15), 0 4px 12px -3px hsl(var(--earth) / 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   }
 
   /* Animation utilities */
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out;
+  .animate-in {
+    animation: animateIn 0.3s ease-out forwards;
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideUp {
-    from { 
+  @keyframes animateIn {
+    from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(8px);
     }
-    to { 
+    to {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Stagger children */
+  .stagger-children > * {
+    animation: animateIn 0.4s ease-out backwards;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+
+  /* Hover lift */
+  .hover-lift {
+    @apply transition-transform duration-300;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Heart animation */
+  .heart-beat {
+    animation: heartBeat 0.3s ease-in-out;
+  }
+
+  @keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
   }
 }
