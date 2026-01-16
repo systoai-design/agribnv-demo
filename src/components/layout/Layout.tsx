@@ -8,6 +8,7 @@ interface LayoutProps {
   showMobileNav?: boolean;
   showSearch?: boolean;
   showFooter?: boolean;
+  hideNavbarOnMobile?: boolean;
   searchLocation?: string;
   onSearchLocationChange?: (location: string) => void;
   searchDateRange?: { from: Date | undefined; to: Date | undefined };
@@ -22,6 +23,7 @@ export function Layout({
   showMobileNav = true,
   showSearch = true,
   showFooter = true,
+  hideNavbarOnMobile = false,
   searchLocation,
   onSearchLocationChange,
   searchDateRange,
@@ -32,16 +34,18 @@ export function Layout({
 }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar 
-        showSearch={showSearch}
-        searchLocation={searchLocation}
-        onSearchLocationChange={onSearchLocationChange}
-        searchDateRange={searchDateRange}
-        onSearchDateRangeChange={onSearchDateRangeChange}
-        searchGuestCount={searchGuestCount}
-        onSearchGuestCountChange={onSearchGuestCountChange}
-        onSearch={onSearch}
-      />
+      <div className={hideNavbarOnMobile ? 'hidden md:block' : ''}>
+        <Navbar 
+          showSearch={showSearch}
+          searchLocation={searchLocation}
+          onSearchLocationChange={onSearchLocationChange}
+          searchDateRange={searchDateRange}
+          onSearchDateRangeChange={onSearchDateRangeChange}
+          searchGuestCount={searchGuestCount}
+          onSearchGuestCountChange={onSearchGuestCountChange}
+          onSearch={onSearch}
+        />
+      </div>
       <main className={`flex-1 ${showMobileNav ? 'pb-20 md:pb-0' : ''}`}>
         {children}
       </main>
