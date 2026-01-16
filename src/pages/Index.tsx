@@ -93,29 +93,20 @@ export default function Index() {
       onSearchGuestCountChange={setSearchGuestCount}
       onSearch={handleSearch}
     >
-      {/* Mobile Welcome + Search */}
-      <div className="md:hidden bg-primary text-primary-foreground pt-4 pb-6 px-4 -mt-px">
-        {/* Welcome */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4"
-        >
-          <p className="text-sage text-sm font-medium">Welcome!</p>
-          <h1 className="text-xl font-bold">{firstName}</h1>
-        </motion.div>
-
-        {/* Search Bar */}
+      {/* Mobile Compact Search Bar */}
+      <div className="md:hidden sticky top-0 z-40 bg-background pt-3 pb-2 px-4">
         <motion.button
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors"
+          className="w-full flex items-center gap-3 px-5 py-3.5 rounded-full bg-card border border-border/50 shadow-md hover:shadow-lg transition-shadow"
         >
-          <Search className="h-5 w-5 text-white/80" />
-          <span className="text-sm text-white/80">Start your search</span>
+          <Search className="h-5 w-5 text-primary" />
+          <div className="flex-1 text-left">
+            <p className="text-sm font-medium text-foreground">Where to?</p>
+            <p className="text-xs text-muted-foreground">Anywhere · Any week · Add guests</p>
+          </div>
         </motion.button>
       </div>
 
@@ -140,17 +131,19 @@ export default function Index() {
       />
 
       {/* Main Content */}
-      <section id="search-section" className="container py-6">
+      <section id="search-section" className="container py-4 md:py-6">
         {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6"
+          className="flex items-center justify-between mb-4 md:mb-6"
         >
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground">Featured Farms</h2>
+            <h2 className="text-lg md:text-2xl font-bold text-foreground">
+              {hasActiveFilters ? 'Search Results' : 'Featured Farms'}
+            </h2>
             {hasActiveFilters && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {filteredProperties.length} places found
               </p>
             )}
