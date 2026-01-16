@@ -112,7 +112,7 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05, duration: 0.3 }}
-              className="snap-start shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)]"
+              className="snap-start shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)] lg:w-[calc(20%-13px)] xl:w-[calc(16.666%-13px)] 2xl:w-[calc(12.5%-14px)]"
             >
               <PropertyCard property={property} index={index} />
             </motion.div>
