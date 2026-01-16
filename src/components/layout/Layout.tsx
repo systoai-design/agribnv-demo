@@ -1,11 +1,13 @@
 import { ReactNode } from 'react';
 import { Navbar } from './Navbar';
 import { MobileNav } from './MobileNav';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: ReactNode;
   showMobileNav?: boolean;
   showSearch?: boolean;
+  showFooter?: boolean;
   searchLocation?: string;
   onSearchLocationChange?: (location: string) => void;
   searchDateRange?: { from: Date | undefined; to: Date | undefined };
@@ -19,6 +21,7 @@ export function Layout({
   children, 
   showMobileNav = true,
   showSearch = true,
+  showFooter = true,
   searchLocation,
   onSearchLocationChange,
   searchDateRange,
@@ -42,6 +45,7 @@ export function Layout({
       <main className={`flex-1 ${showMobileNav ? 'pb-20 md:pb-0' : ''}`}>
         {children}
       </main>
+      {showFooter && <Footer />}
       {showMobileNav && <MobileNav />}
     </div>
   );
