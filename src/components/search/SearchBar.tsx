@@ -131,20 +131,69 @@ export function SearchBar({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="flex items-center gap-4 px-4 py-2 rounded-full border shadow-soft hover:shadow-soft-lg transition-shadow cursor-pointer bg-background"
-            onClick={() => setIsExpanded(true)}
+            className="flex items-center rounded-full border border-border/60 shadow-lg shadow-black/[0.08] hover:shadow-xl hover:shadow-black/[0.12] transition-all duration-200 cursor-pointer bg-background"
           >
-            <span className="text-sm font-semibold border-r pr-4">
-              {location || 'Anywhere'}
-            </span>
-            <span className="text-sm font-semibold border-r pr-4">
-              {formatDateRange()}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {guestCount > 1 ? `${guestCount} guests` : 'Add guests'}
-            </span>
-            <div className="bg-primary text-primary-foreground p-2 rounded-full">
-              <Search className="h-4 w-4" />
+            {/* Where Section */}
+            <button
+              className="flex-1 min-w-0 px-6 py-3 text-left rounded-full hover:bg-muted/40 transition-colors"
+              onClick={() => {
+                setIsExpanded(true);
+                setActiveSection('location');
+              }}
+            >
+              <p className="text-[12px] font-semibold text-foreground tracking-tight">Where</p>
+              <p className="text-[14px] text-muted-foreground truncate">
+                {location || 'Search destinations'}
+              </p>
+            </button>
+
+            {/* Separator */}
+            <div className="h-6 w-px bg-border/70 shrink-0" />
+
+            {/* When Section */}
+            <button
+              className="flex-1 min-w-0 px-6 py-3 text-left rounded-full hover:bg-muted/40 transition-colors"
+              onClick={() => {
+                setIsExpanded(true);
+                setActiveSection('dates');
+              }}
+            >
+              <p className="text-[12px] font-semibold text-foreground tracking-tight">When</p>
+              <p className="text-[14px] text-muted-foreground truncate">
+                {formatDateRange()}
+              </p>
+            </button>
+
+            {/* Separator */}
+            <div className="h-6 w-px bg-border/70 shrink-0" />
+
+            {/* Who Section */}
+            <button
+              className="flex-1 min-w-0 px-5 py-3 text-left rounded-full hover:bg-muted/40 transition-colors"
+              onClick={() => {
+                setIsExpanded(true);
+                setActiveSection('guests');
+              }}
+            >
+              <p className="text-[12px] font-semibold text-foreground tracking-tight">Who</p>
+              <p className="text-[14px] text-muted-foreground truncate">
+                {guestCount > 1 ? `${guestCount} guests` : 'Add guests'}
+              </p>
+            </button>
+
+            {/* Search Button */}
+            <div className="pr-2 shrink-0">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="h-12 w-12 rounded-full bg-gradient-to-r from-primary to-primary/90 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSearch?.();
+                }}
+              >
+                <Search className="h-4 w-4 text-primary-foreground" />
+              </motion.button>
             </div>
           </motion.div>
         )}
