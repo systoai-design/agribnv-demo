@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ChevronLeft, ChevronRight, Star, MapPin } from 'lucide-react';
 import { Property, CATEGORY_LABELS } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { useWishlist } from '@/hooks/useWishlist';
+import haptics from '@/utils/haptics';
 
 interface PropertyCardProps {
   property: Property;
@@ -69,8 +71,10 @@ function GuestFavoriteBadge() {
 
 export function PropertyCard({ property, className, index = 0 }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist();
+
+  const isLiked = isWishlisted(property.id);
 
   const images = property.images?.sort((a, b) => a.display_order - b.display_order) || [];
   const imageUrls = images.length > 0 
@@ -80,19 +84,21 @@ export function PropertyCard({ property, className, index = 0 }: PropertyCardPro
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    haptics.selection();
     setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    haptics.selection();
     setCurrentImageIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
   };
 
-  const toggleLike = (e: React.MouseEvent) => {
+  const handleToggleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsLiked(!isLiked);
+    toggleWishlist(property.id);
   };
 
   // Generate a random rating for demo
@@ -129,7 +135,7 @@ export function PropertyCard({ property, className, index = 0 }: PropertyCardPro
 
           {/* Heart Button - Top Right */}
           <motion.button
-            onClick={toggleLike}
+            onClick={handleToggleLike}
             whileTap={{ scale: 0.85 }}
             className="absolute top-3 right-3 p-2.5 rounded-full transition-colors z-10"
           >

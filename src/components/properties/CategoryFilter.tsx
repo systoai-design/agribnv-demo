@@ -1,9 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, SlidersHorizontal, Map, Apple, Leaf, TreePine, Sparkles, UtensilsCrossed, Footprints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyCategory } from '@/types/database';
 import { cn } from '@/lib/utils';
+import haptics from '@/utils/haptics';
 
 interface CategoryFilterProps {
   selectedCategories: PropertyCategory[];
@@ -22,9 +24,28 @@ const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType
 ];
 
 export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick, onMapClick }: CategoryFilterProps) {
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const handleMapClick = () => {
+    haptics.medium();
+    if (onMapClick) {
+      onMapClick();
+    } else {
+      navigate('/map');
+    }
+  };
+
+  const handleCategoryClick = (categoryId: PropertyCategory) => {
+    haptics.light();
+    if (selectedCategories.includes(categoryId)) {
+      onCategoryChange(selectedCategories.filter(c => c !== categoryId));
+    } else {
+      onCategoryChange([...selectedCategories, categoryId]);
+    }
+  };
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -66,7 +87,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
           {/* Map Button - Mobile Only */}
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={onMapClick}
+            onClick={handleMapClick}
             className="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 bg-card text-sm font-medium text-foreground shadow-sm shrink-0"
           >
             <Map className="h-4 w-4" />

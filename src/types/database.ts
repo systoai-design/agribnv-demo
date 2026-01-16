@@ -105,6 +105,13 @@ export interface UserRole {
   created_at: string;
 }
 
+export interface Wishlist {
+  id: string;
+  user_id: string;
+  property_id: string;
+  created_at: string;
+}
+
 // Category display helpers
 export const CATEGORY_LABELS: Record<PropertyCategory, string> = {
   fruit_picking: 'Fruit Picking',
