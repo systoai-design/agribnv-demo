@@ -33,6 +33,47 @@ const amenityIcons: Record<string, any> = {
   'Washer': Warehouse,
 };
 
+// Mock host data (since profiles require auth users)
+const mockHosts: Record<string, { full_name: string; avatar_url: string; bio: string }> = {
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa': {
+    full_name: 'Maria Santos',
+    avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+    bio: 'Passionate organic farmer with 15 years of experience. I love sharing the joy of farm life!',
+  },
+  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb': {
+    full_name: 'Juan dela Cruz',
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    bio: 'Third-generation organic farmer. Our family has been cultivating sustainable crops for decades.',
+  },
+  'cccccccc-cccc-cccc-cccc-cccccccccccc': {
+    full_name: 'Elena Reyes',
+    avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    bio: 'Wellness advocate and nature lover. I created this retreat to help people reconnect with nature.',
+  },
+  'dddddddd-dddd-dddd-dddd-dddddddddddd': {
+    full_name: 'Roberto Gonzales',
+    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+    bio: 'Sustainable livestock farmer committed to ethical farming practices.',
+  },
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee': {
+    full_name: 'Ana Villanueva',
+    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
+    bio: 'Environmental scientist turned eco-tourism guide. Every trail tells a story!',
+  },
+  'ffffffff-ffff-ffff-ffff-ffffffffffff': {
+    full_name: 'Pedro Aquino',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
+    bio: 'Island native and seafood expert. Join me for the freshest farm-to-table experience.',
+  },
+};
+
+// Default host for properties without specific mock data
+const defaultHost = {
+  full_name: 'Farm Host',
+  avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200',
+  bio: 'Experienced agritourism host passionate about sustainable farming.',
+};
+
 // Mock reviews data
 const mockReviews = [
   { id: 1, name: 'Blessed Fernsby', date: '5 months ago', avatar: null, rating: 5, text: "Wonderful! I admire how the hosts made this property a reality. It's full of love and thoughtfulness. We really appreciate how Bing answered and..."  },
@@ -79,14 +120,21 @@ export default function PropertyDetails() {
       return;
     }
     
+    // Query without FK hint - fetch property with images and experiences only
     const { data, error } = await supabase
       .from('properties')
-      .select(`*, images:property_images(*), experiences(*), host:profiles!properties_host_id_fkey(*)`)
+      .select(`*, images:property_images(*), experiences(*)`)
       .eq('id', id)
       .maybeSingle();
 
     if (!error && data) {
-      setProperty(data as unknown as Property);
+      // Add mock host data based on property ID
+      const mockHost = mockHosts[id] || defaultHost;
+      const propertyWithHost = {
+        ...data,
+        host: mockHost,
+      };
+      setProperty(propertyWithHost as unknown as Property);
     }
     setIsLoading(false);
   };
