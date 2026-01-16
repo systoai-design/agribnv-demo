@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Calendar, Users, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
@@ -21,6 +21,7 @@ interface SearchBarProps {
   onGuestCountChange: (count: number) => void;
   onSearch?: () => void;
   className?: string;
+  isCompact?: boolean;
 }
 
 const POPULAR_LOCATIONS = [
@@ -41,6 +42,7 @@ export function SearchBar({
   onGuestCountChange,
   onSearch,
   className,
+  isCompact = false,
 }: SearchBarProps) {
   const [activeSection, setActiveSection] = useState<'location' | 'dates' | 'guests' | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -66,6 +68,24 @@ export function SearchBar({
     }
     return 'Any week';
   };
+
+  // Compact version - simple pill
+  if (isCompact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={cn(
+          'flex items-center gap-2 px-4 py-2 rounded-full border shadow-soft bg-background cursor-pointer hover:shadow-soft-lg transition-shadow',
+          className
+        )}
+        onClick={() => setIsExpanded(true)}
+      >
+        <Search className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium">Start your search</span>
+      </motion.div>
+    );
+  }
 
   return (
     <div className={cn('relative', className)}>
