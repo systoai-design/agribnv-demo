@@ -102,15 +102,85 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   };
 
   return (
-    <div className="sticky top-0 md:top-20 z-40 bg-background py-3 md:py-4">
-      <div className="container">
-        <div className="flex items-center gap-3" ref={containerRef}>
+    <div className="sticky top-0 md:top-20 z-40 bg-background py-2 md:py-4">
+      <div className="md:container">
+        {/* Mobile Layout - Categories + Buttons in one row */}
+        <div className="md:hidden">
+          <div className="flex items-center gap-2" ref={containerRef}>
+            {/* Category Cards - Scrollable */}
+            <div className="flex-1 overflow-hidden touch-pan-x relative">
+              {/* Fade edge indicator */}
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              
+              <motion.div
+                ref={scrollRef}
+                drag="x"
+                dragConstraints={{ left: -scrollWidth, right: 0 }}
+                dragElastic={0.1}
+                dragMomentum={true}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => {
+                  setTimeout(() => setIsDragging(false), 100);
+                }}
+                className="flex items-center gap-2 cursor-grab active:cursor-grabbing"
+                style={{ x }}
+              >
+                {CATEGORIES.map((category) => {
+                  const isSelected = selectedCategories.includes(category.id);
+                  const Icon = category.icon;
+                  return (
+                    <motion.button
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.id)}
+                      whileTap={!isDragging ? { scale: 0.95 } : undefined}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-1 w-[68px] h-[62px] rounded-xl text-xs font-medium transition-all shrink-0',
+                        isSelected 
+                          ? 'bg-primary text-primary-foreground shadow-soft' 
+                          : 'bg-card border border-border/50 text-foreground'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-8 h-8 rounded-lg flex items-center justify-center',
+                        isSelected ? 'bg-primary-foreground/20' : 'bg-primary/10'
+                      )}>
+                        <Icon className={cn('h-4 w-4', isSelected ? 'text-primary-foreground' : 'text-primary')} />
+                      </div>
+                      <span className="text-[10px] leading-tight">{category.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
+            </div>
+
+            {/* Action Buttons - Fixed on right */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={onFiltersClick}
+                className="flex items-center justify-center w-[62px] h-[62px] rounded-xl border border-border/50 bg-card"
+              >
+                <SlidersHorizontal className="h-4 w-4 text-foreground" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleMapClick}
+                className="flex items-center justify-center w-[62px] h-[62px] rounded-xl border border-border/50 bg-card"
+              >
+                <Map className="h-4 w-4 text-foreground" />
+              </motion.button>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center gap-3 container" ref={containerRef}>
           {/* Scroll Left Button - Desktop */}
           {canScrollLeft && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="hidden md:block absolute left-0 z-10 pl-4 pr-8 bg-gradient-to-r from-background via-background to-transparent"
+              className="absolute left-0 z-10 pl-4 pr-8 bg-gradient-to-r from-background via-background to-transparent"
             >
               <Button
                 variant="outline"
@@ -122,49 +192,6 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
               </Button>
             </motion.div>
           )}
-
-          {/* Mobile: Square Category Cards */}
-          <div className="md:hidden flex-1 overflow-hidden touch-pan-x">
-            <motion.div
-              ref={scrollRef}
-              drag="x"
-              dragConstraints={{ left: -scrollWidth, right: 0 }}
-              dragElastic={0.1}
-              dragMomentum={true}
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={() => {
-                setTimeout(() => setIsDragging(false), 100);
-              }}
-              className="flex items-center gap-3 cursor-grab active:cursor-grabbing"
-              style={{ x }}
-            >
-              {CATEGORIES.map((category) => {
-                const isSelected = selectedCategories.includes(category.id);
-                const Icon = category.icon;
-                return (
-                  <motion.button
-                    key={category.id}
-                    onClick={() => handleCategoryClick(category.id)}
-                    whileTap={!isDragging ? { scale: 0.95 } : undefined}
-                    className={cn(
-                      'flex flex-col items-center justify-center gap-1.5 w-20 h-20 rounded-2xl text-xs font-medium transition-all shrink-0',
-                      isSelected 
-                        ? 'bg-primary text-primary-foreground shadow-soft' 
-                        : 'bg-card border border-border/50 text-foreground'
-                    )}
-                  >
-                    <div className={cn(
-                      'w-10 h-10 rounded-xl flex items-center justify-center',
-                      isSelected ? 'bg-primary-foreground/20' : 'bg-primary/10'
-                    )}>
-                      <Icon className={cn('h-5 w-5', isSelected ? 'text-primary-foreground' : 'text-primary')} />
-                    </div>
-                    <span className="text-[11px]">{category.label}</span>
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          </div>
 
           {/* Desktop: Scrollable Categories */}
           <div
@@ -208,7 +235,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="hidden md:block absolute right-20 z-10 pl-8 pr-4 bg-gradient-to-l from-background via-background to-transparent"
+              className="absolute right-20 z-10 pl-8 pr-4 bg-gradient-to-l from-background via-background to-transparent"
             >
               <Button
                 variant="outline"
@@ -228,7 +255,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             onClick={onFiltersClick}
           >
             <SlidersHorizontal className="h-4 w-4" />
-            <span className="hidden sm:inline">Filters</span>
+            <span>Filters</span>
           </Button>
 
           {/* Map Button */}
@@ -238,7 +265,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 bg-card text-sm font-medium text-foreground shadow-sm shrink-0"
           >
             <Map className="h-4 w-4" />
-            <span className="hidden sm:inline">Map</span>
+            <span>Map</span>
           </motion.button>
         </div>
       </div>
