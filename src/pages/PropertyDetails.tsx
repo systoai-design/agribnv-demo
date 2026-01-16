@@ -74,11 +74,16 @@ export default function PropertyDetails() {
   }, [id]);
 
   const fetchProperty = async () => {
+    if (!id) {
+      setIsLoading(false);
+      return;
+    }
+    
     const { data, error } = await supabase
       .from('properties')
       .select(`*, images:property_images(*), experiences(*), host:profiles!properties_host_id_fkey(*)`)
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       setProperty(data as unknown as Property);
@@ -635,7 +640,7 @@ export default function PropertyDetails() {
                   </div>
 
                   <Button 
-                    className="w-full h-12 rounded-lg text-base font-semibold bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
+                    className="w-full h-12 rounded-lg text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
                     disabled={!dateRange.from || !dateRange.to || isBooking}
                     onClick={handleBooking}
                   >
