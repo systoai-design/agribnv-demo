@@ -14,9 +14,12 @@ interface PropertyCardProps {
   variant?: 'default' | 'overlay';
 }
 
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop';
+
 export function PropertyCard({ property, className, index = 0, variant = 'overlay' }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const { isWishlisted, toggleWishlist } = useWishlist();
 
   const isLiked = isWishlisted(property.id);
@@ -24,7 +27,15 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
   const images = property.images?.sort((a, b) => a.display_order - b.display_order) || [];
   const imageUrls = images.length > 0 
     ? images.map(img => img.image_url) 
-    : ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop'];
+    : [FALLBACK_IMAGE];
+
+  const handleImageError = (index: number) => {
+    setFailedImages(prev => new Set(prev).add(index));
+  };
+
+  const getImageSrc = (index: number) => {
+    return failedImages.has(index) ? FALLBACK_IMAGE : imageUrls[index];
+  };
 
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,13 +80,14 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImageIndex}
-                src={imageUrls[currentImageIndex]}
+                src={getImageSrc(currentImageIndex)}
                 alt={property.name}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="w-full h-full object-cover"
+                onError={() => handleImageError(currentImageIndex)}
               />
             </AnimatePresence>
 
@@ -191,9 +203,10 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
         {/* Image */}
         <div className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0">
           <img
-            src={imageUrls[0]}
+            src={failedImages.has(0) ? FALLBACK_IMAGE : imageUrls[0]}
             alt={property.name}
             className="w-full h-full object-cover"
+            onError={() => handleImageError(0)}
           />
           {/* Heart on image */}
           <motion.button
