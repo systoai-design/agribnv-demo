@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, SlidersHorizontal, Apple, Leaf, TreePine, Sparkles, UtensilsCrossed, Footprints } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SlidersHorizontal, Map, Apple, Leaf, TreePine, Sparkles, UtensilsCrossed, Footprints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyCategory } from '@/types/database';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ interface CategoryFilterProps {
   selectedCategories: PropertyCategory[];
   onCategoryChange: (categories: PropertyCategory[]) => void;
   onFiltersClick?: () => void;
+  onMapClick?: () => void;
 }
 
 const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType }[] = [
@@ -20,7 +21,7 @@ const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType
   { id: 'eco_trail', label: 'Eco Trails', icon: Footprints },
 ];
 
-export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick }: CategoryFilterProps) {
+export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick, onMapClick }: CategoryFilterProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -59,9 +60,19 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   };
 
   return (
-    <div className="sticky top-16 md:top-20 z-40 bg-background py-4 border-b border-border/50">
+    <div className="sticky top-16 md:top-20 z-40 bg-background py-3 md:py-4 border-b border-border/30">
       <div className="container">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Map Button - Mobile Only */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onMapClick}
+            className="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 bg-card text-sm font-medium text-foreground shadow-sm shrink-0"
+          >
+            <Map className="h-4 w-4" />
+            <span>Map</span>
+          </motion.button>
+
           {/* Scroll Left Button */}
           {canScrollLeft && (
             <motion.div
@@ -80,11 +91,11 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             </motion.div>
           )}
 
-          {/* Categories - Circular Icon Style */}
+          {/* Categories - Pill Style for Mobile, Circular for Desktop */}
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="flex items-center gap-4 md:gap-6 overflow-x-auto scrollbar-hide flex-1"
+            className="flex items-center gap-2 md:gap-6 overflow-x-auto scrollbar-hide flex-1"
           >
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
@@ -93,9 +104,32 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
                 <motion.button
                   key={category.id}
                   onClick={() => toggleCategory(category.id)}
+                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    // Mobile: Pill style
+                    'md:hidden flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0',
+                    isSelected 
+                      ? 'bg-foreground text-background' 
+                      : 'bg-card border border-border/50 text-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {category.label}
+                </motion.button>
+              );
+            })}
+            
+            {/* Desktop: Circular Icon Style */}
+            {CATEGORIES.map((category) => {
+              const isSelected = selectedCategories.includes(category.id);
+              const Icon = category.icon;
+              return (
+                <motion.button
+                  key={`desktop-${category.id}`}
+                  onClick={() => toggleCategory(category.id)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center gap-2 min-w-[72px]"
+                  className="hidden md:flex flex-col items-center gap-2 min-w-[72px]"
                 >
                   <div 
                     className={cn(
