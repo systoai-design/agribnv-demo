@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { SearchBar } from '@/components/search/SearchBar';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   searchLocation?: string;
@@ -25,28 +26,46 @@ interface NavbarProps {
   showSearch?: boolean;
 }
 
-// Agribnv Logo Component
-function AgribnvLogo({ className = '' }: { className?: string }) {
+// Agribnv Logo Component - Based on brand guide (A with leaf)
+function AgribnvLogo({ className = '', showText = true }: { className?: string; showText?: boolean }) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" className={className}>
-      {/* Triangle/Mountain shape */}
-      <path 
-        d="M20 4L36 36H4L20 4Z" 
-        fill="currentColor"
-      />
-      {/* Leaf inside */}
-      <path 
-        d="M20 12C20 12 15 20 15 26C15 28.5 17 30 20 30C23 30 25 28.5 25 26C25 20 20 12 20 12Z" 
-        fill="hsl(100, 35%, 67%)"
-      />
-      {/* Leaf vein */}
-      <path 
-        d="M20 16V26" 
-        stroke="currentColor" 
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    <div className={cn("flex items-center gap-1", className)}>
+      <svg viewBox="0 0 48 48" fill="none" className="h-10 w-10">
+        {/* Main A shape - triangle with notch */}
+        <path 
+          d="M24 4L44 44H35L24 24L13 44H4L24 4Z" 
+          fill="currentColor"
+          className="text-primary"
+        />
+        {/* Leaf curve integrated into A */}
+        <path 
+          d="M24 14C24 14 19 22 19 28C19 32 21 34 24 34C27 34 29 32 29 28C29 22 24 14 24 14Z" 
+          fill="hsl(84, 48%, 66%)"
+        />
+        {/* Leaf stem */}
+        <path 
+          d="M24 18V30" 
+          stroke="currentColor" 
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          className="text-primary"
+        />
+        {/* Small leaf accent */}
+        <path 
+          d="M24 22C26 22 27 24 27 24C27 24 26 26 24 26" 
+          stroke="currentColor" 
+          strokeWidth="1"
+          strokeLinecap="round"
+          className="text-primary"
+          fill="none"
+        />
+      </svg>
+      {showText && (
+        <span className="hidden md:block text-xl font-bold text-primary tracking-tight font-display">
+          Agribnv
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -91,17 +110,13 @@ export function Navbar({
           {/* Top Row - Logo and User Menu */}
           <div className="flex items-center justify-between h-16 md:h-20 shrink-0">
             {/* Logo */}
-            <div className="flex-shrink-0 w-[100px] md:w-[160px]">
-              <Link to="/" className="flex items-center gap-2 group">
+            <div className="flex-shrink-0 w-[100px] md:w-[180px]">
+              <Link to="/" className="flex items-center group">
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center"
                 >
-                  <AgribnvLogo className="h-9 w-9 md:h-10 md:w-10 text-primary" />
-                  <span className="hidden md:block ml-2 text-xl font-bold text-primary tracking-tight">
-                    Agribnv
-                  </span>
+                  <AgribnvLogo />
                 </motion.div>
               </Link>
             </div>

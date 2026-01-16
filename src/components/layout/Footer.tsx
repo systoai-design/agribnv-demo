@@ -4,6 +4,30 @@ import { Globe, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+// Agribnv Logo Icon (just the A with leaf)
+function AgribnvIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={cn("h-8 w-8", className)}>
+      <path 
+        d="M24 4L44 44H35L24 24L13 44H4L24 4Z" 
+        fill="currentColor"
+        className="text-primary"
+      />
+      <path 
+        d="M24 14C24 14 19 22 19 28C19 32 21 34 24 34C27 34 29 32 29 28C29 22 24 14 24 14Z" 
+        fill="hsl(84, 48%, 66%)"
+      />
+      <path 
+        d="M24 18V30" 
+        stroke="currentColor" 
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        className="text-primary"
+      />
+    </svg>
+  );
+}
+
 const INSPIRATION_TABS = [
   { id: 'popular', label: 'Popular' },
   { id: 'farm-stays', label: 'Farm stays' },
