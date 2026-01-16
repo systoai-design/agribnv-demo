@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { SearchBar } from '@/components/search/SearchBar';
 import { cn } from '@/lib/utils';
+import agribnvLogo from '@/assets/agribnv-logo.png';
 
 interface NavbarProps {
   searchLocation?: string;
@@ -26,46 +27,14 @@ interface NavbarProps {
   showSearch?: boolean;
 }
 
-// Agribnv Logo Component - Based on brand guide (A with leaf)
-function AgribnvLogo({ className = '', showText = true }: { className?: string; showText?: boolean }) {
+// Agribnv Logo Component - Using brand logo image
+function AgribnvLogo({ className = '' }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      <svg viewBox="0 0 48 48" fill="none" className="h-10 w-10">
-        {/* Main A shape - triangle with notch */}
-        <path 
-          d="M24 4L44 44H35L24 24L13 44H4L24 4Z" 
-          fill="currentColor"
-          className="text-primary"
-        />
-        {/* Leaf curve integrated into A */}
-        <path 
-          d="M24 14C24 14 19 22 19 28C19 32 21 34 24 34C27 34 29 32 29 28C29 22 24 14 24 14Z" 
-          fill="hsl(84, 48%, 66%)"
-        />
-        {/* Leaf stem */}
-        <path 
-          d="M24 18V30" 
-          stroke="currentColor" 
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          className="text-primary"
-        />
-        {/* Small leaf accent */}
-        <path 
-          d="M24 22C26 22 27 24 27 24C27 24 26 26 24 26" 
-          stroke="currentColor" 
-          strokeWidth="1"
-          strokeLinecap="round"
-          className="text-primary"
-          fill="none"
-        />
-      </svg>
-      {showText && (
-        <span className="hidden md:block text-xl font-bold text-primary tracking-tight font-display">
-          Agribnv
-        </span>
-      )}
-    </div>
+    <img 
+      src={agribnvLogo} 
+      alt="Agribnv" 
+      className={cn("h-10 w-auto", className)} 
+    />
   );
 }
 
