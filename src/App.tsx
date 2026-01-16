@@ -11,6 +11,8 @@ import Bookings from "./pages/Bookings";
 import HostDashboard from "./pages/HostDashboard";
 import NewProperty from "./pages/NewProperty";
 import Profile from "./pages/Profile";
+import Wishlists from "./pages/Wishlists";
+import MapView from "./pages/MapView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/host" element={<HostDashboard />} />
             <Route path="/host/properties/new" element={<NewProperty />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/wishlists" element={<Wishlists />} />
+            <Route path="/map" element={<MapView />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

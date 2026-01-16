@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Heart, CalendarDays, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import haptics from '@/utils/haptics';
 
 export function MobileNav() {
   const { user, isHost } = useAuth();
@@ -34,6 +35,7 @@ export function MobileNav() {
             <Link
               key={item.href}
               to={item.href}
+              onClick={() => haptics.selection()}
               className="flex flex-col items-center gap-1 py-2 px-4 min-w-[60px]"
             >
               <motion.div
