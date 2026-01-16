@@ -229,7 +229,7 @@ export default function PropertyDetails() {
     : ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'];
 
   return (
-    <Layout showMobileNav={false} showFooter={false}>
+    <Layout hideNavbarOnMobile={true} showMobileNav={false} showFooter={false}>
       {/* Mobile Header - Transparent with floating buttons only */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <div className="flex items-center justify-between p-4 pt-safe">
