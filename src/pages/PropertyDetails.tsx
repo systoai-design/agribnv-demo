@@ -229,8 +229,227 @@ export default function PropertyDetails() {
     : ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'];
 
   return (
-    <Layout showMobileNav={false}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <Layout showMobileNav={false} showFooter={false}>
+      {/* Mobile Header - Fixed */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-transparent">
+        <div className="flex items-center justify-between p-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate(-1)}
+            className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </motion.button>
+          <div className="flex gap-2">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+            >
+              <Share className="h-4 w-4" />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsLiked(!isLiked)}
+              className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+            >
+              <Heart className={cn('h-4 w-4', isLiked && 'fill-destructive text-destructive')} />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Full-Width Image Carousel */}
+      <div className="md:hidden relative -mt-16">
+        <div className="relative h-[280px] overflow-hidden">
+          <motion.img
+            key={currentImageIndex}
+            src={imageUrls[currentImageIndex]}
+            alt={property.name}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full h-full object-cover"
+          />
+          {/* Image navigation */}
+          {imageUrls.length > 1 && (
+            <>
+              <button
+                onClick={() => setCurrentImageIndex(prev => prev === 0 ? imageUrls.length - 1 : prev - 1)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setCurrentImageIndex(prev => prev === imageUrls.length - 1 ? 0 : prev + 1)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </>
+          )}
+          {/* Dots indicator */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {imageUrls.slice(0, 5).map((_, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  'h-1.5 rounded-full transition-all',
+                  idx === currentImageIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
+                )}
+              />
+            ))}
+          </div>
+          {/* Image counter */}
+          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+            {currentImageIndex + 1} / {imageUrls.length}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Content */}
+      <div className="md:hidden px-4 py-4 pb-24 space-y-4">
+        {/* Title */}
+        <div>
+          <h1 className="text-xl font-semibold">{property.name}</h1>
+          <p className="text-sm text-muted-foreground">{CATEGORY_LABELS[property.category]} · {property.location}</p>
+        </div>
+
+        {/* Rating & Reviews summary */}
+        <div className="flex items-center gap-4 py-3 border-b border-border/50">
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 fill-foreground" />
+            <span className="font-semibold">4.89</span>
+          </div>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-sm underline cursor-pointer">{mockReviews.length} reviews</span>
+        </div>
+
+        {/* Host Info */}
+        <div className="flex items-center gap-4 py-4 border-b border-border/50">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={property.host?.avatar_url} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {property.host?.full_name?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <p className="font-medium">Hosted by {property.host?.full_name}</p>
+            <p className="text-sm text-muted-foreground">Superhost · 2 years hosting</p>
+          </div>
+        </div>
+
+        {/* Quick highlights */}
+        <div className="space-y-4 py-4 border-b border-border/50">
+          <div className="flex gap-4">
+            <Users className="h-6 w-6 shrink-0" />
+            <div>
+              <p className="font-medium">{property.max_guests} guests · {property.bedrooms} bedroom · {property.bathrooms} bath</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <DoorOpen className="h-6 w-6 shrink-0" />
+            <div>
+              <p className="font-medium">Self check-in</p>
+              <p className="text-sm text-muted-foreground">Check yourself in with the lockbox</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <Award className="h-6 w-6 shrink-0" />
+            <div>
+              <p className="font-medium">{property.host?.full_name} is a Superhost</p>
+              <p className="text-sm text-muted-foreground">Superhosts are experienced, highly rated hosts</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="py-4 border-b border-border/50">
+          <p className="text-sm leading-relaxed line-clamp-4">
+            {property.description}
+          </p>
+          <Button variant="link" className="px-0 h-auto text-sm font-semibold underline mt-2">
+            Show more
+          </Button>
+        </div>
+
+        {/* Amenities Preview */}
+        {property.amenities && property.amenities.length > 0 && (
+          <div className="py-4 border-b border-border/50">
+            <h3 className="font-semibold mb-4">What this place offers</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {property.amenities.slice(0, 6).map((amenity) => {
+                const IconComponent = amenityIcons[amenity] || Wifi;
+                return (
+                  <div key={amenity} className="flex items-center gap-3">
+                    <IconComponent className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm">{amenity}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {property.amenities.length > 6 && (
+              <Button variant="outline" className="w-full mt-4 rounded-lg border-foreground">
+                Show all {property.amenities.length} amenities
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Reviews Section */}
+        <div className="py-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="h-5 w-5 fill-foreground" />
+            <span className="text-lg font-semibold">4.89</span>
+            <span className="text-muted-foreground">· {mockReviews.length} reviews</span>
+          </div>
+          {/* Sample reviews */}
+          <div className="space-y-4">
+            {mockReviews.slice(0, 2).map((review) => (
+              <div key={review.id} className="bg-muted/30 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-gray-300 text-gray-600 text-sm">
+                      {review.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-sm">{review.name}</p>
+                    <p className="text-xs text-muted-foreground">{review.date}</p>
+                  </div>
+                </div>
+                <p className="text-sm line-clamp-3">{review.text}</p>
+              </div>
+            ))}
+          </div>
+          <Button variant="outline" className="w-full mt-4 rounded-lg border-foreground">
+            Show all {mockReviews.length} reviews
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Bottom Booking Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border/50 px-4 py-3 safe-area-pb">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm">
+              <span className="font-semibold">₱{property.price_per_night.toLocaleString()}</span>
+              <span className="text-muted-foreground"> / night</span>
+            </p>
+            <p className="text-xs underline text-muted-foreground">
+              {nights > 0 ? `${format(dateRange.from!, 'MMM d')} – ${format(dateRange.to!, 'MMM d')}` : 'Select dates'}
+            </p>
+          </div>
+          <Button 
+            onClick={handleBooking}
+            disabled={!dateRange.from || !dateRange.to || isBooking}
+            className="rounded-lg px-6 h-12 bg-primary hover:bg-primary/90 font-semibold"
+          >
+            {isBooking ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reserve'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Title & Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -276,7 +495,7 @@ export default function PropertyDetails() {
               <div 
                 key={idx} 
                 className={cn(
-                  "relative hidden md:block cursor-pointer",
+                  "relative cursor-pointer",
                   idx === 1 && "rounded-tr-xl overflow-hidden",
                   idx === 3 && "rounded-br-xl overflow-hidden"
                 )}
@@ -732,6 +951,16 @@ export default function PropertyDetails() {
           </div>
         </div>
       </div>
+
+      {/* Photo Gallery Modal - Works for both mobile and desktop */}
+      <PhotoGalleryModal
+        isOpen={showAllPhotos}
+        onClose={() => setShowAllPhotos(false)}
+        images={imageUrls}
+        propertyName={property.name}
+        isLiked={isLiked}
+        onToggleLike={() => setIsLiked(!isLiked)}
+      />
     </Layout>
   );
 }
