@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
 import LocationCarousel from '@/components/properties/LocationCarousel';
+import { WelcomeHeader } from '@/components/home/WelcomeHeader';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Calendar } from '@/components/ui/calendar';
@@ -84,9 +85,6 @@ export default function Index() {
 
   const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation || searchDateRange.from;
 
-  // Get first name for welcome message
-  const firstName = profile?.full_name?.split(' ')[0] || 'Explorer';
-
   // Group properties by location for carousels
   const propertiesByLocation = useMemo(() => {
     const groups: Record<string, Property[]> = {};
@@ -122,20 +120,24 @@ export default function Index() {
       onSearchGuestCountChange={setSearchGuestCount}
       onSearch={handleSearch}
     >
-      {/* Mobile Compact Search Bar */}
-      <div className="md:hidden sticky top-0 z-40 bg-background pt-3 pb-2 px-4">
+      {/* Mobile Welcome Header */}
+      <div className="md:hidden">
+        <WelcomeHeader />
+      </div>
+
+      {/* Mobile Simple Search Bar */}
+      <div className="md:hidden px-5 pb-4">
         <motion.button
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-5 py-3.5 rounded-full bg-card border border-border/50 shadow-md hover:shadow-lg transition-shadow"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-card border border-border/50 shadow-sm"
         >
-          <Search className="h-5 w-5 text-primary" />
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium text-foreground">Where to?</p>
-            <p className="text-xs text-muted-foreground">Anywhere · Any week · Add guests</p>
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Search className="h-5 w-5 text-primary" />
           </div>
+          <span className="text-sm text-muted-foreground">Search your destination here...</span>
         </motion.button>
       </div>
 
@@ -153,11 +155,13 @@ export default function Index() {
       />
 
       {/* Category Filter */}
-      <CategoryFilter
-        selectedCategories={selectedCategories}
-        onCategoryChange={setSelectedCategories}
-        onFiltersClick={() => setIsFiltersOpen(true)}
-      />
+      <div className="px-5 md:px-0">
+        <CategoryFilter
+          selectedCategories={selectedCategories}
+          onCategoryChange={setSelectedCategories}
+          onFiltersClick={() => setIsFiltersOpen(true)}
+        />
+      </div>
 
       {/* Main Content */}
       <section id="search-section" className="container py-4 md:py-6">
@@ -168,7 +172,7 @@ export default function Index() {
           className="flex items-center justify-between mb-4 md:mb-6"
         >
           <div>
-            <h2 className="text-lg md:text-2xl font-bold text-foreground">
+            <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">
               {hasActiveFilters ? 'Search Results' : 'Featured Farms'}
             </h2>
             {hasActiveFilters && (

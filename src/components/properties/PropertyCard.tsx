@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ChevronLeft, ChevronRight, Star, MapPin } from 'lucide-react';
-import { Property, CATEGORY_LABELS } from '@/types/database';
+import { Heart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { Property } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { useWishlist } from '@/hooks/useWishlist';
 import haptics from '@/utils/haptics';
@@ -11,65 +11,10 @@ interface PropertyCardProps {
   property: Property;
   className?: string;
   index?: number;
+  variant?: 'default' | 'overlay';
 }
 
-// Guest Favorite Badge with laurel design
-function GuestFavoriteBadge() {
-  return (
-    <div className="absolute top-3 left-3 bg-white rounded-xl px-3 py-1.5 shadow-lg flex items-center gap-2">
-      <div className="flex items-center gap-1">
-        {/* Left laurel */}
-        <svg className="h-4 w-4 text-foreground" viewBox="0 0 24 24" fill="none">
-          <path 
-            d="M8 4C8 4 6 6 6 9C6 12 8 14 8 14" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-          <path 
-            d="M6 7C6 7 4 8 3 10C2 12 3 14 3 14" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-          <path 
-            d="M5 11C5 11 3 12 2 15C1 18 3 20 3 20" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="text-center">
-          <p className="text-[10px] font-bold text-foreground leading-tight">Guest</p>
-          <p className="text-[10px] font-bold text-foreground leading-tight">favorite</p>
-        </div>
-        {/* Right laurel */}
-        <svg className="h-4 w-4 text-foreground scale-x-[-1]" viewBox="0 0 24 24" fill="none">
-          <path 
-            d="M8 4C8 4 6 6 6 9C6 12 8 14 8 14" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-          <path 
-            d="M6 7C6 7 4 8 3 10C2 12 3 14 3 14" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-          <path 
-            d="M5 11C5 11 3 12 2 15C1 18 3 20 3 20" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-export function PropertyCard({ property, className, index = 0 }: PropertyCardProps) {
+export function PropertyCard({ property, className, index = 0, variant = 'overlay' }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -101,129 +46,160 @@ export function PropertyCard({ property, className, index = 0 }: PropertyCardPro
     toggleWishlist(property.id);
   };
 
-  // Generate a random rating for demo
-  const rating = (4.5 + Math.random() * 0.5).toFixed(2);
-  const isGuestFavorite = property.experiences && property.experiences.length > 0;
+  // Overlay variant - text on image
+  if (variant === 'overlay') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.05 }}
+        className={cn('group', className)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Link to={`/properties/${property.id}`} className="block">
+          {/* Image Container with Overlay Text */}
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentImageIndex}
+                src={imageUrls[currentImageIndex]}
+                alt={property.name}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-full h-full object-cover"
+              />
+            </AnimatePresence>
 
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+            {/* Heart Button - Top Right */}
+            <motion.button
+              onClick={handleToggleLike}
+              whileTap={{ scale: 0.85 }}
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/20 backdrop-blur-sm transition-colors z-10"
+            >
+              <motion.div
+                animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
+                transition={{ duration: 0.3 }}
+              >
+                <Heart 
+                  className={cn(
+                    'h-5 w-5 transition-all',
+                    isLiked 
+                      ? 'fill-primary text-primary' 
+                      : 'text-white stroke-[2]'
+                  )}
+                />
+              </motion.div>
+            </motion.button>
+
+            {/* Navigation Arrows - Desktop only */}
+            <AnimatePresence>
+              {isHovered && imageUrls.length > 1 && (
+                <>
+                  <motion.button
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white hover:scale-105 rounded-full p-1.5 shadow-md transition-transform hidden md:flex"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-foreground" />
+                  </motion.button>
+                  <motion.button
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white hover:scale-105 rounded-full p-1.5 shadow-md transition-transform hidden md:flex"
+                  >
+                    <ChevronRight className="h-4 w-4 text-foreground" />
+                  </motion.button>
+                </>
+              )}
+            </AnimatePresence>
+
+            {/* Image Dots */}
+            {imageUrls.length > 1 && (
+              <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {imageUrls.slice(0, 5).map((_, idx) => (
+                  <motion.div
+                    key={idx}
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full transition-all',
+                      idx === currentImageIndex 
+                        ? 'bg-white w-2' 
+                        : 'bg-white/60'
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Overlay Text Content */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <h3 className="font-bold text-white text-lg uppercase tracking-wide line-clamp-1">
+                {property.name}
+              </h3>
+              <div className="flex items-center gap-1.5 text-white/90 mt-1">
+                <MapPin className="h-3.5 w-3.5" />
+                <p className="text-sm line-clamp-1">{property.location}</p>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </motion.div>
+    );
+  }
+
+  // Default variant - horizontal card for wishlists
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
       className={cn('group', className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/properties/${property.id}`} className="block">
-        {/* Image Container */}
-        <div className="relative aspect-[4/3] md:aspect-[4/3] rounded-2xl overflow-hidden mb-3 shadow-soft group-hover:shadow-card transition-shadow">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={currentImageIndex}
-              src={imageUrls[currentImageIndex]}
-              alt={property.name}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="w-full h-full object-cover"
-            />
-          </AnimatePresence>
-
-          {/* Guest Favorite Badge - Top Left */}
-          {isGuestFavorite && <GuestFavoriteBadge />}
-
-          {/* Heart Button - Top Right */}
+      <Link to={`/properties/${property.id}`} className="flex gap-4 p-3 bg-card rounded-2xl shadow-soft hover:shadow-card transition-shadow">
+        {/* Image */}
+        <div className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0">
+          <img
+            src={imageUrls[0]}
+            alt={property.name}
+            className="w-full h-full object-cover"
+          />
+          {/* Heart on image */}
           <motion.button
             onClick={handleToggleLike}
             whileTap={{ scale: 0.85 }}
-            className="absolute top-3 right-3 p-2.5 rounded-full transition-colors z-10"
+            className="absolute top-1.5 right-1.5 p-1.5"
           >
-            <motion.div
-              animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
-              transition={{ duration: 0.3 }}
-            >
-              <Heart 
-                className={cn(
-                  'h-6 w-6 drop-shadow-md transition-all',
-                  isLiked 
-                    ? 'fill-primary text-primary' 
-                    : 'fill-black/30 text-white stroke-[2]'
-                )}
-              />
-            </motion.div>
-          </motion.button>
-
-          {/* Navigation Arrows - Desktop only */}
-          <AnimatePresence>
-            {isHovered && imageUrls.length > 1 && (
-              <>
-                <motion.button
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white hover:scale-105 rounded-full p-1.5 shadow-md transition-transform hidden md:flex"
-                >
-                  <ChevronLeft className="h-4 w-4 text-foreground" />
-                </motion.button>
-                <motion.button
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white hover:scale-105 rounded-full p-1.5 shadow-md transition-transform hidden md:flex"
-                >
-                  <ChevronRight className="h-4 w-4 text-foreground" />
-                </motion.button>
-              </>
-            )}
-          </AnimatePresence>
-
-          {/* Image Dots */}
-          {imageUrls.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {imageUrls.slice(0, 5).map((_, idx) => (
-                <motion.div
-                  key={idx}
-                  className={cn(
-                    'w-1.5 h-1.5 rounded-full transition-all',
-                    idx === currentImageIndex 
-                      ? 'bg-white w-2' 
-                      : 'bg-white/60'
-                  )}
-                />
-              ))}
-              {imageUrls.length > 5 && (
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
+            <Heart 
+              className={cn(
+                'h-4 w-4 transition-all drop-shadow',
+                isLiked 
+                  ? 'fill-primary text-primary' 
+                  : 'text-white stroke-[2]'
               )}
-            </div>
-          )}
+            />
+          </motion.button>
         </div>
 
         {/* Content */}
-        <div className="space-y-1 px-0.5">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-foreground line-clamp-1 text-[15px]">
-              {property.name}
-            </h3>
-            <div className="flex items-center gap-1 shrink-0 text-foreground">
-              <Star className="h-3.5 w-3.5 fill-current" />
-              <span className="text-sm font-medium">{rating}</span>
-            </div>
+        <div className="flex-1 min-w-0 py-1">
+          <h3 className="font-bold text-primary line-clamp-1">
+            {property.name}
+          </h3>
+          <div className="flex items-center gap-1 text-muted-foreground mt-1">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <p className="text-sm line-clamp-1">{property.location}</p>
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5" />
-            <p className="text-sm line-clamp-1">
-              {property.location}
-            </p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {CATEGORY_LABELS[property.category]}
-          </p>
-          <p className="text-[15px] text-foreground">
-            <span className="font-semibold">₱{property.price_per_night.toLocaleString()}</span>
-            <span className="text-muted-foreground"> night</span>
+          <p className="text-sm font-semibold text-foreground mt-2">
+            ₱{property.price_per_night.toLocaleString()} / night
           </p>
         </div>
       </Link>
