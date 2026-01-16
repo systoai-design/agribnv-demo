@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, Navigation } from 'lucide-react';
 import { format } from 'date-fns';
@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface SearchBarProps {
   location: string;
@@ -96,6 +97,13 @@ export function SearchBar({
   // Use external state if provided, otherwise use internal
   const isExpanded = externalExpanded ?? internalExpanded;
   const setIsExpanded = onExpandedChange ?? setInternalExpanded;
+
+  // ESC key to collapse expanded search
+  const collapseSearch = useCallback(() => {
+    setIsExpanded(false);
+    setActiveSection(null);
+  }, [setIsExpanded]);
+  useEscapeKey(collapseSearch, isExpanded);
 
   const handleSectionClick = (section: 'location' | 'dates' | 'guests') => {
     if (!isExpanded) {

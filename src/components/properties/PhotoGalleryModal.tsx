@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface PhotoGalleryModalProps {
   isOpen: boolean;
@@ -72,27 +73,40 @@ export function PhotoGalleryModal({
   // Get flat index for lightbox navigation
   const allImages = images;
   
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (lightboxIndex !== null && lightboxIndex > 0) {
       setLightboxIndex(lightboxIndex - 1);
     }
-  };
+  }, [lightboxIndex]);
   
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (lightboxIndex !== null && lightboxIndex < allImages.length - 1) {
       setLightboxIndex(lightboxIndex + 1);
     }
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  }, [lightboxIndex, allImages.length]);
+
+  // ESC key handling
+  const handleEscape = useCallback(() => {
     if (lightboxIndex !== null) {
-      if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'Escape') setLightboxIndex(null);
-    } else if (e.key === 'Escape') {
+      setLightboxIndex(null);
+    } else {
       onClose();
     }
-  };
+  }, [lightboxIndex, onClose]);
+  useEscapeKey(handleEscape, isOpen);
+
+  // Arrow key navigation for lightbox
+  useEffect(() => {
+    if (!isOpen || lightboxIndex === null) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'ArrowRight') handleNext();
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, lightboxIndex, handlePrev, handleNext]);
 
   if (!isOpen) return null;
 
@@ -103,7 +117,6 @@ export function PhotoGalleryModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 bg-background"
-        onKeyDown={handleKeyDown}
         tabIndex={0}
       >
         {/* Header */}

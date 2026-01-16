@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
+import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
+import LocationCarousel from '@/components/properties/LocationCarousel';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Sheet,
   SheetContent,
@@ -15,6 +18,7 @@ import {
 import { MobileSearchModal } from '@/components/search/MobileSearchModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { Property, PropertyCategory } from '@/types/database';
 
 export default function Index() {
@@ -78,10 +82,35 @@ export default function Index() {
     setSearchDateRange({ from: undefined, to: undefined });
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation;
+  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation || searchDateRange.from;
 
   // Get first name for welcome message
   const firstName = profile?.full_name?.split(' ')[0] || 'Explorer';
+
+  // Group properties by location for carousels
+  const propertiesByLocation = useMemo(() => {
+    const groups: Record<string, Property[]> = {};
+    properties.forEach((property) => {
+      const city = property.location.split(',')[0].trim();
+      if (!groups[city]) groups[city] = [];
+      groups[city].push(property);
+    });
+    return groups;
+  }, [properties]);
+
+  // ESC key to close filters sheet
+  const closeFilters = useCallback(() => setIsFiltersOpen(false), []);
+  useEscapeKey(closeFilters, isFiltersOpen);
+
+  // Format date range for display
+  const formatDateRangeDisplay = () => {
+    if (!searchDateRange.from && !searchDateRange.to) return 'Any dates';
+    if (searchDateRange.from && !searchDateRange.to) return format(searchDateRange.from, 'MMM d');
+    if (searchDateRange.from && searchDateRange.to) {
+      return `${format(searchDateRange.from, 'MMM d')} - ${format(searchDateRange.to, 'MMM d')}`;
+    }
+    return 'Any dates';
+  };
 
   return (
     <Layout
@@ -161,7 +190,21 @@ export default function Index() {
           )}
         </motion.div>
 
-        <PropertyGrid properties={filteredProperties} isLoading={isLoading} />
+        {/* Show location carousels when no filters, otherwise show grid */}
+        {!hasActiveFilters ? (
+          <div className="space-y-8">
+            {Object.entries(propertiesByLocation).map(([location, props]) => (
+              <LocationCarousel
+                key={location}
+                title={`Available in ${location}`}
+                properties={props}
+                onShowAll={() => setSearchLocation(location)}
+              />
+            ))}
+          </div>
+        ) : (
+          <PropertyGrid properties={filteredProperties} isLoading={isLoading} />
+        )}
       </section>
 
       {/* Filters Sheet */}
@@ -223,6 +266,34 @@ export default function Index() {
                   </Button>
                 </div>
               </div>
+            </div>
+
+            {/* Dates */}
+            <div className="space-y-6 border-t border-border/50 pt-8">
+              <h3 className="text-xl font-semibold text-foreground">Dates</h3>
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl mb-4">
+                <span className="font-medium text-foreground">Check in - Check out</span>
+                <span className="text-muted-foreground">{formatDateRangeDisplay()}</span>
+              </div>
+              <div className="flex justify-center">
+                <Calendar
+                  mode="range"
+                  selected={searchDateRange}
+                  onSelect={(range) => setSearchDateRange({ from: range?.from, to: range?.to })}
+                  disabled={{ before: new Date() }}
+                  numberOfMonths={1}
+                  className="rounded-xl pointer-events-auto"
+                />
+              </div>
+              {searchDateRange.from && (
+                <Button 
+                  variant="link" 
+                  className="px-0 underline text-foreground"
+                  onClick={() => setSearchDateRange({ from: undefined, to: undefined })}
+                >
+                  Clear dates
+                </Button>
+              )}
             </div>
           </div>
 
