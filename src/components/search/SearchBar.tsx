@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Calendar, Users, MapPin } from 'lucide-react';
+import { Search, MapPin, Navigation } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,13 +24,48 @@ interface SearchBarProps {
   isCompact?: boolean;
 }
 
-const POPULAR_LOCATIONS = [
-  { name: 'Anywhere', description: 'Search all locations' },
-  { name: 'Tagaytay', description: 'Cool highland farms' },
-  { name: 'Batangas', description: 'Beachside retreats' },
-  { name: 'La Union', description: 'Surf and farm' },
-  { name: 'Baguio', description: 'Mountain fresh' },
-  { name: 'Guimaras', description: 'Mango paradise' },
+// Airbnb-style grid icon component
+const GridIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 32 32" 
+    className={className}
+    fill="currentColor"
+  >
+    <path d="M4 4h10v10H4zM18 4h10v10H18zM4 18h10v10H4zM18 18h10v10H18z" />
+  </svg>
+);
+
+const SUGGESTED_DESTINATIONS = [
+  { 
+    name: 'Nearby', 
+    description: "Find what's around you",
+    iconType: 'navigation' as const,
+  },
+  { 
+    name: 'Tagaytay, Philippines', 
+    description: 'Cool highland farms',
+    iconType: 'grid' as const,
+  },
+  { 
+    name: 'Batangas, Philippines', 
+    description: 'Beachside retreats',
+    iconType: 'grid' as const,
+  },
+  { 
+    name: 'La Union, Philippines', 
+    description: 'Surf and farm',
+    iconType: 'grid' as const,
+  },
+  { 
+    name: 'Baguio, Philippines', 
+    description: 'Mountain fresh',
+    iconType: 'grid' as const,
+  },
+  { 
+    name: 'Guimaras, Philippines', 
+    description: 'Mango paradise',
+    iconType: 'grid' as const,
+  },
 ];
 
 export function SearchBar({
@@ -156,37 +191,51 @@ export function SearchBar({
                       </p>
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] max-w-[calc(100vw-2rem)] p-4 rounded-3xl shadow-card" align="center">
-                    <div className="space-y-4">
+                  <PopoverContent className="w-[400px] max-w-[calc(100vw-2rem)] p-6 rounded-3xl shadow-card border-0" align="center" sideOffset={12}>
+                    <div className="space-y-5">
                       <Input
                         placeholder="Search destinations"
                         value={location}
                         onChange={(e) => onLocationChange(e.target.value)}
-                        className="rounded-xl"
+                        className="rounded-xl border-muted-foreground/20 focus:border-foreground"
                         autoFocus
                       />
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
-                          Popular destinations
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground px-1">
+                          Suggested destinations
                         </p>
-                        {POPULAR_LOCATIONS.map((loc) => (
-                          <button
-                            key={loc.name}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
-                            onClick={() => {
-                              onLocationChange(loc.name === 'Anywhere' ? '' : loc.name);
-                              setActiveSection('dates');
-                            }}
-                          >
-                            <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-                              <MapPin className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="font-medium">{loc.name}</p>
-                              <p className="text-sm text-muted-foreground">{loc.description}</p>
-                            </div>
-                          </button>
-                        ))}
+                        <div className="space-y-1">
+                          {SUGGESTED_DESTINATIONS.map((loc, index) => (
+                            <motion.button
+                              key={loc.name}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/60 transition-colors text-left group"
+                              onClick={() => {
+                                onLocationChange(loc.name === 'Nearby' ? '' : loc.name.split(',')[0]);
+                                setActiveSection('dates');
+                              }}
+                            >
+                              <div className={cn(
+                                "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                                loc.iconType === 'navigation' 
+                                  ? "bg-muted" 
+                                  : "bg-gradient-to-br from-rose-400 to-rose-500"
+                              )}>
+                                {loc.iconType === 'navigation' ? (
+                                  <Navigation className="h-5 w-5 text-foreground" />
+                                ) : (
+                                  <GridIcon className="h-5 w-5 text-white" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-medium text-foreground truncate">{loc.name}</p>
+                                <p className="text-sm text-muted-foreground truncate">{loc.description}</p>
+                              </div>
+                            </motion.button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </PopoverContent>
