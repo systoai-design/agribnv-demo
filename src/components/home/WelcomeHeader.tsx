@@ -18,30 +18,29 @@ export function WelcomeHeader() {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between px-5 py-4"
+      className="flex items-center justify-between px-4 py-2.5 border-b border-border/30"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <Link to={user ? '/profile' : '/auth'}>
-          <Avatar className="h-12 w-12 border-2 border-primary/20">
+          <Avatar className="h-10 w-10 border-2 border-primary/20">
             <AvatarImage src={profile?.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Link>
         <div>
-          <p className="text-sm text-muted-foreground">Welcome!</p>
-          <p className="font-bold text-foreground text-lg">{firstName}</p>
+          <p className="text-xs text-muted-foreground leading-tight">Welcome!</p>
+          <p className="font-bold text-foreground text-base leading-tight">{firstName}</p>
         </div>
       </div>
 
       <motion.button
         whileTap={{ scale: 0.9 }}
-        className="relative p-2.5 rounded-full bg-card border border-border/50 shadow-sm"
+        className="relative p-2 rounded-full bg-card border border-border/50 shadow-sm"
       >
-        <Bell className="h-5 w-5 text-foreground" />
-        {/* Notification dot */}
-        <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+        <Bell className="h-4 w-4 text-foreground" />
+        <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full" />
       </motion.button>
     </motion.div>
   );

@@ -126,18 +126,18 @@ export default function Index() {
       </div>
 
       {/* Mobile Simple Search Bar */}
-      <div className="md:hidden px-5 pb-4">
+      <div className="md:hidden px-4 pb-3">
         <motion.button
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-card border border-border/50 shadow-sm"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full bg-card border border-border/50 shadow-soft"
         >
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <Search className="h-5 w-5 text-primary" />
+          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Search className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-sm text-muted-foreground">Search your destination here...</span>
+          <span className="text-sm text-muted-foreground">Search your destination...</span>
         </motion.button>
       </div>
 
@@ -155,7 +155,7 @@ export default function Index() {
       />
 
       {/* Category Filter */}
-      <div className="px-5 md:px-0">
+      <div className="px-4 md:px-0">
         <CategoryFilter
           selectedCategories={selectedCategories}
           onCategoryChange={setSelectedCategories}
