@@ -1,134 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Agribnv Design System - Modern Airbnb-inspired
-   Clean, minimal, with coral accent
+/* Agribnv Design System - Modern Agricultural Theme
+   Color Palette: Deep Forest Green, Sage, Cream
+   Typography: Poppins
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Pure white background for clean look */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
+    /* Cream/off-white background */
+    --background: 60 30% 96%;
+    --foreground: 150 60% 12%;
 
-    /* Card styling */
+    /* Card styling - white */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 150 60% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover-foreground: 150 60% 12%;
 
-    /* Coral/Rose - Primary brand color (Airbnb-inspired) */
-    --primary: 356 100% 66%;
+    /* Deep Forest Green - Primary brand color */
+    --primary: 152 85% 16%;
     --primary-foreground: 0 0% 100%;
 
-    /* Neutral gray secondary */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 13%;
+    /* Sage green secondary */
+    --secondary: 100 35% 67%;
+    --secondary-foreground: 150 60% 12%;
 
-    /* Muted tones */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted tones - cream */
+    --muted: 60 20% 92%;
+    --muted-foreground: 150 20% 40%;
 
-    /* Accent - matching primary */
-    --accent: 356 100% 66%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Sage */
+    --accent: 100 35% 67%;
+    --accent-foreground: 150 60% 12%;
 
     /* Warning/error states */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs - very subtle */
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 356 100% 66%;
+    /* Borders and inputs */
+    --border: 150 15% 85%;
+    --input: 150 15% 85%;
+    --ring: 152 85% 16%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar styling */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 13%;
-    --sidebar-primary: 356 100% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 13%;
-    --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 356 100% 66%;
+    --sidebar-background: 152 85% 16%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 100 35% 67%;
+    --sidebar-primary-foreground: 150 60% 12%;
+    --sidebar-accent: 152 70% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 152 70% 25%;
+    --sidebar-ring: 100 35% 67%;
 
-    /* Custom tokens */
-    --coral: 356 100% 66%;
-    --coral-light: 356 90% 75%;
-    --coral-dark: 356 85% 55%;
-    --gray-50: 0 0% 98%;
-    --gray-100: 0 0% 96%;
-    --gray-200: 0 0% 90%;
-    --gray-300: 0 0% 83%;
-    --gray-400: 0 0% 64%;
-    --gray-500: 0 0% 45%;
-    --gray-600: 0 0% 32%;
-    --gray-700: 0 0% 25%;
-    --gray-800: 0 0% 15%;
-    --gray-900: 0 0% 9%;
-    --success: 160 84% 39%;
+    /* Custom tokens - Agribnv palette */
+    --forest: 152 85% 16%;
+    --forest-light: 152 60% 25%;
+    --forest-dark: 152 90% 10%;
+    --sage: 100 35% 67%;
+    --sage-light: 100 40% 80%;
+    --sage-dark: 100 30% 50%;
+    --cream: 60 30% 96%;
+    --cream-dark: 60 20% 90%;
+    --sand: 40 30% 85%;
+    
+    --gray-50: 60 20% 98%;
+    --gray-100: 60 15% 95%;
+    --gray-200: 150 10% 88%;
+    --gray-300: 150 10% 78%;
+    --gray-400: 150 10% 55%;
+    --gray-500: 150 15% 40%;
+    --gray-600: 150 20% 30%;
+    --gray-700: 150 25% 22%;
+    --gray-800: 150 30% 15%;
+    --gray-900: 150 40% 10%;
+    
+    --success: 152 85% 16%;
     --warning: 38 92% 50%;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 95%;
+    --background: 150 30% 7%;
+    --foreground: 60 20% 95%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 150 25% 10%;
+    --card-foreground: 60 20% 95%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 150 25% 10%;
+    --popover-foreground: 60 20% 95%;
 
-    --primary: 356 100% 66%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 100 45% 55%;
+    --primary-foreground: 150 60% 8%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 150 25% 18%;
+    --secondary-foreground: 60 20% 95%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 150 20% 15%;
+    --muted-foreground: 60 10% 60%;
 
-    --accent: 356 100% 66%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 100 40% 45%;
+    --accent-foreground: 150 60% 8%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 356 100% 66%;
+    --border: 150 20% 18%;
+    --input: 150 20% 18%;
+    --ring: 100 45% 55%;
 
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 356 100% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 356 100% 66%;
+    --sidebar-background: 150 30% 8%;
+    --sidebar-foreground: 60 20% 95%;
+    --sidebar-primary: 100 45% 55%;
+    --sidebar-primary-foreground: 150 60% 8%;
+    --sidebar-accent: 150 25% 15%;
+    --sidebar-accent-foreground: 60 20% 95%;
+    --sidebar-border: 150 20% 18%;
+    --sidebar-ring: 100 45% 55%;
 
-    --coral: 356 100% 66%;
-    --coral-light: 356 90% 75%;
-    --coral-dark: 356 85% 55%;
-    --gray-50: 0 0% 12%;
-    --gray-100: 0 0% 15%;
-    --gray-200: 0 0% 20%;
-    --gray-300: 0 0% 30%;
-    --gray-400: 0 0% 45%;
-    --gray-500: 0 0% 55%;
-    --gray-600: 0 0% 70%;
-    --gray-700: 0 0% 80%;
-    --gray-800: 0 0% 90%;
-    --gray-900: 0 0% 95%;
-    --success: 160 70% 45%;
+    --forest: 100 45% 55%;
+    --forest-light: 100 40% 65%;
+    --forest-dark: 100 50% 40%;
+    --sage: 100 35% 40%;
+    --sage-light: 100 30% 50%;
+    --sage-dark: 100 40% 30%;
+    --cream: 150 20% 15%;
+    --cream-dark: 150 25% 12%;
+    --sand: 40 15% 25%;
+    
+    --gray-50: 150 15% 12%;
+    --gray-100: 150 15% 15%;
+    --gray-200: 150 12% 20%;
+    --gray-300: 150 10% 30%;
+    --gray-400: 150 8% 45%;
+    --gray-500: 150 8% 55%;
+    --gray-600: 150 10% 70%;
+    --gray-700: 150 12% 80%;
+    --gray-800: 150 15% 90%;
+    --gray-900: 150 20% 95%;
+    
+    --success: 100 45% 55%;
     --warning: 38 85% 55%;
   }
 }
@@ -144,7 +159,12 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Nunito Sans', 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 600;
   }
 
   /* Hide scrollbar but allow scrolling */
@@ -156,7 +176,7 @@
     display: none;
   }
 
-  /* Smooth scrollbar for other areas */
+  /* Smooth scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -167,18 +187,27 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-sage/50 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-sage;
+  }
+
+  /* Safe area for mobile */
+  .safe-area-pb {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
 
 @layer utilities {
   /* Glass effect */
   .glass {
-    @apply bg-white/80 backdrop-blur-md;
+    @apply bg-white/90 backdrop-blur-md;
+  }
+
+  .glass-dark {
+    @apply bg-primary/90 backdrop-blur-md;
   }
 
   /* Gradient overlays */
@@ -190,21 +219,30 @@
     background: linear-gradient(to left, transparent, hsl(var(--background)));
   }
 
-  /* Subtle shadow */
+  /* Nature gradient */
+  .gradient-nature {
+    background: linear-gradient(135deg, hsl(var(--forest)) 0%, hsl(var(--forest-light)) 100%);
+  }
+
+  .gradient-sage {
+    background: linear-gradient(135deg, hsl(var(--sage)) 0%, hsl(var(--sage-light)) 100%);
+  }
+
+  /* Shadows */
   .shadow-soft {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(5, 74, 41, 0.08);
   }
 
   .shadow-soft-lg {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(5, 74, 41, 0.12);
   }
 
   .shadow-card {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(5, 74, 41, 0.1);
   }
 
   .shadow-card-hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 32px rgba(5, 74, 41, 0.15);
   }
 
   /* Animation utilities */
@@ -237,12 +275,12 @@
   .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
   .stagger-children > *:nth-child(8) { animation-delay: 350ms; }
 
-  /* Hover lift */
+  /* Hover effects */
   .hover-lift {
-    @apply transition-transform duration-300;
+    @apply transition-all duration-300;
   }
   .hover-lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
   }
 
   /* Heart animation */
@@ -253,5 +291,10 @@
   @keyframes heartBeat {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
+  }
+
+  /* Leaf decoration */
+  .leaf-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-25 15 5 10 15 15 25 35 10-20 20-25 25-35-10 0-20-5-25-15z' fill='%239BC88B' fill-opacity='0.1'/%3E%3C/svg%3E");
   }
 }

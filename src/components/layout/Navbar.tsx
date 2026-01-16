@@ -1,5 +1,4 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, User, LogOut, Calendar, Plus, LayoutDashboard, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,31 @@ interface NavbarProps {
   showSearch?: boolean;
 }
 
+// Agribnv Logo Component
+function AgribnvLogo({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className={className}>
+      {/* Triangle/Mountain shape */}
+      <path 
+        d="M20 4L36 36H4L20 4Z" 
+        fill="currentColor"
+      />
+      {/* Leaf inside */}
+      <path 
+        d="M20 12C20 12 15 20 15 26C15 28.5 17 30 20 30C23 30 25 28.5 25 26C25 20 20 12 20 12Z" 
+        fill="hsl(100, 35%, 67%)"
+      />
+      {/* Leaf vein */}
+      <path 
+        d="M20 16V26" 
+        stroke="currentColor" 
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function Navbar({
   searchLocation = '',
   onSearchLocationChange,
@@ -45,28 +69,25 @@ export function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b border-border/50">
-      <div className="container flex h-20 items-center">
-        {/* Logo - Fixed width for balance */}
-        <div className="flex-shrink-0 w-[140px]">
+    <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur-sm border-b border-border/50">
+      <div className="container flex h-16 md:h-20 items-center">
+        {/* Logo */}
+        <div className="flex-shrink-0 w-[100px] md:w-[160px]">
           <Link to="/" className="flex items-center gap-2 group">
             <motion.div 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="flex items-center"
             >
-              <svg className="h-8 w-8 text-primary" viewBox="0 0 32 32" fill="currentColor">
-                <path d="M16 1c-5.5 0-10 4.5-10 10 0 7.5 10 20 10 20s10-12.5 10-20c0-5.5-4.5-10-10-10zm0 14c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
-                <circle cx="16" cy="11" r="2.5"/>
-              </svg>
-              <span className="hidden sm:block ml-2 text-xl font-bold text-primary">
-                agribnv
+              <AgribnvLogo className="h-9 w-9 md:h-10 md:w-10 text-primary" />
+              <span className="hidden md:block ml-2 text-xl font-bold text-primary tracking-tight">
+                Agribnv
               </span>
             </motion.div>
           </Link>
         </div>
 
-        {/* Center Search - Absolutely centered */}
+        {/* Center Search - Desktop */}
         {showSearch && (
           <div className="hidden md:flex flex-1 justify-center">
             <SearchBar
@@ -81,40 +102,36 @@ export function Navbar({
           </div>
         )}
 
-        {/* Right Actions - Fixed width for balance */}
-        <div className="flex items-center gap-2 flex-shrink-0 w-[140px] justify-end">
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0 w-[100px] md:w-[160px] justify-end">
           {isHost && (
             <Button 
               variant="ghost" 
-              className="hidden md:flex rounded-full font-semibold"
+              className="hidden lg:flex rounded-full font-medium text-primary hover:bg-sage/20"
               asChild
             >
               <Link to="/host">Switch to hosting</Link>
             </Button>
           )}
 
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Globe className="h-5 w-5" />
-          </Button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <motion.div whileTap={{ scale: 0.95 }}>
                 <Button 
                   variant="outline" 
-                  className="flex items-center gap-3 rounded-full pl-3 pr-2 py-6 border-border hover:shadow-soft transition-shadow"
+                  className="flex items-center gap-2 md:gap-3 rounded-full px-2 md:pl-3 md:pr-2 py-5 md:py-6 border-border hover:shadow-soft transition-all hover:border-primary/30"
                 >
-                  <Menu className="h-4 w-4" />
-                  <Avatar className="h-8 w-8">
+                  <Menu className="h-4 w-4 text-foreground" />
+                  <Avatar className="h-7 w-7 md:h-8 md:w-8">
                     <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-gray-500 text-white text-sm">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                       {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || <User className="h-4 w-4" />}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </motion.div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 rounded-xl shadow-card mt-2" align="end">
+            <DropdownMenuContent className="w-64 rounded-2xl shadow-card mt-2 border-border/50" align="end">
               <AnimatePresence>
                 {user ? (
                   <motion.div
@@ -122,42 +139,42 @@ export function Navbar({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                   >
-                    <div className="p-3 border-b">
-                      <p className="font-semibold">{profile?.full_name || 'Welcome!'}</p>
+                    <div className="p-4 border-b border-border/50">
+                      <p className="font-semibold text-foreground">{profile?.full_name || 'Welcome!'}</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
-                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
-                      <Link to="/bookings">
-                        <Calendar className="mr-3 h-4 w-4" />
-                        Trips
+                    <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
+                      <Link to="/bookings" className="flex items-center gap-3">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span>Trips</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
-                      <Link to="/profile">
-                        <User className="mr-3 h-4 w-4" />
-                        Account
+                    <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
+                      <Link to="/profile" className="flex items-center gap-3">
+                        <User className="h-4 w-4 text-primary" />
+                        <span>Account</span>
                       </Link>
                     </DropdownMenuItem>
                     {isHost && (
                       <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild className="py-3 cursor-pointer">
-                          <Link to="/host">
-                            <LayoutDashboard className="mr-3 h-4 w-4" />
-                            Manage listings
+                        <DropdownMenuSeparator className="bg-border/50" />
+                        <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
+                          <Link to="/host" className="flex items-center gap-3">
+                            <LayoutDashboard className="h-4 w-4 text-primary" />
+                            <span>Manage listings</span>
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="py-3 cursor-pointer">
-                          <Link to="/host/properties/new">
-                            <Plus className="mr-3 h-4 w-4" />
-                            Create new listing
+                        <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
+                          <Link to="/host/properties/new" className="flex items-center gap-3">
+                            <Plus className="h-4 w-4 text-primary" />
+                            <span>Create new listing</span>
                           </Link>
                         </DropdownMenuItem>
                       </>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="py-3 cursor-pointer text-foreground">
-                      <LogOut className="mr-3 h-4 w-4" />
+                    <DropdownMenuSeparator className="bg-border/50" />
+                    <DropdownMenuItem onClick={handleSignOut} className="py-3 px-4 cursor-pointer text-foreground">
+                      <LogOut className="mr-3 h-4 w-4 text-muted-foreground" />
                       Log out
                     </DropdownMenuItem>
                   </motion.div>
@@ -167,10 +184,10 @@ export function Navbar({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                   >
-                    <DropdownMenuItem asChild className="py-3 cursor-pointer font-semibold">
+                    <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer font-semibold">
                       <Link to="/auth?mode=signup">Sign up</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="py-3 cursor-pointer">
+                    <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
                       <Link to="/auth">Log in</Link>
                     </DropdownMenuItem>
                   </motion.div>
