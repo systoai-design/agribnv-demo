@@ -46,27 +46,29 @@ export function Navbar({
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background border-b border-border/50">
-      <div className="container flex h-20 items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center"
-          >
-            <svg className="h-8 w-8 text-primary" viewBox="0 0 32 32" fill="currentColor">
-              <path d="M16 1c-5.5 0-10 4.5-10 10 0 7.5 10 20 10 20s10-12.5 10-20c0-5.5-4.5-10-10-10zm0 14c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
-              <circle cx="16" cy="11" r="2.5"/>
-            </svg>
-            <span className="hidden sm:block ml-2 text-xl font-bold text-primary">
-              agribnv
-            </span>
-          </motion.div>
-        </Link>
+      <div className="container flex h-20 items-center">
+        {/* Logo - Fixed width for balance */}
+        <div className="flex-shrink-0 w-[140px]">
+          <Link to="/" className="flex items-center gap-2 group">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center"
+            >
+              <svg className="h-8 w-8 text-primary" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 1c-5.5 0-10 4.5-10 10 0 7.5 10 20 10 20s10-12.5 10-20c0-5.5-4.5-10-10-10zm0 14c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+                <circle cx="16" cy="11" r="2.5"/>
+              </svg>
+              <span className="hidden sm:block ml-2 text-xl font-bold text-primary">
+                agribnv
+              </span>
+            </motion.div>
+          </Link>
+        </div>
 
-        {/* Center Search - Desktop */}
+        {/* Center Search - Absolutely centered */}
         {showSearch && (
-          <div className="hidden md:flex flex-1 justify-center px-8">
+          <div className="hidden md:flex flex-1 justify-center">
             <SearchBar
               location={searchLocation}
               onLocationChange={onSearchLocationChange || (() => {})}
@@ -79,8 +81,8 @@ export function Navbar({
           </div>
         )}
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2">
+        {/* Right Actions - Fixed width for balance */}
+        <div className="flex items-center gap-2 flex-shrink-0 w-[140px] justify-end">
           {isHost && (
             <Button 
               variant="ghost" 

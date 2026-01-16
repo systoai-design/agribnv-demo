@@ -117,7 +117,7 @@ export function SearchBar({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute top-0 left-1/2 -translate-x-1/2 z-50 w-[850px] max-w-[95vw]"
+              className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[850px] max-w-[calc(100vw-2rem)]"
             >
               <div className="bg-background rounded-full border shadow-card flex items-center">
                 {/* Location */}
@@ -136,7 +136,7 @@ export function SearchBar({
                       </p>
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-4 rounded-3xl shadow-card" align="start">
+                  <PopoverContent className="w-[400px] max-w-[calc(100vw-2rem)] p-4 rounded-3xl shadow-card" align="center">
                     <div className="space-y-4">
                       <Input
                         placeholder="Search destinations"
@@ -190,7 +190,7 @@ export function SearchBar({
                       </p>
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-4 rounded-3xl shadow-card" align="center">
+                  <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-4 rounded-3xl shadow-card overflow-x-auto" align="center">
                     <div className="space-y-4">
                       <div className="flex gap-2">
                         <Button
