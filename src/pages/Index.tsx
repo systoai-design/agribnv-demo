@@ -5,7 +5,6 @@ import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import {
   Sheet,
@@ -13,6 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { MobileSearchModal } from '@/components/search/MobileSearchModal';
 import { supabase } from '@/integrations/supabase/client';
 import { Property, PropertyCategory } from '@/types/database';
 
@@ -24,6 +24,7 @@ export default function Index() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [guestCount, setGuestCount] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   
   // Search bar state
   const [searchLocation, setSearchLocation] = useState('');
@@ -87,6 +88,31 @@ export default function Index() {
       onSearchGuestCountChange={setSearchGuestCount}
       onSearch={handleSearch}
     >
+      {/* Mobile Search Trigger */}
+      <div className="md:hidden sticky top-0 z-40 bg-background pt-4 pb-2 px-4 border-b">
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setIsMobileSearchOpen(true)}
+          className="w-full flex items-center gap-3 px-5 py-3 rounded-full border shadow-soft bg-background hover:shadow-soft-lg transition-shadow"
+        >
+          <Search className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Start your search</span>
+        </motion.button>
+      </div>
+
+      {/* Mobile Search Modal */}
+      <MobileSearchModal
+        isOpen={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+        location={searchLocation}
+        onLocationChange={setSearchLocation}
+        dateRange={searchDateRange}
+        onDateRangeChange={setSearchDateRange}
+        guestCount={searchGuestCount}
+        onGuestCountChange={setSearchGuestCount}
+        onSearch={handleSearch}
+      />
+
       {/* Category Filter */}
       <CategoryFilter
         selectedCategories={selectedCategories}
@@ -96,26 +122,6 @@ export default function Index() {
 
       {/* Main Content */}
       <section id="search-section" className="container py-6">
-        {/* Mobile Search */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden mb-6"
-        >
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Search destinations"
-              value={searchQuery || searchLocation}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchLocation(e.target.value);
-              }}
-              className="pl-12 h-14 rounded-full border-2 text-base shadow-soft"
-            />
-          </div>
-        </motion.div>
-
         {/* Results */}
         <div className="mb-6">
           {hasActiveFilters && (
