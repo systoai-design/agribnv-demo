@@ -46,7 +46,13 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
     toggleWishlist(property.id);
   };
 
-  // Overlay variant - text on image
+  // Generate a consistent pseudo-random rating based on property id
+  const getRating = () => {
+    const hash = property.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return (4.5 + (hash % 6) / 10).toFixed(1);
+  };
+
+  // Overlay variant - text on image with info below
   if (variant === 'overlay') {
     return (
       <motion.div
@@ -59,7 +65,7 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
       >
         <Link to={`/properties/${property.id}`} className="block">
           {/* Image Container with Overlay Text */}
-          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow">
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImageIndex}
@@ -74,7 +80,7 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
             </AnimatePresence>
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
             {/* Heart Button - Top Right */}
             <motion.button
@@ -125,7 +131,7 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
 
             {/* Image Dots */}
             {imageUrls.length > 1 && (
-              <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {imageUrls.slice(0, 5).map((_, idx) => (
                   <motion.div
                     key={idx}
@@ -140,14 +146,31 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
               </div>
             )}
 
-            {/* Overlay Text Content */}
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <h3 className="font-bold text-white text-lg uppercase tracking-wide line-clamp-1">
+            {/* Overlay Text Content - Name & Location on image */}
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <h3 className="font-bold text-white text-base uppercase tracking-wide line-clamp-1">
                 {property.name}
               </h3>
-              <div className="flex items-center gap-1.5 text-white/90 mt-1">
-                <MapPin className="h-3.5 w-3.5" />
-                <p className="text-sm line-clamp-1">{property.location}</p>
+              <div className="flex items-center gap-1 text-white/90 mt-0.5">
+                <MapPin className="h-3 w-3" />
+                <p className="text-xs line-clamp-1">{property.location}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Section Below Image */}
+          <div className="mt-2 px-1">
+            <h4 className="font-semibold text-foreground text-sm line-clamp-1">
+              {property.name}
+            </h4>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-sm text-muted-foreground">
+                ₱{property.price_per_night.toLocaleString()} / night
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <div className="flex items-center gap-0.5">
+                <span className="text-amber-500">★</span>
+                <span className="text-sm text-muted-foreground">{getRating()}</span>
               </div>
             </div>
           </div>
