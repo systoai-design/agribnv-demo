@@ -1,6 +1,6 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { ChevronLeft, ChevronRight, SlidersHorizontal, Map, Apple, Leaf, TreePine, Sparkles, UtensilsCrossed, Footprints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyCategory } from '@/types/database';
@@ -26,8 +26,14 @@ const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType
 export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick, onMapClick }: CategoryFilterProps) {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [scrollWidth, setScrollWidth] = useState(0);
+  
+  // Drag state for mobile
+  const x = useMotionValue(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleMapClick = () => {
     haptics.medium();
@@ -39,6 +45,8 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   };
 
   const handleCategoryClick = (categoryId: PropertyCategory) => {
+    // Prevent click if just finished dragging
+    if (isDragging) return;
     haptics.light();
     if (selectedCategories.includes(categoryId)) {
       onCategoryChange(selectedCategories.filter(c => c !== categoryId));
@@ -47,19 +55,32 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
     }
   };
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const { scrollLeft, scrollWidth: sw, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+      setCanScrollRight(scrollLeft < sw - clientWidth - 10);
     }
-  };
+  }, []);
+
+  const updateScrollWidth = useCallback(() => {
+    if (containerRef.current && scrollRef.current) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const contentWidth = scrollRef.current.scrollWidth;
+      setScrollWidth(Math.max(0, contentWidth - containerWidth + 100));
+    }
+  }, []);
 
   useEffect(() => {
     checkScroll();
+    updateScrollWidth();
     window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+    window.addEventListener('resize', updateScrollWidth);
+    return () => {
+      window.removeEventListener('resize', checkScroll);
+      window.removeEventListener('resize', updateScrollWidth);
+    };
+  }, [checkScroll, updateScrollWidth]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -73,6 +94,8 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   };
 
   const toggleCategory = (category: PropertyCategory) => {
+    if (isDragging) return;
+    haptics.light();
     if (selectedCategories.includes(category)) {
       onCategoryChange(selectedCategories.filter((c) => c !== category));
     } else {
@@ -83,8 +106,8 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   return (
     <div className="sticky top-16 md:top-20 z-40 bg-background py-3 md:py-4 border-b border-border/30">
       <div className="container">
-        <div className="flex items-center gap-3">
-          {/* Map Button - Mobile Only */}
+        <div className="flex items-center gap-3" ref={containerRef}>
+          {/* Map Button - Mobile Only - Outside draggable area */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleMapClick}
@@ -94,7 +117,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             <span>Map</span>
           </motion.button>
 
-          {/* Scroll Left Button */}
+          {/* Scroll Left Button - Desktop */}
           {canScrollLeft && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -112,35 +135,50 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             </motion.div>
           )}
 
-          {/* Categories - Pill Style for Mobile, Circular for Desktop */}
+          {/* Mobile: Draggable Categories */}
+          <div className="md:hidden flex-1 overflow-hidden touch-pan-x">
+            <motion.div
+              ref={scrollRef}
+              drag="x"
+              dragConstraints={{ left: -scrollWidth, right: 0 }}
+              dragElastic={0.1}
+              dragMomentum={true}
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => {
+                setTimeout(() => setIsDragging(false), 100);
+              }}
+              className="flex items-center gap-2 cursor-grab active:cursor-grabbing"
+              style={{ x }}
+            >
+              {CATEGORIES.map((category) => {
+                const isSelected = selectedCategories.includes(category.id);
+                const Icon = category.icon;
+                return (
+                  <motion.button
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.id)}
+                    whileTap={!isDragging ? { scale: 0.95 } : undefined}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0',
+                      isSelected 
+                        ? 'bg-foreground text-background' 
+                        : 'bg-card border border-border/50 text-foreground'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {category.label}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          </div>
+
+          {/* Desktop: Scrollable Categories */}
           <div
-            ref={scrollRef}
+            className="hidden md:flex items-center gap-6 overflow-x-auto scrollbar-hide flex-1"
             onScroll={checkScroll}
-            className="flex items-center gap-2 md:gap-6 overflow-x-auto scrollbar-hide flex-1"
           >
-            {CATEGORIES.map((category) => {
-              const isSelected = selectedCategories.includes(category.id);
-              const Icon = category.icon;
-              return (
-                <motion.button
-                  key={category.id}
-                  onClick={() => toggleCategory(category.id)}
-                  whileTap={{ scale: 0.95 }}
-                  className={cn(
-                    // Mobile: Pill style
-                    'md:hidden flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0',
-                    isSelected 
-                      ? 'bg-foreground text-background' 
-                      : 'bg-card border border-border/50 text-foreground'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {category.label}
-                </motion.button>
-              );
-            })}
             
-            {/* Desktop: Circular Icon Style */}
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
               const Icon = category.icon;
@@ -150,13 +188,13 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
                   onClick={() => toggleCategory(category.id)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="hidden md:flex flex-col items-center gap-2 min-w-[72px]"
+                  className="flex flex-col items-center gap-2 min-w-[72px]"
                 >
                   <div 
                     className={cn(
                       'w-14 h-14 rounded-full flex items-center justify-center transition-all',
                       isSelected 
-                        ? 'bg-primary text-primary-foreground shadow-soft' 
+                        ? 'bg-primary text-primary-foreground shadow-soft'
                         : 'bg-card border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     )}
                   >
@@ -173,7 +211,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             })}
           </div>
 
-          {/* Scroll Right Button */}
+          {/* Scroll Right Button - Desktop */}
           {canScrollRight && (
             <motion.div
               initial={{ opacity: 0 }}

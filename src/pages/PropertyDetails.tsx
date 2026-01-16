@@ -230,29 +230,29 @@ export default function PropertyDetails() {
 
   return (
     <Layout showMobileNav={false} showFooter={false}>
-      {/* Mobile Header - Fixed */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-transparent">
-        <div className="flex items-center justify-between p-4">
+      {/* Mobile Header - Transparent with floating buttons only */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 pointer-events-none">
+        <div className="flex items-center justify-between p-4 pt-safe">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => navigate(-1)}
-            className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+            className="h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center pointer-events-auto"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5 text-foreground" />
           </motion.button>
-          <div className="flex gap-2">
+          <div className="flex gap-2 pointer-events-auto">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+              className="h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center"
             >
-              <Share className="h-4 w-4" />
+              <Share className="h-4 w-4 text-foreground" />
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsLiked(!isLiked)}
-              className="h-9 w-9 rounded-full bg-white shadow-md flex items-center justify-center"
+              className="h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center"
             >
-              <Heart className={cn('h-4 w-4', isLiked && 'fill-destructive text-destructive')} />
+              <Heart className={cn('h-4 w-4', isLiked ? 'fill-destructive text-destructive' : 'text-foreground')} />
             </motion.button>
           </div>
         </div>
