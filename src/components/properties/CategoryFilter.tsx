@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SlidersHorizontal, Apple, Leaf, TreePine, Sparkles, UtensilsCrossed, Footprints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PropertyCategory, CATEGORY_LABELS } from '@/types/database';
+import { PropertyCategory } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
@@ -11,13 +11,13 @@ interface CategoryFilterProps {
   onFiltersClick?: () => void;
 }
 
-const CATEGORIES: { id: PropertyCategory; label: string; icon: string }[] = [
-  { id: 'fruit_picking', label: 'Fruit Farms', icon: '🍎' },
-  { id: 'organic_farm', label: 'Organic', icon: '🌱' },
-  { id: 'livestock', label: 'Livestock', icon: '🐄' },
-  { id: 'wellness', label: 'Wellness', icon: '🧘' },
-  { id: 'farm_to_table', label: 'Farm-to-Table', icon: '🍽️' },
-  { id: 'eco_trail', label: 'Eco Trails', icon: '🥾' },
+const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType }[] = [
+  { id: 'fruit_picking', label: 'Fruit Farms', icon: Apple },
+  { id: 'organic_farm', label: 'Organic', icon: Leaf },
+  { id: 'livestock', label: 'Livestock', icon: TreePine },
+  { id: 'wellness', label: 'Wellness', icon: Sparkles },
+  { id: 'farm_to_table', label: 'Farm-to-Table', icon: UtensilsCrossed },
+  { id: 'eco_trail', label: 'Eco Trails', icon: Footprints },
 ];
 
 export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick }: CategoryFilterProps) {
@@ -41,7 +41,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 300;
+      const scrollAmount = 200;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
@@ -59,7 +59,7 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
   };
 
   return (
-    <div className="sticky top-20 z-40 bg-background py-4 border-b">
+    <div className="sticky top-16 md:top-20 z-40 bg-background py-4 border-b border-border/50">
       <div className="container">
         <div className="flex items-center gap-4">
           {/* Scroll Left Button */}
@@ -67,12 +67,12 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="absolute left-0 z-10 pl-4 pr-8 bg-gradient-to-r from-background via-background to-transparent"
+              className="hidden md:block absolute left-0 z-10 pl-4 pr-8 bg-gradient-to-r from-background via-background to-transparent"
             >
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full shadow-soft h-8 w-8"
+                className="rounded-full shadow-soft h-8 w-8 border-border/50"
                 onClick={() => scroll('left')}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -80,30 +80,39 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             </motion.div>
           )}
 
-          {/* Categories */}
+          {/* Categories - Circular Icon Style */}
           <div
             ref={scrollRef}
             onScroll={checkScroll}
-            className="flex items-center gap-8 overflow-x-auto scrollbar-hide flex-1 px-2"
+            className="flex items-center gap-4 md:gap-6 overflow-x-auto scrollbar-hide flex-1"
           >
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
+              const Icon = category.icon;
               return (
                 <motion.button
                   key={category.id}
                   onClick={() => toggleCategory(category.id)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={cn(
-                    'flex flex-col items-center gap-2 py-2 px-1 min-w-fit transition-all',
-                    'border-b-2',
-                    isSelected 
-                      ? 'border-foreground text-foreground' 
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
-                  )}
+                  className="flex flex-col items-center gap-2 min-w-[72px]"
                 >
-                  <span className="text-2xl">{category.icon}</span>
-                  <span className="text-xs font-medium whitespace-nowrap">{category.label}</span>
+                  <div 
+                    className={cn(
+                      'w-14 h-14 rounded-full flex items-center justify-center transition-all',
+                      isSelected 
+                        ? 'bg-primary text-primary-foreground shadow-soft' 
+                        : 'bg-card border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <span className={cn(
+                    'text-xs font-medium whitespace-nowrap transition-colors',
+                    isSelected ? 'text-primary' : 'text-muted-foreground'
+                  )}>
+                    {category.label}
+                  </span>
                 </motion.button>
               );
             })}
@@ -114,12 +123,12 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="absolute right-24 z-10 pl-8 pr-4 bg-gradient-to-l from-background via-background to-transparent"
+              className="hidden md:block absolute right-20 z-10 pl-8 pr-4 bg-gradient-to-l from-background via-background to-transparent"
             >
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full shadow-soft h-8 w-8"
+                className="rounded-full shadow-soft h-8 w-8 border-border/50"
                 onClick={() => scroll('right')}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -130,11 +139,11 @@ export function CategoryFilter({ selectedCategories, onCategoryChange, onFilters
           {/* Filters Button */}
           <Button
             variant="outline"
-            className="shrink-0 rounded-xl gap-2 font-medium"
+            className="shrink-0 rounded-xl gap-2 font-medium border-border/50 hover:border-primary/50"
             onClick={onFiltersClick}
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Filters
+            <span className="hidden sm:inline">Filters</span>
           </Button>
         </div>
       </div>

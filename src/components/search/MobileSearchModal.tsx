@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Calendar, Users, MapPin, ChevronRight } from 'lucide-react';
+import { Search, X, MapPin, ChevronRight, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,11 +21,11 @@ interface MobileSearchModalProps {
 
 const POPULAR_LOCATIONS = [
   { name: 'Anywhere', description: 'Search all locations' },
+  { name: 'Guimaras', description: 'Mango paradise' },
   { name: 'Tagaytay', description: 'Cool highland farms' },
   { name: 'Batangas', description: 'Beachside retreats' },
   { name: 'La Union', description: 'Surf and farm' },
   { name: 'Baguio', description: 'Mountain fresh' },
-  { name: 'Guimaras', description: 'Mango paradise' },
 ];
 
 type ActiveStep = 'where' | 'when' | 'who' | null;
@@ -84,20 +84,20 @@ export function MobileSearchModal({
             className="fixed inset-0 z-50 bg-background overflow-auto"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-background z-10 p-4 flex items-center justify-between border-b">
+            <div className="sticky top-0 bg-card z-10 p-4 flex items-center justify-between border-b border-border/50 shadow-soft">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="rounded-full"
+                className="rounded-full text-foreground hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </Button>
-              <div className="flex gap-4">
-                <button className="text-sm font-semibold border-b-2 border-foreground pb-1">
+              <div className="flex gap-6">
+                <button className="text-sm font-semibold text-primary border-b-2 border-primary pb-1">
                   Stays
                 </button>
-                <button className="text-sm text-muted-foreground pb-1">
+                <button className="text-sm text-muted-foreground pb-1 hover:text-foreground">
                   Experiences
                 </button>
               </div>
@@ -105,11 +105,11 @@ export function MobileSearchModal({
             </div>
 
             {/* Search Sections */}
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-3 pb-32">
               {/* Where */}
               <motion.div
                 className={cn(
-                  'bg-background border rounded-2xl overflow-hidden transition-all',
+                  'bg-card border border-border/50 rounded-2xl overflow-hidden transition-all',
                   activeStep === 'where' ? 'shadow-card' : ''
                 )}
               >
@@ -117,8 +117,14 @@ export function MobileSearchModal({
                   className="w-full p-4 flex items-center justify-between"
                   onClick={() => setActiveStep(activeStep === 'where' ? null : 'where')}
                 >
-                  <span className="text-sm text-muted-foreground">Where</span>
-                  <span className="font-medium">{location || "I'm flexible"}</span>
+                  <span className="text-sm text-muted-foreground font-medium">Where</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{location || "I'm flexible"}</span>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      activeStep === 'where' && "rotate-180"
+                    )} />
+                  </div>
                 </button>
 
                 <AnimatePresence>
@@ -136,7 +142,7 @@ export function MobileSearchModal({
                             placeholder="Search destinations"
                             value={location}
                             onChange={(e) => onLocationChange(e.target.value)}
-                            className="pl-12 h-14 rounded-xl border-2"
+                            className="pl-12 h-14 rounded-xl border-2 border-border focus:border-primary bg-muted/30"
                             autoFocus
                           />
                         </div>
@@ -145,17 +151,17 @@ export function MobileSearchModal({
                           {POPULAR_LOCATIONS.map((loc) => (
                             <button
                               key={loc.name}
-                              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
+                              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-sage/20 transition-colors text-left"
                               onClick={() => {
                                 onLocationChange(loc.name === 'Anywhere' ? '' : loc.name);
                                 setActiveStep('when');
                               }}
                             >
-                              <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                                <MapPin className="h-5 w-5 text-muted-foreground" />
+                              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <MapPin className="h-5 w-5 text-primary" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{loc.name}</p>
+                                <p className="font-semibold text-foreground truncate">{loc.name}</p>
                                 <p className="text-sm text-muted-foreground truncate">{loc.description}</p>
                               </div>
                               <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -171,7 +177,7 @@ export function MobileSearchModal({
               {/* When */}
               <motion.div
                 className={cn(
-                  'bg-background border rounded-2xl overflow-hidden transition-all',
+                  'bg-card border border-border/50 rounded-2xl overflow-hidden transition-all',
                   activeStep === 'when' ? 'shadow-card' : ''
                 )}
               >
@@ -179,8 +185,14 @@ export function MobileSearchModal({
                   className="w-full p-4 flex items-center justify-between"
                   onClick={() => setActiveStep(activeStep === 'when' ? null : 'when')}
                 >
-                  <span className="text-sm text-muted-foreground">When</span>
-                  <span className="font-medium">{formatDateRange()}</span>
+                  <span className="text-sm text-muted-foreground font-medium">When</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{formatDateRange()}</span>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      activeStep === 'when' && "rotate-180"
+                    )} />
+                  </div>
                 </button>
 
                 <AnimatePresence>
@@ -196,7 +208,7 @@ export function MobileSearchModal({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-full"
+                            className="rounded-full border-border/50 text-foreground"
                             onClick={() => onDateRangeChange({ from: undefined, to: undefined })}
                           >
                             Clear dates
@@ -219,7 +231,7 @@ export function MobileSearchModal({
               {/* Who */}
               <motion.div
                 className={cn(
-                  'bg-background border rounded-2xl overflow-hidden transition-all',
+                  'bg-card border border-border/50 rounded-2xl overflow-hidden transition-all',
                   activeStep === 'who' ? 'shadow-card' : ''
                 )}
               >
@@ -227,10 +239,16 @@ export function MobileSearchModal({
                   className="w-full p-4 flex items-center justify-between"
                   onClick={() => setActiveStep(activeStep === 'who' ? null : 'who')}
                 >
-                  <span className="text-sm text-muted-foreground">Who</span>
-                  <span className="font-medium">
-                    {guestCount > 1 ? `${guestCount} guests` : 'Add guests'}
-                  </span>
+                  <span className="text-sm text-muted-foreground font-medium">Who</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">
+                      {guestCount > 1 ? `${guestCount} guests` : 'Add guests'}
+                    </span>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      activeStep === 'who' && "rotate-180"
+                    )} />
+                  </div>
                 </button>
 
                 <AnimatePresence>
@@ -242,26 +260,26 @@ export function MobileSearchModal({
                       className="overflow-hidden"
                     >
                       <div className="px-4 pb-4">
-                        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                        <div className="flex items-center justify-between p-4 bg-sage/20 rounded-xl">
                           <div>
-                            <p className="font-semibold">Guests</p>
+                            <p className="font-semibold text-foreground">Guests</p>
                             <p className="text-sm text-muted-foreground">How many guests?</p>
                           </div>
                           <div className="flex items-center gap-4">
                             <Button
                               variant="outline"
                               size="icon"
-                              className="rounded-full h-10 w-10"
+                              className="rounded-full h-10 w-10 border-primary/30 text-foreground"
                               onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
                               disabled={guestCount <= 1}
                             >
                               -
                             </Button>
-                            <span className="w-8 text-center font-semibold text-lg">{guestCount}</span>
+                            <span className="w-8 text-center font-bold text-lg text-foreground">{guestCount}</span>
                             <Button
                               variant="outline"
                               size="icon"
-                              className="rounded-full h-10 w-10"
+                              className="rounded-full h-10 w-10 border-primary/30 text-foreground"
                               onClick={() => onGuestCountChange(guestCount + 1)}
                             >
                               +
@@ -276,18 +294,18 @@ export function MobileSearchModal({
             </div>
 
             {/* Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-pb">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border/50 safe-area-pb">
               <div className="flex items-center justify-between gap-4">
                 <Button
                   variant="ghost"
                   onClick={handleClear}
-                  className="underline font-semibold"
+                  className="underline font-semibold text-foreground hover:text-primary"
                 >
                   Clear all
                 </Button>
                 <Button
                   onClick={handleSearch}
-                  className="rounded-xl px-8 h-12 gap-2 bg-primary hover:bg-primary/90"
+                  className="rounded-xl px-8 h-12 gap-2 bg-primary hover:bg-primary/90 font-semibold shadow-soft"
                 >
                   <Search className="h-4 w-4" />
                   Search

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/sheet';
 import { MobileSearchModal } from '@/components/search/MobileSearchModal';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Property, PropertyCategory } from '@/types/database';
 
 export default function Index() {
+  const { user, profile } = useAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,6 +80,9 @@ export default function Index() {
 
   const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation;
 
+  // Get first name for welcome message
+  const firstName = profile?.full_name?.split(' ')[0] || 'Explorer';
+
   return (
     <Layout
       searchLocation={searchLocation}
@@ -88,15 +93,29 @@ export default function Index() {
       onSearchGuestCountChange={setSearchGuestCount}
       onSearch={handleSearch}
     >
-      {/* Mobile Search Trigger */}
-      <div className="md:hidden sticky top-0 z-40 bg-background pt-4 pb-2 px-4 border-b">
+      {/* Mobile Welcome + Search */}
+      <div className="md:hidden bg-primary text-primary-foreground pt-4 pb-6 px-4 -mt-px">
+        {/* Welcome */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4"
+        >
+          <p className="text-sage text-sm font-medium">Welcome!</p>
+          <h1 className="text-xl font-bold">{firstName}</h1>
+        </motion.div>
+
+        {/* Search Bar */}
         <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-5 py-3 rounded-full border shadow-soft bg-background hover:shadow-soft-lg transition-shadow"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors"
         >
-          <Search className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Start your search</span>
+          <Search className="h-5 w-5 text-white/80" />
+          <span className="text-sm text-white/80">Start your search</span>
         </motion.button>
       </div>
 
@@ -122,43 +141,47 @@ export default function Index() {
 
       {/* Main Content */}
       <section id="search-section" className="container py-6">
-        {/* Results */}
-        <div className="mb-6">
+        {/* Section Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Featured Farms</h2>
+            {hasActiveFilters && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {filteredProperties.length} places found
+              </p>
+            )}
+          </div>
           {hasActiveFilters && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-2 mb-4"
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="text-primary hover:text-primary/80"
             >
-              <span className="text-sm text-muted-foreground">
-                {filteredProperties.length} places
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={clearFilters}
-                className="text-sm underline"
-              >
-                Clear all
-              </Button>
-            </motion.div>
+              Clear filters
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
           )}
-        </div>
+        </motion.div>
 
         <PropertyGrid properties={filteredProperties} isLoading={isLoading} />
       </section>
 
       {/* Filters Sheet */}
       <Sheet open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader className="border-b pb-4">
-            <SheetTitle className="text-center text-lg font-semibold">Filters</SheetTitle>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto border-l-0 rounded-l-3xl">
+          <SheetHeader className="border-b border-border/50 pb-4">
+            <SheetTitle className="text-center text-lg font-semibold text-foreground">Filters</SheetTitle>
           </SheetHeader>
           
           <div className="py-8 space-y-8">
             {/* Price Range */}
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold">Price range</h3>
+              <h3 className="text-xl font-semibold text-foreground">Price range</h3>
               <p className="text-sm text-muted-foreground">Nightly prices before fees and taxes</p>
               <Slider
                 value={priceRange}
@@ -169,38 +192,38 @@ export default function Index() {
                 className="mt-6"
               />
               <div className="flex items-center justify-between gap-4 mt-4">
-                <div className="flex-1 p-3 border rounded-xl">
-                  <p className="text-xs text-muted-foreground">Minimum</p>
-                  <p className="font-semibold">₱{priceRange[0].toLocaleString()}</p>
+                <div className="flex-1 p-4 border border-border/50 rounded-2xl bg-muted/30">
+                  <p className="text-xs text-muted-foreground font-medium">Minimum</p>
+                  <p className="font-bold text-foreground text-lg">₱{priceRange[0].toLocaleString()}</p>
                 </div>
                 <span className="text-muted-foreground">–</span>
-                <div className="flex-1 p-3 border rounded-xl">
-                  <p className="text-xs text-muted-foreground">Maximum</p>
-                  <p className="font-semibold">₱{priceRange[1].toLocaleString()}</p>
+                <div className="flex-1 p-4 border border-border/50 rounded-2xl bg-muted/30">
+                  <p className="text-xs text-muted-foreground font-medium">Maximum</p>
+                  <p className="font-bold text-foreground text-lg">₱{priceRange[1].toLocaleString()}</p>
                 </div>
               </div>
             </div>
 
             {/* Guests */}
-            <div className="space-y-6 border-t pt-8">
-              <h3 className="text-xl font-semibold">Guests</h3>
-              <div className="flex items-center justify-between">
-                <span>Number of guests</span>
+            <div className="space-y-6 border-t border-border/50 pt-8">
+              <h3 className="text-xl font-semibold text-foreground">Guests</h3>
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl">
+                <span className="font-medium text-foreground">Number of guests</span>
                 <div className="flex items-center gap-4">
                   <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-full h-10 w-10"
+                    className="rounded-full h-10 w-10 border-border/50"
                     onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
                     disabled={guestCount <= 1}
                   >
                     -
                   </Button>
-                  <span className="w-8 text-center font-semibold">{guestCount}</span>
+                  <span className="w-8 text-center font-bold text-lg text-foreground">{guestCount}</span>
                   <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-full h-10 w-10"
+                    className="rounded-full h-10 w-10 border-border/50"
                     onClick={() => setGuestCount(guestCount + 1)}
                   >
                     +
@@ -211,12 +234,15 @@ export default function Index() {
           </div>
 
           {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 border-t bg-background">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={clearFilters} className="underline font-semibold">
+          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-border/50 bg-card">
+            <div className="flex items-center justify-between gap-4">
+              <Button variant="ghost" onClick={clearFilters} className="underline font-semibold text-foreground">
                 Clear all
               </Button>
-              <Button onClick={() => setIsFiltersOpen(false)} className="rounded-lg px-6">
+              <Button 
+                onClick={() => setIsFiltersOpen(false)} 
+                className="rounded-xl px-6 h-12 bg-primary hover:bg-primary/90 font-semibold"
+              >
                 Show {filteredProperties.length} places
               </Button>
             </div>
