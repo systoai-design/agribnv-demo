@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { PhotoGalleryModal } from '@/components/properties/PhotoGalleryModal';
 import { Layout } from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -296,16 +296,15 @@ export default function PropertyDetails() {
           </Button>
         </motion.div>
 
-        {/* Photo Gallery Dialog */}
-        <Dialog open={showAllPhotos} onOpenChange={setShowAllPhotos}>
-          <DialogContent className="max-w-5xl h-[90vh] overflow-y-auto">
-            <div className="grid gap-2">
-              {imageUrls.map((img, idx) => (
-                <img key={idx} src={img} alt="" className="w-full rounded-lg" />
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Photo Gallery Modal */}
+        <PhotoGalleryModal
+          isOpen={showAllPhotos}
+          onClose={() => setShowAllPhotos(false)}
+          images={imageUrls}
+          propertyName={property.name}
+          isLiked={isLiked}
+          onToggleLike={() => setIsLiked(!isLiked)}
+        />
 
         <div className="grid lg:grid-cols-3 gap-12 lg:gap-16">
           {/* Main Content */}
