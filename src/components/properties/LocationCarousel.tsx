@@ -54,18 +54,18 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       className="relative"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-4 md:px-0">
-        <h2 className="text-xl md:text-2xl font-semibold">{title}</h2>
+      <div className="flex items-center justify-between mb-3 px-4 md:px-0">
+        <h2 className="text-lg md:text-xl font-semibold text-foreground">{title}</h2>
         {onShowAll && hasMore && (
           <button
             onClick={onShowAll}
-            className="text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+            className="text-xs font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
           >
             Show all
           </button>
@@ -109,16 +109,16 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
         {/* Scrollable container */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth px-4 md:px-0 pb-4"
+          className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth px-4 md:px-0 pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {displayedProperties.map((property, index) => (
             <motion.div
               key={property.id}
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              className="snap-start shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)] lg:w-[calc(20%-13px)] xl:w-[calc(16.666%-13px)] 2xl:w-[calc(12.5%-14px)]"
+              transition={{ delay: index * 0.03, duration: 0.2 }}
+              className="snap-start shrink-0 w-[calc(48%-6px)] sm:w-[calc(33.333%-8px)] md:w-[calc(25%-9px)] lg:w-[calc(20%-10px)] xl:w-[calc(16.666%-10px)]"
             >
               <PropertyCard property={property} index={index} />
             </motion.div>
@@ -127,24 +127,24 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
           {/* Show All card - appears after 8th property when there are more */}
           {hasMore && onShowAll && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: MAX_VISIBLE * 0.05, duration: 0.3 }}
-              className="snap-start shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)] lg:w-[calc(20%-13px)] xl:w-[calc(16.666%-13px)] 2xl:w-[calc(12.5%-14px)]"
+              transition={{ delay: MAX_VISIBLE * 0.03, duration: 0.2 }}
+              className="snap-start shrink-0 w-[calc(48%-6px)] sm:w-[calc(33.333%-8px)] md:w-[calc(25%-9px)] lg:w-[calc(20%-10px)] xl:w-[calc(16.666%-10px)]"
             >
               <button
                 onClick={onShowAll}
-                className="w-full aspect-[3/4] rounded-xl border-2 border-dashed border-muted-foreground/30 
-                           flex flex-col items-center justify-center gap-3 
+                className="w-full aspect-[4/3] rounded-xl border-2 border-dashed border-muted-foreground/25 
+                           flex flex-col items-center justify-center gap-2 
                            hover:border-primary hover:bg-primary/5 transition-all group"
               >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center 
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center 
                                 group-hover:bg-primary/20 transition-colors">
-                  <ChevronRight className="w-6 h-6 text-primary" />
+                  <ChevronRight className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-foreground">Show all</p>
-                  <p className="text-sm text-muted-foreground">{remainingCount}+ stays</p>
+                  <p className="font-medium text-sm text-foreground">Show all</p>
+                  <p className="text-xs text-muted-foreground">{remainingCount}+ stays</p>
                 </div>
               </button>
             </motion.div>
