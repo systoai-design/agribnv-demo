@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { Property } from '@/types/database';
 import { cn } from '@/lib/utils';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import haptics from '@/utils/haptics';
 
 interface PropertyCardProps {
@@ -37,19 +38,34 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
     return failedImages.has(index) ? FALLBACK_IMAGE : imageUrls[index];
   };
 
+  const goToNextImage = useCallback(() => {
+    haptics.selection();
+    setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
+  }, [imageUrls.length]);
+
+  const goToPrevImage = useCallback(() => {
+    haptics.selection();
+    setCurrentImageIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
+  }, [imageUrls.length]);
+
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    haptics.selection();
-    setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
+    goToNextImage();
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    haptics.selection();
-    setCurrentImageIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
+    goToPrevImage();
   };
+
+  // Swipe gesture for mobile image navigation
+  const swipeHandlers = useSwipeGesture({
+    threshold: 40,
+    onSwipeLeft: imageUrls.length > 1 ? goToNextImage : undefined,
+    onSwipeRight: imageUrls.length > 1 ? goToPrevImage : undefined,
+  });
 
   const handleToggleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -76,7 +92,10 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
       >
         <Link to={`/properties/${property.id}`} className="block">
           {/* Image Container with Overlay Text */}
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow">
+          <div 
+            className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow"
+            {...swipeHandlers}
+          >
             <AnimatePresence mode="wait">
               <motion.img
                 key={currentImageIndex}
@@ -85,8 +104,9 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15 }}
                 className="w-full h-full object-cover"
+                loading="lazy"
                 onError={() => handleImageError(currentImageIndex)}
               />
             </AnimatePresence>
@@ -159,30 +179,26 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
             )}
 
             {/* Overlay Text Content - Name & Location on image */}
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <h3 className="font-bold text-white text-base uppercase tracking-wide line-clamp-1">
+            <div className="absolute bottom-0 left-0 right-0 p-2.5">
+              <h3 className="font-bold text-white text-sm uppercase tracking-wide line-clamp-1">
                 {property.name}
               </h3>
               <div className="flex items-center gap-1 text-white/90 mt-0.5">
-                <MapPin className="h-3 w-3" />
-                <p className="text-xs line-clamp-1">{property.location}</p>
+                <MapPin className="h-2.5 w-2.5" />
+                <p className="text-[11px] line-clamp-1">{property.location}</p>
               </div>
             </div>
           </div>
 
-          {/* Info Section Below Image */}
-          <div className="mt-2 px-1">
-            <h4 className="font-semibold text-foreground text-sm line-clamp-1">
-              {property.name}
-            </h4>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-sm text-muted-foreground">
-                ₱{property.price_per_night.toLocaleString()} / night
+          {/* Info Section Below Image - Compact */}
+          <div className="mt-1.5 px-0.5">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-medium text-foreground truncate">
+                ₱{property.price_per_night.toLocaleString()}/night
               </span>
-              <span className="text-muted-foreground">·</span>
-              <div className="flex items-center gap-0.5">
-                <span className="text-amber-500">★</span>
-                <span className="text-sm text-muted-foreground">{getRating()}</span>
+              <div className="flex items-center gap-0.5 shrink-0">
+                <span className="text-amber-500 text-xs">★</span>
+                <span className="text-xs text-muted-foreground">{getRating()}</span>
               </div>
             </div>
           </div>

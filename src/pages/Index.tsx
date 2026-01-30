@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
 import { CategoryFilter } from '@/components/properties/CategoryFilter';
 import LocationCarousel from '@/components/properties/LocationCarousel';
+import { FloatingMapButton } from '@/components/properties/FloatingMapButton';
 import { WelcomeHeader } from '@/components/home/WelcomeHeader';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -164,19 +165,19 @@ export default function Index() {
       </div>
 
       {/* Main Content */}
-      <section id="search-section" className="container py-4 md:py-6">
+      <section id="search-section" className="container py-3 md:py-6">
         {/* Section Header */}
         <motion.div 
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-4 md:mb-6"
+          className="flex items-center justify-between mb-3 md:mb-6"
         >
           <div>
-            <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">
+            <h2 className="font-serif text-lg md:text-2xl font-bold text-foreground">
               {hasActiveFilters ? 'Search Results' : 'Featured Farms'}
             </h2>
             {hasActiveFilters && (
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {filteredProperties.length} places found
               </p>
             )}
@@ -186,17 +187,17 @@ export default function Index() {
               variant="ghost" 
               size="sm" 
               onClick={clearFilters}
-              className="text-primary hover:text-primary/80"
+              className="text-primary hover:text-primary/80 text-xs h-8"
             >
               Clear filters
-              <ArrowRight className="ml-1 h-4 w-4" />
+              <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           )}
         </motion.div>
 
         {/* Show location carousels when no filters, otherwise show grid */}
         {!hasActiveFilters ? (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {Object.entries(propertiesByLocation).map(([location, props]) => (
               <LocationCarousel
                 key={location}
@@ -317,6 +318,8 @@ export default function Index() {
           </div>
         </SheetContent>
       </Sheet>
+      {/* Floating Map Button - Mobile */}
+      <FloatingMapButton threshold={250} />
     </Layout>
   );
 }
