@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/hooks/useShare';
+import { useConversations } from '@/hooks/useConversations';
 import { Property, Experience, CATEGORY_LABELS } from '@/types/database';
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine, Tv, Wind,
@@ -103,6 +104,7 @@ export default function PropertyDetails() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { share } = useShare();
+  const { getOrCreateConversation } = useConversations();
   
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,6 +117,7 @@ export default function PropertyDetails() {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
 
   // Share handler
   const handleShare = () => {
@@ -127,19 +130,31 @@ export default function PropertyDetails() {
   };
 
   // Contact host handler
-  const handleContactHost = () => {
-    if (user) {
-      navigate('/inbox');
-      toast({
-        title: 'Opening messages',
-        description: `Start a conversation with ${property?.host?.full_name || 'the host'}.`,
-      });
-    } else {
+  const handleContactHost = async () => {
+    if (!user) {
       toast({
         title: 'Sign in to message host',
         description: 'Create an account to send messages to hosts.',
       });
       navigate('/auth');
+      return;
+    }
+
+    if (!property) return;
+
+    setIsStartingConversation(true);
+    try {
+      const conversationId = await getOrCreateConversation(property.id, property.host_id);
+      if (conversationId) {
+        navigate(`/inbox?conversation=${conversationId}`);
+      } else {
+        navigate('/inbox');
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      navigate('/inbox');
+    } finally {
+      setIsStartingConversation(false);
     }
   };
 
@@ -902,8 +917,13 @@ export default function PropertyDetails() {
                   <Button 
                     className="rounded-lg bg-foreground text-background hover:bg-foreground/90 mt-4"
                     onClick={handleContactHost}
+                    disabled={isStartingConversation}
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                    {isStartingConversation ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                    )}
                     Message Host
                   </Button>
                 </div>

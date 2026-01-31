@@ -3,12 +3,13 @@ import { Navbar } from './Navbar';
 import { MobileNav } from './MobileNav';
 import { Footer } from './Footer';
 
-interface LayoutProps {
+export interface LayoutProps {
   children: ReactNode;
   showMobileNav?: boolean;
   showSearch?: boolean;
   showFooter?: boolean;
   hideNavbarOnMobile?: boolean;
+  hideNav?: boolean;
   searchLocation?: string;
   onSearchLocationChange?: (location: string) => void;
   searchDateRange?: { from: Date | undefined; to: Date | undefined };
@@ -24,6 +25,7 @@ export function Layout({
   showSearch = true,
   showFooter = true,
   hideNavbarOnMobile = false,
+  hideNav = false,
   searchLocation,
   onSearchLocationChange,
   searchDateRange,
@@ -32,6 +34,17 @@ export function Layout({
   onSearchGuestCountChange,
   onSearch,
 }: LayoutProps) {
+  // Full screen mode - no nav, no footer
+  if (hideNav) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className={hideNavbarOnMobile ? 'hidden md:block' : ''}>
