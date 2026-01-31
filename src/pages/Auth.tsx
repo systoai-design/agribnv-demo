@@ -37,9 +37,24 @@ export default function AuthPage() {
   });
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
+    const checkUserAndRedirect = async () => {
+      if (user) {
+        // Check if user is a host and redirect accordingly
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'host')
+          .single();
+        
+        if (data) {
+          navigate('/host');
+        } else {
+          navigate('/');
+        }
+      }
+    };
+    checkUserAndRedirect();
   }, [user, navigate]);
 
   const onSubmit = async (data: AuthForm) => {
@@ -80,7 +95,8 @@ export default function AuthPage() {
               ? 'Your host account has been created. Start listing your farm!' 
               : 'Your account has been created.' 
           });
-          navigate('/');
+          // Redirect based on role
+          navigate(selectedRole === 'host' ? '/host' : '/');
         }
       } else {
         const { error } = await signIn(data.email, data.password);

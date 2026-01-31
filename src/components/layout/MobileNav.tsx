@@ -1,18 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Compass, Bookmark, Home, Mail, User } from 'lucide-react';
+import { Compass, Bookmark, Home, Mail, User, Building2, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import haptics from '@/utils/haptics';
 
 export function MobileNav() {
-  const { user } = useAuth();
+  const { user, isHost } = useAuth();
   const location = useLocation();
 
-  // 5-tab navigation: Explore, Bookmark, Home (center), Inbox, Profile
-  const navItems = [
+  // Different navigation for hosts vs guests
+  const guestNavItems = [
     { href: '/', label: 'Explore', icon: Compass, isCenter: false },
-    { href: '/wishlists', label: 'Bookmark', icon: Bookmark, isCenter: false },
+    { href: '/wishlists', label: 'Wishlist', icon: Bookmark, isCenter: false },
     { href: '/', label: 'Home', icon: Home, isCenter: true },
     { href: '/inbox', label: 'Inbox', icon: Mail, isCenter: false },
     ...(user 
@@ -20,6 +20,16 @@ export function MobileNav() {
       : [{ href: '/auth', label: 'Log in', icon: User, isCenter: false }]
     ),
   ];
+
+  const hostNavItems = [
+    { href: '/host', label: 'Dashboard', icon: Building2, isCenter: false },
+    { href: '/bookings', label: 'Bookings', icon: Calendar, isCenter: false },
+    { href: '/host', label: 'Home', icon: Home, isCenter: true },
+    { href: '/inbox', label: 'Inbox', icon: Mail, isCenter: false },
+    { href: '/profile', label: 'Profile', icon: User, isCenter: false },
+  ];
+
+  const navItems = isHost ? hostNavItems : guestNavItems;
 
   const isActive = (path: string, label: string) => {
     // Special handling for Home vs Explore which share the same path
