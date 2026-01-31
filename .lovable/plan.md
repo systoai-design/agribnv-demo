@@ -5,24 +5,26 @@ This comprehensive plan covers making ALL buttons, filters, links, and interacti
 
 ---
 
-## Part 1: Home Page (Index.tsx) - Filters & Navigation
+## Part 1: Home Page (Index.tsx) - Filters & Navigation ✅ PHASE 1 COMPLETE
 
-### 1.1 Listing Type Tabs - NEEDS FUNCTIONAL FILTERING
-**Current State:** UI tabs exist but don't filter properties
-**Action Required:**
-- Add `listing_type` column to properties table (farm_stay | farm_experience | farm_tour)
-- Update fetch query to filter by `selectedListingType`
-- Show different content based on tab:
-  - Farm Stay: Properties with accommodations
-  - Farm Experience: Experience-only listings (no accommodation)
-  - Farm Tour: Guided tour packages
+### 1.1 Listing Type Tabs - ✅ WORKING
+**Implementation:**
+- Created Turso database integration with `listing_type` column
+- Created `useTursoProperties` hook for filtered queries
+- Tabs now filter properties by type (farm_stay | farm_experience | farm_tour)
 
-### 1.2 Farmstay Subcategory Filters - NEEDS FUNCTIONAL FILTERING
-**Current State:** Category buttons exist but don't filter
-**Action Required:**
-- Add `subcategory` column to properties table
-- Update FarmstayCategories to actually filter properties
+### 1.2 Farmstay Subcategory Filters - ✅ WORKING
+**Implementation:**
+- Added `subcategory` column to Turso schema
+- Updated FarmstayCategories to actually filter properties via Turso
 - Categories: agrifarm, aquafarm, homestay, kubo_hut, farm_cottage, camp_stay, dorm_shared
+
+### 1.3 Turso Database Integration - ✅ NEW
+**Implementation:**
+- Created `supabase/functions/turso-db/index.ts` edge function
+- Created `src/lib/turso.ts` client library
+- Created `src/hooks/useTursoProperties.ts` for reactive filtering
+- Data auto-migrates from existing Supabase on first load
 
 ### 1.3 Price Range Filter - ✅ WORKING
 Already functional in the filters sheet.

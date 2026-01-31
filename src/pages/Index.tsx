@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
@@ -19,74 +19,131 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { MobileSearchModal } from '@/components/search/MobileSearchModal';
-import { supabase } from '@/integrations/supabase/client';
+import { useTursoProperties } from '@/hooks/useTursoProperties';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { Property, ListingType, FarmstaySubcategory, GUIMARAS_MUNICIPALITIES } from '@/types/database';
+import { tursoDb } from '@/lib/turso';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Index() {
   const { user, profile } = useAuth();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedListingType, setSelectedListingType] = useState<ListingType>('farm_stay');
   const [selectedCategories, setSelectedCategories] = useState<FarmstaySubcategory[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [guestCount, setGuestCount] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [isTursoReady, setIsTursoReady] = useState(false);
   
   // Search bar state
   const [searchLocation, setSearchLocation] = useState('');
   const [searchDateRange, setSearchDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [searchGuestCount, setSearchGuestCount] = useState(1);
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
+  // Use Turso for properties with filtering
+  const { 
+    properties, 
+    isLoading, 
+    hasActiveFilters: tursoHasActiveFilters,
+    updateListingType,
+    updateSubcategories,
+    updateSearch,
+    updatePriceRange,
+    updateGuests,
+    clearFilters: tursoClearFilters,
+    refetch 
+  } = useTursoProperties();
 
-  const fetchProperties = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from('properties')
-      .select(`*, images:property_images(*), experiences(*)`)
-      .eq('is_published', true)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setProperties(data as unknown as Property[]);
+  // Initialize Turso and migrate data on first load
+  // Migration function
+  const runMigration = useCallback(async () => {
+    setIsMigrating(true);
+    try {
+      // Fetch from Supabase in smaller batches
+      const { data: supabaseProps, error } = await supabase
+        .from('properties')
+        .select(`*, images:property_images(*), experiences(*)`)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(100); // Process first 100 properties to avoid timeout
+      
+      if (error) {
+        console.error('Failed to fetch from Supabase:', error);
+        return;
+      }
+      
+      if (supabaseProps && supabaseProps.length > 0) {
+        console.log(`Migrating ${supabaseProps.length} properties to Turso...`);
+        const migrated = await tursoDb.migrateFromSupabase(supabaseProps as unknown as Property[]);
+        console.log(`Migrated ${migrated} properties`);
+        await refetch();
+      }
+    } catch (error) {
+      console.error('Migration failed:', error);
+    } finally {
+      setIsMigrating(false);
     }
-    setIsLoading(false);
+  }, [refetch]);
+
+  useEffect(() => {
+    const initializeTurso = async () => {
+      try {
+        // Initialize the Turso schema
+        await tursoDb.init();
+        setIsTursoReady(true);
+        
+        // Check if we need to migrate data from Supabase
+        const tursoProperties = await tursoDb.getProperties();
+        
+        if (tursoProperties.length === 0) {
+          // Trigger migration automatically
+          await runMigration();
+        }
+      } catch (error) {
+        console.error('Failed to initialize Turso:', error);
+        setIsTursoReady(true); // Still set ready to show UI
+      }
+    };
+    
+    initializeTurso();
+  }, [runMigration]);
+
+  // Sync listing type changes
+  useEffect(() => {
+    updateListingType(selectedListingType);
+  }, [selectedListingType, updateListingType]);
+
+  // Sync subcategory changes
+  useEffect(() => {
+    updateSubcategories(selectedCategories);
+  }, [selectedCategories, updateSubcategories]);
+
+  // Sync price range on sheet close
+  const applyFilters = () => {
+    updatePriceRange(priceRange[0], priceRange[1]);
+    updateGuests(Math.max(guestCount, searchGuestCount));
+    setIsFiltersOpen(false);
   };
 
-  // Sync search location to filter
+  // Sync search location
   const handleSearch = () => {
-    setSearchQuery(searchLocation);
-    setGuestCount(searchGuestCount);
+    updateSearch(searchLocation);
+    updateGuests(searchGuestCount);
   };
-
-  const filteredProperties = properties.filter((property) => {
-    const searchTerm = searchQuery || searchLocation;
-    const matchesSearch = !searchTerm || 
-      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    // For now, show all properties regardless of subcategory filter (UI-only subcategories)
-    const matchesPrice = property.price_per_night >= priceRange[0] && property.price_per_night <= priceRange[1];
-    const matchesGuests = property.max_guests >= Math.max(guestCount, searchGuestCount);
-    return matchesSearch && matchesPrice && matchesGuests;
-  });
 
   const clearFilters = () => {
-    setSearchQuery('');
     setSearchLocation('');
     setSelectedCategories([]);
     setPriceRange([0, 10000]);
     setGuestCount(1);
     setSearchGuestCount(1);
     setSearchDateRange({ from: undefined, to: undefined });
+    tursoClearFilters();
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation || searchDateRange.from;
+  const hasActiveFilters = tursoHasActiveFilters || selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation || searchDateRange.from;
 
   // Group properties by location for carousels - prioritize Guimaras municipalities
   const propertiesByLocation = useMemo(() => {
@@ -208,7 +265,7 @@ export default function Index() {
             </h2>
             {hasActiveFilters && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {filteredProperties.length} places found
+                {properties.length} places found
               </p>
             )}
           </div>
@@ -238,7 +295,7 @@ export default function Index() {
             ))}
           </div>
         ) : (
-          <PropertyGrid properties={filteredProperties} isLoading={isLoading} />
+          <PropertyGrid properties={properties} isLoading={isLoading || isMigrating} />
         )}
       </section>
 
@@ -339,10 +396,10 @@ export default function Index() {
                 Clear all
               </Button>
               <Button 
-                onClick={() => setIsFiltersOpen(false)} 
+                onClick={applyFilters} 
                 className="rounded-xl px-6 h-12 bg-primary hover:bg-primary/90 font-semibold"
               >
-                Show {filteredProperties.length} places
+                Show {properties.length} places
               </Button>
             </div>
           </div>
