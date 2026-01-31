@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useShare } from '@/hooks/useShare';
 import { 
   Loader2, 
   Camera, 
@@ -38,9 +39,18 @@ export default function Profile() {
   const { user, profile, refreshProfile, signOut, isHost, becomeHost } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { share } = useShare();
   const [isLoading, setIsLoading] = useState(false);
   const [isBecomingHost, setIsBecomingHost] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  const handleShareApp = () => {
+    share({
+      title: 'Agribnv - Farm Stay Experiences',
+      text: 'Discover authentic farm stays and agricultural experiences across the Philippines! 🌿',
+      url: 'https://agribnv-demo.lovable.app',
+    });
+  };
 
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -133,15 +143,15 @@ export default function Profile() {
   const username = profile?.full_name?.toLowerCase().replace(/\s+/g, '') || 'user';
 
   const settingsItems = [
-    { icon: Lock, label: 'Change Password', href: '#' },
+    { icon: Lock, label: 'Change Password', href: '/change-password' },
     { icon: Globe, label: 'Language', href: '#', value: 'English' },
   ];
 
   const infoItems = [
-    { icon: Info, label: 'About App', href: '#' },
-    { icon: FileText, label: 'Terms of Use', href: '#' },
-    { icon: Shield, label: 'Privacy Policy', href: '#' },
-    { icon: Share2, label: 'Share This App', href: '#' },
+    { icon: Info, label: 'About App', href: '/about' },
+    { icon: FileText, label: 'Terms of Use', href: '/terms' },
+    { icon: Shield, label: 'Privacy Policy', href: '/privacy' },
+    { icon: Share2, label: 'Share This App', href: '#', action: 'share' },
   ];
 
   return (
@@ -280,21 +290,42 @@ export default function Profile() {
             Information
           </h3>
           <div className="bg-card rounded-2xl overflow-hidden shadow-soft">
-            {infoItems.map((item, index) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`flex items-center justify-between p-4 hover:bg-muted/50 transition-colors ${
-                  index < infoItems.length - 1 ? 'border-b border-border/30' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-foreground">{item.label}</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            ))}
+            {infoItems.map((item, index) => {
+              const baseClassName = `flex items-center justify-between p-4 hover:bg-muted/50 transition-colors w-full text-left ${
+                index < infoItems.length - 1 ? 'border-b border-border/30' : ''
+              }`;
+              
+              if (item.action === 'share') {
+                return (
+                  <button
+                    key={item.label}
+                    onClick={handleShareApp}
+                    type="button"
+                    className={baseClassName}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-foreground">{item.label}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                );
+              }
+              
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className={baseClassName}
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-foreground">{item.label}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+              );
+            })}
           </div>
         </motion.div>
 
