@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils';
 import haptics from '@/utils/haptics';
 
 export function MobileNav() {
-  const { user, isHost } = useAuth();
+  const { user, isHost, viewMode } = useAuth();
   const location = useLocation();
 
-  // Different navigation for hosts vs guests
+  // Different navigation for hosts vs guests based on viewMode
   const guestNavItems = [
     { href: '/', label: 'Explore', icon: Compass, isCenter: false },
     { href: '/wishlists', label: 'Wishlist', icon: Bookmark, isCenter: false },
@@ -29,7 +29,8 @@ export function MobileNav() {
     { href: '/profile', label: 'Profile', icon: User, isCenter: false },
   ];
 
-  const navItems = isHost ? hostNavItems : guestNavItems;
+  // Use viewMode instead of isHost to determine which nav to show
+  const navItems = (isHost && viewMode === 'host') ? hostNavItems : guestNavItems;
 
   const isActive = (path: string, label: string) => {
     // Special handling for Home vs Explore which share the same path

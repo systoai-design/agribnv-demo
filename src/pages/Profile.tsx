@@ -25,7 +25,8 @@ import {
   Shield, 
   Share2,
   LogOut,
-  User
+  User,
+  Repeat
 } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -36,13 +37,25 @@ const profileSchema = z.object({
 type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function Profile() {
-  const { user, profile, refreshProfile, signOut, isHost, becomeHost } = useAuth();
+  const { user, profile, refreshProfile, signOut, isHost, viewMode, switchViewMode, becomeHost } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { share } = useShare();
   const [isLoading, setIsLoading] = useState(false);
   const [isBecomingHost, setIsBecomingHost] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  const handleSwitchMode = () => {
+    if (viewMode === 'host') {
+      switchViewMode('guest');
+      navigate('/');
+      toast({ title: 'Switched to Guest mode', description: 'Now browsing as a traveler.' });
+    } else {
+      switchViewMode('host');
+      navigate('/host');
+      toast({ title: 'Switched to Host mode', description: 'Now managing your listings.' });
+    }
+  };
 
   const handleShareApp = () => {
     share({
@@ -226,12 +239,37 @@ export default function Profile() {
           </motion.div>
         )}
 
-        {/* Become Host Card */}
-        {!isHost && (
+        {/* Host Mode Toggle - For users who are hosts */}
+        {isHost && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className="bg-secondary/20 rounded-2xl p-4 mb-6"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-secondary-foreground">
+                  {viewMode === 'host' ? 'You\'re in Host mode' : 'You\'re in Guest mode'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {viewMode === 'host' ? 'Managing your listings' : 'Browsing farm stays'}
+                </p>
+              </div>
+              <Button onClick={handleSwitchMode} variant="outline" size="sm" className="gap-2">
+                <Repeat className="h-4 w-4" />
+                {viewMode === 'host' ? 'Switch to Guest' : 'Switch to Host'}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Become Host Card - Only for non-hosts */}
+        {!isHost && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
             className="bg-primary/10 rounded-2xl p-4 mb-6"
           >
             <div className="flex items-center justify-between">

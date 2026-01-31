@@ -55,7 +55,7 @@ export function Navbar({
   onSearch,
   showSearch = true,
 }: NavbarProps) {
-  const { user, profile, isHost, signOut } = useAuth();
+  const { user, profile, isHost, viewMode, switchViewMode, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -63,6 +63,16 @@ export function Navbar({
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleSwitchMode = () => {
+    if (viewMode === 'host') {
+      switchViewMode('guest');
+      navigate('/');
+    } else {
+      switchViewMode('host');
+      navigate('/host');
+    }
   };
 
   return (
@@ -104,9 +114,9 @@ export function Navbar({
               <Button 
                 variant="ghost" 
                 className="hidden lg:flex rounded-full font-medium text-primary hover:bg-sage/20"
-                asChild
+                onClick={handleSwitchMode}
               >
-                <Link to="/host">Switch to hosting</Link>
+                {viewMode === 'host' ? 'Switch to traveling' : 'Switch to hosting'}
               </Button>
             )}
 
