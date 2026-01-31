@@ -10,6 +10,13 @@ export type PropertyCategory =
   | 'organic_farm';
 
 // Image category enum - must match DB exactly
+// Cancellation policy enum - must match DB exactly
+export type CancellationPolicy = 
+  | 'flexible'
+  | 'moderate'
+  | 'strict'
+  | 'non_refundable';
+
 export type ImageCategory = 
   | 'exterior'
   | 'living_area'
@@ -63,6 +70,13 @@ export interface Property {
   category: PropertyCategory;
   amenities: string[];
   is_published: boolean;
+  // Property settings
+  check_in_time: string;
+  check_out_time: string;
+  house_rules: string[];
+  safety_features: string[];
+  cancellation_policy: CancellationPolicy;
+  additional_rules: string | null;
   created_at: string;
   updated_at: string;
   // Joined data
@@ -205,6 +219,53 @@ export const FARMSTAY_LABELS: Record<FarmstaySubcategory, string> = {
   camp_stay: 'Camp Stay',
   dorm_shared: 'Dorm',
 };
+
+// Cancellation policy labels
+export const CANCELLATION_POLICY_LABELS: Record<CancellationPolicy, string> = {
+  flexible: 'Flexible',
+  moderate: 'Moderate',
+  strict: 'Strict',
+  non_refundable: 'Non-refundable',
+};
+
+export const CANCELLATION_POLICY_DESCRIPTIONS: Record<CancellationPolicy, string> = {
+  flexible: 'Free cancellation up to 24 hours before check-in',
+  moderate: 'Free cancellation up to 5 days before check-in',
+  strict: 'Free cancellation up to 14 days before check-in. 50% refund up to 7 days before.',
+  non_refundable: 'No refunds after booking confirmation',
+};
+
+// Common house rules presets
+export const HOUSE_RULES_OPTIONS = [
+  'No smoking',
+  'No pets',
+  'No parties or events',
+  'No loud music after 10 PM',
+  'Respect farm animals',
+  'Stay on designated paths',
+  'Children must be supervised',
+  'No outside food in accommodations',
+  'Remove shoes before entering',
+  'Dispose of trash properly',
+  'No open flames outside designated areas',
+  'Quiet hours: 10 PM - 7 AM',
+];
+
+// Common safety features
+export const SAFETY_FEATURES_OPTIONS = [
+  'Smoke detector',
+  'Carbon monoxide alarm',
+  'Fire extinguisher',
+  'First aid kit',
+  'Security camera (outdoor)',
+  'Gated property',
+  'Well-lit pathways',
+  'Nearby hospital',
+  'Pool/hot tub without gate or lock',
+  'Nearby lake, river, or water body',
+  'Farm machinery on site',
+  'Livestock on property',
+];
 
 // Guimaras municipalities for location focus
 export const GUIMARAS_MUNICIPALITIES = [
