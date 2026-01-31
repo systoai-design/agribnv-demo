@@ -35,11 +35,11 @@ export function FloatingMapButton({ threshold = 300 }: FloatingMapButtonProps) {
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           onClick={handleClick}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 md:hidden
+          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-50
                      flex items-center gap-2 px-5 py-3 
                      bg-foreground text-background
                      rounded-full shadow-lg
-                     active:scale-95 transition-transform"
+                     hover:scale-105 active:scale-95 transition-transform"
         >
           <Map className="h-4 w-4" />
           <span className="text-sm font-semibold">Show map</span>
