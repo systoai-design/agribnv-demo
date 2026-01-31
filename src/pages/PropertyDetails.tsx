@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PhotoGalleryModal } from '@/components/properties/PhotoGalleryModal';
+import { FarmExperiences } from '@/components/properties/FarmExperiences';
+import { FarmCalendar } from '@/components/properties/FarmCalendar';
 import { Layout } from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -393,6 +395,22 @@ export default function PropertyDetails() {
             )}
           </div>
         )}
+
+        {/* Farm Experiences Section - NEW */}
+        <FarmExperiences
+          experiences={property.experiences || []}
+          selectedExperiences={selectedExperiences}
+          onToggleExperience={(expId) => {
+            if (selectedExperiences.includes(expId)) {
+              setSelectedExperiences(selectedExperiences.filter(id => id !== expId));
+            } else {
+              setSelectedExperiences([...selectedExperiences, expId]);
+            }
+          }}
+        />
+
+        {/* Farm Calendar Section - NEW */}
+        <FarmCalendar />
 
         {/* Reviews Section */}
         <div className="py-4">

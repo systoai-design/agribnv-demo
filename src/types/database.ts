@@ -1,5 +1,6 @@
 // Database types for Agribnv
 
+// Database enum - must match DB exactly
 export type PropertyCategory = 
   | 'fruit_picking' 
   | 'livestock' 
@@ -7,6 +8,19 @@ export type PropertyCategory =
   | 'farm_to_table' 
   | 'eco_trail' 
   | 'organic_farm';
+
+// UI-only listing type for top-level tabs
+export type ListingType = 'farm_stay' | 'farm_experience' | 'farm_tour';
+
+// UI-only farmstay subcategory for display
+export type FarmstaySubcategory = 
+  | 'agrifarm'
+  | 'aquafarm'
+  | 'homestay'
+  | 'kubo_hut'
+  | 'farm_cottage'
+  | 'camp_stay'
+  | 'dorm_shared';
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
@@ -137,3 +151,32 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   cancelled: 'Cancelled',
   completed: 'Completed',
 };
+
+// Listing type labels for top tabs
+export const LISTING_TYPE_LABELS: Record<ListingType, string> = {
+  farm_stay: 'Farm Stay',
+  farm_experience: 'Experience',
+  farm_tour: 'Farm Tour',
+};
+
+// Farmstay subcategory labels and icons
+export const FARMSTAY_LABELS: Record<FarmstaySubcategory, string> = {
+  agrifarm: 'Agrifarm',
+  aquafarm: 'Aquafarm',
+  homestay: 'Homestay',
+  kubo_hut: 'Kubo/Hut',
+  farm_cottage: 'Cottage',
+  camp_stay: 'Camp Stay',
+  dorm_shared: 'Dorm',
+};
+
+// Guimaras municipalities for location focus
+export const GUIMARAS_MUNICIPALITIES = [
+  'Jordan',
+  'Buenavista', 
+  'Nueva Valencia',
+  'San Lorenzo',
+  'Sibunag',
+] as const;
+
+export type GuimarasMunicipality = typeof GUIMARAS_MUNICIPALITIES[number];

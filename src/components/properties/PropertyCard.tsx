@@ -91,9 +91,9 @@ export function PropertyCard({ property, className, index = 0, variant = 'overla
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/properties/${property.id}`} className="block">
-          {/* Image Container with Overlay Text */}
+          {/* Image Container with Overlay Text - subtle shadow/border for separation */}
           <div 
-            className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-card group-hover:shadow-card-hover transition-shadow"
+            className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-black/5 group-hover:shadow-card-hover transition-shadow"
             {...swipeHandlers}
           >
             <AnimatePresence mode="wait">
