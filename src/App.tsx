@@ -10,6 +10,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import Bookings from "./pages/Bookings";
 import HostDashboard from "./pages/HostDashboard";
 import NewProperty from "./pages/NewProperty";
+import EditProperty from "./pages/EditProperty";
 import Profile from "./pages/Profile";
 import Wishlists from "./pages/Wishlists";
 import MapView from "./pages/MapView";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/host" element={<HostDashboard />} />
             <Route path="/host/properties/new" element={<NewProperty />} />
+            <Route path="/host/properties/:id/edit" element={<EditProperty />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/wishlists" element={<Wishlists />} />
             <Route path="/map" element={<MapView />} />

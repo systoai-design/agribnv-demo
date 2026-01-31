@@ -258,14 +258,21 @@ export type Database = {
       }
       properties: {
         Row: {
+          additional_rules: string | null
           address: string | null
           amenities: string[] | null
           bathrooms: number
           bedrooms: number
+          cancellation_policy:
+            | Database["public"]["Enums"]["cancellation_policy"]
+            | null
           category: Database["public"]["Enums"]["property_category"]
+          check_in_time: string | null
+          check_out_time: string | null
           created_at: string
           description: string | null
           host_id: string
+          house_rules: string[] | null
           id: string
           is_published: boolean
           latitude: number | null
@@ -274,17 +281,25 @@ export type Database = {
           max_guests: number
           name: string
           price_per_night: number
+          safety_features: string[] | null
           updated_at: string
         }
         Insert: {
+          additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
           bathrooms?: number
           bedrooms?: number
+          cancellation_policy?:
+            | Database["public"]["Enums"]["cancellation_policy"]
+            | null
           category?: Database["public"]["Enums"]["property_category"]
+          check_in_time?: string | null
+          check_out_time?: string | null
           created_at?: string
           description?: string | null
           host_id: string
+          house_rules?: string[] | null
           id?: string
           is_published?: boolean
           latitude?: number | null
@@ -293,17 +308,25 @@ export type Database = {
           max_guests?: number
           name: string
           price_per_night: number
+          safety_features?: string[] | null
           updated_at?: string
         }
         Update: {
+          additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
           bathrooms?: number
           bedrooms?: number
+          cancellation_policy?:
+            | Database["public"]["Enums"]["cancellation_policy"]
+            | null
           category?: Database["public"]["Enums"]["property_category"]
+          check_in_time?: string | null
+          check_out_time?: string | null
           created_at?: string
           description?: string | null
           host_id?: string
+          house_rules?: string[] | null
           id?: string
           is_published?: boolean
           latitude?: number | null
@@ -312,6 +335,7 @@ export type Database = {
           max_guests?: number
           name?: string
           price_per_night?: number
+          safety_features?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -424,6 +448,7 @@ export type Database = {
     Enums: {
       app_role: "guest" | "host"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      cancellation_policy: "flexible" | "moderate" | "strict" | "non_refundable"
       image_category:
         | "exterior"
         | "living_area"
@@ -569,6 +594,7 @@ export const Constants = {
     Enums: {
       app_role: ["guest", "host"],
       booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      cancellation_policy: ["flexible", "moderate", "strict", "non_refundable"],
       image_category: [
         "exterior",
         "living_area",

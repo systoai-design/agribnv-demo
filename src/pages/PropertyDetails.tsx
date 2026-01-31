@@ -18,7 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/hooks/useShare';
 import { useConversations } from '@/hooks/useConversations';
-import { Property, Experience, CATEGORY_LABELS } from '@/types/database';
+import { Property, Experience, CATEGORY_LABELS, CANCELLATION_POLICY_LABELS, CANCELLATION_POLICY_DESCRIPTIONS } from '@/types/database';
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine, Tv, Wind,
   Clock, ChevronLeft, ChevronRight, Loader2, Star, Share, Heart, Grid3X3,
@@ -97,6 +97,18 @@ const ratingCategories = [
   { label: 'Location', rating: 5.0, icon: '📍' },
   { label: 'Value', rating: 5.0, icon: '💰' },
 ];
+
+// Helper to format time (e.g., "14:00" -> "2:00 PM")
+const formatTime = (time: string) => {
+  try {
+    const [hours, minutes] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  } catch {
+    return time;
+  }
+};
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -943,36 +955,74 @@ export default function PropertyDetails() {
                 <div>
                   <h4 className="font-semibold mb-4">House rules</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li>Check-in: 2:00 PM - 10:00 PM</li>
-                    <li>Checkout before 12:00 PM</li>
-                    <li>{property.max_guests} guests maximum</li>
+                    <li className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Check-in: {property.check_in_time ? formatTime(property.check_in_time) : '2:00 PM'}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Checkout: {property.check_out_time ? formatTime(property.check_out_time) : '12:00 PM'}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      {property.max_guests} guests maximum
+                    </li>
+                    {property.house_rules?.slice(0, 2).map((rule, idx) => (
+                      <li key={idx}>{rule}</li>
+                    ))}
                   </ul>
-                  <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold text-sm">
-                    Show more
-                  </Button>
+                  {property.house_rules && property.house_rules.length > 2 && (
+                    <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold text-sm">
+                      Show more
+                    </Button>
+                  )}
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4">Safety & property</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li>Pool/hot tub without a gate or lock</li>
-                    <li>Nearby lake, river, other body of water</li>
-                    <li>Carbon monoxide alarm</li>
+                    {property.safety_features && property.safety_features.length > 0 ? (
+                      property.safety_features.slice(0, 3).map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" />
+                          {feature}
+                        </li>
+                      ))
+                    ) : (
+                      <>
+                        <li>Carbon monoxide alarm</li>
+                        <li>Smoke detector</li>
+                        <li>First aid kit</li>
+                      </>
+                    )}
                   </ul>
-                  <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold text-sm">
-                    Show more
-                  </Button>
+                  {property.safety_features && property.safety_features.length > 3 && (
+                    <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold text-sm">
+                      Show more
+                    </Button>
+                  )}
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4">Cancellation policy</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li>Free cancellation before check-in</li>
-                    <li>Review the full policy for details</li>
+                    <li className="font-medium text-foreground">
+                      {property.cancellation_policy 
+                        ? CANCELLATION_POLICY_LABELS[property.cancellation_policy]
+                        : 'Moderate'}
+                    </li>
+                    <li>
+                      {property.cancellation_policy 
+                        ? CANCELLATION_POLICY_DESCRIPTIONS[property.cancellation_policy]
+                        : 'Free cancellation up to 5 days before check-in'}
+                    </li>
                   </ul>
-                  <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold text-sm">
-                    Show more
-                  </Button>
                 </div>
               </div>
+              {property.additional_rules && (
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Additional information</h4>
+                  <p className="text-sm text-muted-foreground">{property.additional_rules}</p>
+                </div>
+              )}
             </motion.div>
           </div>
 
