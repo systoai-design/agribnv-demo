@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [viewMode, setViewMode] = useState<ViewMode>('guest');
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string): Promise<void> => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -49,13 +49,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const checkHostStatus = async (userId: string) => {
+  const checkHostStatus = async (userId: string): Promise<void> => {
     const { data } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
       .eq('role', 'host')
-      .single();
+      .maybeSingle();
     
     const hostStatus = !!data;
     setIsHost(hostStatus);
@@ -77,38 +77,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let isMounted = true;
+
+    // Listener for ONGOING auth changes (does NOT control isLoading)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!isMounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer Supabase calls with setTimeout to prevent deadlock
+        // Fire and forget for ongoing changes - don't await, don't set loading
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-            checkHostStatus(session.user.id);
-          }, 0);
+          fetchProfile(session.user.id);
+          checkHostStatus(session.user.id);
         } else {
           setProfile(null);
           setIsHost(false);
+          setViewMode('guest');
         }
-        setIsLoading(false);
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-        checkHostStatus(session.user.id);
-      }
-      setIsLoading(false);
-    });
+    // INITIAL load - controls isLoading, awaits role check
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
 
-    return () => subscription.unsubscribe();
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // Await role check BEFORE setting loading false
+        if (session?.user) {
+          await Promise.all([
+            fetchProfile(session.user.id),
+            checkHostStatus(session.user.id)
+          ]);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
