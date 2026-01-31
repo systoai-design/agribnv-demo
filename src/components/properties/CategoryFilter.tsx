@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight, SlidersHorizontal, Map, Home, Fish, Tent, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SlidersHorizontal, Map, Home, Tractor, Leaf, Factory, Trees, Warehouse, Wheat, CircleDot, Shuffle, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyCategory } from '@/types/database';
 import { cn } from '@/lib/utils';
@@ -14,12 +14,18 @@ interface CategoryFilterProps {
   onMapClick?: () => void;
 }
 
-// Updated categories with new labels matching mockup
+// Updated categories matching the new database enum
 const CATEGORIES: { id: PropertyCategory; label: string; icon: React.ElementType }[] = [
-  { id: 'organic_farm', label: 'Farmstay', icon: Home },
-  { id: 'livestock', label: 'Agri-aqua', icon: Fish },
-  { id: 'eco_trail', label: 'Campstay', icon: Tent },
-  { id: 'wellness', label: 'Agri-experience', icon: Sparkles },
+  { id: 'farmstay', label: 'Farmstay', icon: Home },
+  { id: 'agri_tourism_farm', label: 'Agri-Tourism', icon: Tractor },
+  { id: 'integrated_farm', label: 'Integrated', icon: Shuffle },
+  { id: 'working_farm', label: 'Working', icon: Factory },
+  { id: 'nature_farm', label: 'Nature', icon: Trees },
+  { id: 'homestead_farm', label: 'Homestead', icon: Warehouse },
+  { id: 'crop_farm', label: 'Crop', icon: Wheat },
+  { id: 'livestock_farm', label: 'Livestock', icon: CircleDot },
+  { id: 'mixed_farm', label: 'Mixed', icon: Leaf },
+  { id: 'educational_farm', label: 'Educational', icon: GraduationCap },
 ];
 
 export function CategoryFilter({ selectedCategories, onCategoryChange, onFiltersClick, onMapClick }: CategoryFilterProps) {

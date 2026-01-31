@@ -459,12 +459,16 @@ export type Database = {
         | "amenities"
         | "farm_animals"
       property_category:
-        | "fruit_picking"
-        | "livestock"
-        | "wellness"
-        | "farm_to_table"
-        | "eco_trail"
-        | "organic_farm"
+        | "farmstay"
+        | "agri_tourism_farm"
+        | "integrated_farm"
+        | "working_farm"
+        | "nature_farm"
+        | "homestead_farm"
+        | "crop_farm"
+        | "livestock_farm"
+        | "mixed_farm"
+        | "educational_farm"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -606,12 +610,16 @@ export const Constants = {
         "farm_animals",
       ],
       property_category: [
-        "fruit_picking",
-        "livestock",
-        "wellness",
-        "farm_to_table",
-        "eco_trail",
-        "organic_farm",
+        "farmstay",
+        "agri_tourism_farm",
+        "integrated_farm",
+        "working_farm",
+        "nature_farm",
+        "homestead_farm",
+        "crop_farm",
+        "livestock_farm",
+        "mixed_farm",
+        "educational_farm",
       ],
     },
   },
