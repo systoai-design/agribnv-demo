@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format, differenceInDays } from 'date-fns';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,10 +11,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PhotoGalleryModal } from '@/components/properties/PhotoGalleryModal';
 import { FarmExperiences } from '@/components/properties/FarmExperiences';
 import { FarmCalendar } from '@/components/properties/FarmCalendar';
+import { AmenitiesModal } from '@/components/properties/AmenitiesModal';
 import { Layout } from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useShare } from '@/hooks/useShare';
 import { Property, Experience, CATEGORY_LABELS } from '@/types/database';
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine, Tv, Wind,
@@ -100,6 +102,7 @@ export default function PropertyDetails() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { share } = useShare();
   
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +113,35 @@ export default function PropertyDetails() {
   const [isBooking, setIsBooking] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
-  const [showAllAmenities, setShowAllAmenities] = useState(false);
+  const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  // Share handler
+  const handleShare = () => {
+    if (!property) return;
+    share({
+      title: property.name,
+      text: `Check out ${property.name} in ${property.location}! 🌿`,
+      url: window.location.href,
+    });
+  };
+
+  // Contact host handler
+  const handleContactHost = () => {
+    if (user) {
+      navigate('/inbox');
+      toast({
+        title: 'Opening messages',
+        description: `Start a conversation with ${property?.host?.full_name || 'the host'}.`,
+      });
+    } else {
+      toast({
+        title: 'Sign in to message host',
+        description: 'Create an account to send messages to hosts.',
+      });
+      navigate('/auth');
+    }
+  };
 
   useEffect(() => {
     if (id) fetchProperty();
@@ -245,6 +276,7 @@ export default function PropertyDetails() {
           <div className="flex gap-2 pointer-events-auto">
             <motion.button
               whileTap={{ scale: 0.9 }}
+              onClick={handleShare}
               className="h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center"
             >
               <Share className="h-4 w-4 text-foreground" />
@@ -365,12 +397,25 @@ export default function PropertyDetails() {
 
         {/* Description */}
         <div className="py-4 border-b border-border/50">
-          <p className="text-sm leading-relaxed line-clamp-4">
-            {property.description}
-          </p>
-          <Button variant="link" className="px-0 h-auto text-sm font-semibold underline mt-2">
-            Show more
-          </Button>
+          <AnimatePresence mode="wait">
+            <motion.p 
+              key={showFullDescription ? 'full' : 'clipped'}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={cn("text-sm leading-relaxed", !showFullDescription && "line-clamp-4")}
+            >
+              {property.description}
+            </motion.p>
+          </AnimatePresence>
+          {property.description && property.description.length > 200 && (
+            <Button 
+              variant="link" 
+              className="px-0 h-auto text-sm font-semibold underline mt-2"
+              onClick={() => setShowFullDescription(!showFullDescription)}
+            >
+              {showFullDescription ? 'Show less' : 'Show more'}
+            </Button>
+          )}
         </div>
 
         {/* Amenities Preview */}
@@ -389,7 +434,11 @@ export default function PropertyDetails() {
               })}
             </div>
             {property.amenities.length > 6 && (
-              <Button variant="outline" className="w-full mt-4 rounded-lg border-foreground">
+              <Button 
+                variant="outline" 
+                className="w-full mt-4 rounded-lg border-foreground"
+                onClick={() => setShowAmenitiesModal(true)}
+              >
                 Show all {property.amenities.length} amenities
               </Button>
             )}
@@ -482,7 +531,7 @@ export default function PropertyDetails() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted">
+              <Button variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted" onClick={handleShare}>
                 <Share className="h-4 w-4" /> <span className="underline">Share</span>
               </Button>
               <Button 
@@ -617,12 +666,25 @@ export default function PropertyDetails() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <p className="text-foreground leading-relaxed whitespace-pre-line">
-                {property.description}
-              </p>
-              <Button variant="link" className="px-0 mt-2 underline text-foreground font-semibold">
-                Show more
-              </Button>
+              <AnimatePresence mode="wait">
+                <motion.p 
+                  key={showFullDescription ? 'full' : 'clipped'}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className={cn("text-foreground leading-relaxed whitespace-pre-line", !showFullDescription && "line-clamp-6")}
+                >
+                  {property.description}
+                </motion.p>
+              </AnimatePresence>
+              {property.description && property.description.length > 300 && (
+                <Button 
+                  variant="link" 
+                  className="px-0 mt-2 underline text-foreground font-semibold"
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                >
+                  {showFullDescription ? 'Show less' : 'Show more'}
+                </Button>
+              )}
             </motion.div>
 
             {/* Amenities */}
@@ -636,7 +698,7 @@ export default function PropertyDetails() {
                 >
                   <h3 className="text-xl font-semibold mb-6">What this place offers</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {property.amenities.slice(0, showAllAmenities ? property.amenities.length : 10).map((amenity) => {
+                    {property.amenities.slice(0, 10).map((amenity) => {
                       const IconComponent = amenityIcons[amenity] || Wifi;
                       return (
                         <div key={amenity} className="flex items-center gap-4 py-2">
@@ -646,11 +708,11 @@ export default function PropertyDetails() {
                       );
                     })}
                   </div>
-                  {property.amenities.length > 10 && !showAllAmenities && (
+                  {property.amenities.length > 10 && (
                     <Button 
                       variant="outline" 
                       className="mt-6 rounded-lg border-foreground"
-                      onClick={() => setShowAllAmenities(true)}
+                      onClick={() => setShowAmenitiesModal(true)}
                     >
                       Show all {property.amenities.length} amenities
                     </Button>
@@ -837,7 +899,10 @@ export default function PropertyDetails() {
                     <p className="text-sm text-muted-foreground">Response rate: 100%</p>
                     <p className="text-sm text-muted-foreground">Responds within an hour</p>
                   </div>
-                  <Button className="rounded-lg bg-foreground text-background hover:bg-foreground/90 mt-4">
+                  <Button 
+                    className="rounded-lg bg-foreground text-background hover:bg-foreground/90 mt-4"
+                    onClick={handleContactHost}
+                  >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Message Host
                   </Button>
@@ -978,6 +1043,14 @@ export default function PropertyDetails() {
         propertyName={property.name}
         isLiked={isLiked}
         onToggleLike={() => setIsLiked(!isLiked)}
+      />
+
+      {/* Amenities Modal */}
+      <AmenitiesModal
+        isOpen={showAmenitiesModal}
+        onClose={() => setShowAmenitiesModal(false)}
+        amenities={property.amenities || []}
+        propertyName={property.name}
       />
     </Layout>
   );
