@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,9 +14,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useGeocoding } from '@/hooks/useGeocoding';
 import { PropertyCategory, CATEGORY_LABELS, CATEGORY_ICONS, ImageCategory } from '@/types/database';
 import { ImageUploader, UploadedImage } from '@/components/properties/ImageUploader';
-import { Loader2, ArrowLeft, MapPin, Bed, Bath, Users, DollarSign, Camera } from 'lucide-react';
+import { Loader2, ArrowLeft, MapPin, Bed, Bath, Users, DollarSign, Camera, MapPinned, Check } from 'lucide-react';
 
 const AMENITIES = [
   'WiFi', 
@@ -58,8 +59,10 @@ export default function NewProperty() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const { geocode, isLoading: isGeocoding } = useGeocoding();
 
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<PropertyForm>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<PropertyForm>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       max_guests: 2,
@@ -68,6 +71,28 @@ export default function NewProperty() {
       category: 'organic_farm',
     },
   });
+
+  const locationValue = watch('location');
+  const addressValue = watch('address');
+
+  // Auto-geocode when location or address changes
+  useEffect(() => {
+    const geocodeLocation = async () => {
+      const searchAddress = addressValue 
+        ? `${addressValue}, ${locationValue}` 
+        : locationValue;
+      
+      if (searchAddress && searchAddress.length >= 3) {
+        const result = await geocode(searchAddress);
+        if (result) {
+          setCoordinates({ lat: result.latitude, lng: result.longitude });
+        }
+      }
+    };
+
+    const debounce = setTimeout(geocodeLocation, 1000);
+    return () => clearTimeout(debounce);
+  }, [locationValue, addressValue, geocode]);
 
   const onSubmit = async (data: PropertyForm) => {
     if (!user || !isHost) return;
@@ -83,7 +108,7 @@ export default function NewProperty() {
 
     setIsLoading(true);
     try {
-      // Create property
+      // Create property with coordinates
       const { data: property, error } = await supabase
         .from('properties')
         .insert([{
@@ -99,6 +124,8 @@ export default function NewProperty() {
           host_id: user.id,
           amenities: selectedAmenities,
           is_published: false,
+          latitude: coordinates?.lat || null,
+          longitude: coordinates?.lng || null,
         }])
         .select()
         .single();
@@ -223,6 +250,26 @@ export default function NewProperty() {
                     <Label htmlFor="address">Full Address</Label>
                     <Input id="address" placeholder="e.g., Brgy. Rizal, Jordan" {...register('address')} />
                   </div>
+                </div>
+
+                {/* Geocoding Status */}
+                <div className="flex items-center gap-2 text-sm">
+                  {isGeocoding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <span className="text-muted-foreground">Finding coordinates...</span>
+                    </>
+                  ) : coordinates ? (
+                    <>
+                      <MapPinned className="h-4 w-4 text-green-600" />
+                      <span className="text-green-600 flex items-center gap-1">
+                        <Check className="h-3 w-3" />
+                        Location found ({coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)})
+                      </span>
+                    </>
+                  ) : locationValue && locationValue.length >= 3 ? (
+                    <span className="text-muted-foreground">Enter location to auto-detect coordinates</span>
+                  ) : null}
                 </div>
               </div>
 
