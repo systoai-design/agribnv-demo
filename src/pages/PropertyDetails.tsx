@@ -8,10 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PhotoGalleryModal } from '@/components/properties/PhotoGalleryModal';
 import { FarmExperiences } from '@/components/properties/FarmExperiences';
 import { FarmCalendar } from '@/components/properties/FarmCalendar';
 import { AmenitiesModal } from '@/components/properties/AmenitiesModal';
+import PropertyMap from '@/components/map/PropertyMap';
 import { Layout } from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +24,7 @@ import { Property, Experience, CATEGORY_LABELS, CANCELLATION_POLICY_LABELS, CANC
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine, Tv, Wind,
   Clock, ChevronLeft, ChevronRight, Loader2, Star, Share, Heart, Grid3X3,
-  Warehouse, DoorOpen, ShieldCheck, X, Award, CalendarDays, MessageCircle
+  Warehouse, DoorOpen, ShieldCheck, X, Award, CalendarDays, MessageCircle, Minus, Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -865,13 +867,21 @@ export default function PropertyDetails() {
             >
               <h3 className="text-xl font-semibold mb-2">Where you'll be</h3>
               <p className="text-muted-foreground mb-6">{property.location}</p>
-              <div className="h-[300px] md:h-[400px] bg-muted rounded-xl flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-sage/20 to-primary/10" />
-                <div className="text-center z-10">
-                  <MapPin className="h-12 w-12 mx-auto text-primary mb-2" />
-                  <p className="text-muted-foreground">Map view coming soon</p>
+              {property.latitude && property.longitude ? (
+                <PropertyMap
+                  properties={[property]}
+                  selectedPropertyId={property.id}
+                  className="h-[300px] md:h-[400px] rounded-xl"
+                />
+              ) : (
+                <div className="h-[300px] md:h-[400px] bg-muted rounded-xl flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-sage/20 to-primary/10" />
+                  <div className="text-center z-10">
+                    <MapPin className="h-12 w-12 mx-auto text-primary mb-2" />
+                    <p className="text-muted-foreground">Location coordinates not available</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
 
             {/* Host Section */}
@@ -1044,19 +1054,84 @@ export default function PropertyDetails() {
 
                   <div className="border rounded-lg overflow-hidden">
                     <div className="grid grid-cols-2 border-b">
-                      <div className="p-3 border-r hover:bg-muted/50 cursor-pointer transition-colors">
-                        <p className="text-[10px] font-bold uppercase tracking-wide">Check-in</p>
-                        <p className="text-sm">{dateRange.from ? format(dateRange.from, 'M/d/yyyy') : 'Add date'}</p>
-                      </div>
-                      <div className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
-                        <p className="text-[10px] font-bold uppercase tracking-wide">Checkout</p>
-                        <p className="text-sm">{dateRange.to ? format(dateRange.to, 'M/d/yyyy') : 'Add date'}</p>
-                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="p-3 border-r hover:bg-muted/50 cursor-pointer transition-colors">
+                            <p className="text-[10px] font-bold uppercase tracking-wide">Check-in</p>
+                            <p className={cn("text-sm", !dateRange.from && "text-muted-foreground")}>
+                              {dateRange.from ? format(dateRange.from, 'M/d/yyyy') : 'Add date'}
+                            </p>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
+                            disabled={{ before: new Date() }}
+                            numberOfMonths={2}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                            <p className="text-[10px] font-bold uppercase tracking-wide">Checkout</p>
+                            <p className={cn("text-sm", !dateRange.to && "text-muted-foreground")}>
+                              {dateRange.to ? format(dateRange.to, 'M/d/yyyy') : 'Add date'}
+                            </p>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                          <Calendar
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
+                            disabled={{ before: dateRange.from || new Date() }}
+                            numberOfMonths={2}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                    <div className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
-                      <p className="text-[10px] font-bold uppercase tracking-wide">Guests</p>
-                      <p className="text-sm">{guestCount} guest{guestCount > 1 ? 's' : ''}</p>
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                          <p className="text-[10px] font-bold uppercase tracking-wide">Guests</p>
+                          <p className="text-sm">{guestCount} guest{guestCount > 1 ? 's' : ''}</p>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72" align="start">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Guests</p>
+                            <p className="text-sm text-muted-foreground">Max {property.max_guests}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 rounded-full"
+                              disabled={guestCount <= 1}
+                              onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <span className="w-8 text-center font-medium">{guestCount}</span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 rounded-full"
+                              disabled={guestCount >= property.max_guests}
+                              onClick={() => setGuestCount(Math.min(property.max_guests, guestCount + 1))}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <Button 
