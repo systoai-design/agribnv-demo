@@ -167,12 +167,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: new Error('Not authenticated') };
     }
 
+    // First check if user already has host role
+    const { data: existingRole } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('role', 'host')
+      .maybeSingle();
+
+    if (existingRole) {
+      // Already a host, just update state and return success
+      setIsHost(true);
+      setViewMode('host');
+      return { error: null };
+    }
+
+    // Insert new host role
     const { error } = await supabase
       .from('user_roles')
       .insert({ user_id: user.id, role: 'host' });
 
     if (!error) {
       setIsHost(true);
+      setViewMode('host');
     }
 
     return { error };
