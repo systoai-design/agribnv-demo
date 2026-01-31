@@ -9,6 +9,17 @@ export type PropertyCategory =
   | 'eco_trail' 
   | 'organic_farm';
 
+// Image category enum - must match DB exactly
+export type ImageCategory = 
+  | 'exterior'
+  | 'living_area'
+  | 'bedroom'
+  | 'bathroom'
+  | 'kitchen'
+  | 'outdoor'
+  | 'amenities'
+  | 'farm_animals';
+
 // UI-only listing type for top-level tabs
 export type ListingType = 'farm_stay' | 'farm_experience' | 'farm_tour';
 
@@ -66,6 +77,8 @@ export interface PropertyImage {
   image_url: string;
   is_primary: boolean;
   display_order: number;
+  category: ImageCategory;
+  caption: string | null;
   created_at: string;
 }
 
@@ -143,6 +156,29 @@ export const CATEGORY_ICONS: Record<PropertyCategory, string> = {
   farm_to_table: '🍽️',
   eco_trail: '🥾',
   organic_farm: '🌱',
+};
+
+// Image category labels and icons
+export const IMAGE_CATEGORY_LABELS: Record<ImageCategory, string> = {
+  exterior: 'Exterior',
+  living_area: 'Living Area',
+  bedroom: 'Bedroom',
+  bathroom: 'Bathroom',
+  kitchen: 'Kitchen',
+  outdoor: 'Outdoor/Views',
+  amenities: 'Amenities',
+  farm_animals: 'Farm & Animals',
+};
+
+export const IMAGE_CATEGORY_ICONS: Record<ImageCategory, string> = {
+  exterior: '🏠',
+  living_area: '🛋️',
+  bedroom: '🛏️',
+  bathroom: '🚿',
+  kitchen: '🍳',
+  outdoor: '🌳',
+  amenities: '✨',
+  farm_animals: '🐔',
 };
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {

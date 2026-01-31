@@ -14,8 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { PropertyCategory, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/database';
-import { Loader2, ArrowLeft, Upload, MapPin, Bed, Bath, Users, DollarSign } from 'lucide-react';
+import { PropertyCategory, CATEGORY_LABELS, CATEGORY_ICONS, ImageCategory } from '@/types/database';
+import { ImageUploader, UploadedImage } from '@/components/properties/ImageUploader';
+import { Loader2, ArrowLeft, MapPin, Bed, Bath, Users, DollarSign, Camera } from 'lucide-react';
 
 const AMENITIES = [
   'WiFi', 
@@ -56,9 +57,9 @@ export default function NewProperty() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [imageUrl, setImageUrl] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<PropertyForm>({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<PropertyForm>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       max_guests: 2,
@@ -71,8 +72,18 @@ export default function NewProperty() {
   const onSubmit = async (data: PropertyForm) => {
     if (!user || !isHost) return;
 
+    if (uploadedImages.length === 0) {
+      toast({
+        title: 'Images required',
+        description: 'Please upload at least one image of your property',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Create property
       const { data: property, error } = await supabase
         .from('properties')
         .insert([{
@@ -94,16 +105,35 @@ export default function NewProperty() {
 
       if (error) throw error;
 
-      // Add image if provided
-      if (imageUrl && property) {
-        await supabase.from('property_images').insert({
+      // Save all uploaded images to property_images table
+      if (property && uploadedImages.length > 0) {
+        const imageRecords = uploadedImages.map((img, index) => ({
           property_id: property.id,
-          image_url: imageUrl,
-          is_primary: true,
-        });
+          image_url: img.url,
+          is_primary: img.isPrimary,
+          display_order: index,
+          category: img.category as ImageCategory,
+          caption: img.caption || null,
+        }));
+
+        const { error: imageError } = await supabase
+          .from('property_images')
+          .insert(imageRecords);
+
+        if (imageError) {
+          console.error('Error saving images:', imageError);
+          toast({
+            title: 'Warning',
+            description: 'Property created but some images may not have saved correctly',
+            variant: 'destructive',
+          });
+        }
       }
 
-      toast({ title: 'Property created!', description: 'You can now add more details and publish it.' });
+      toast({ 
+        title: 'Property created!', 
+        description: `${uploadedImages.length} images uploaded. You can now publish it from the dashboard.` 
+      });
       navigate('/host');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -125,19 +155,20 @@ export default function NewProperty() {
 
   return (
     <Layout>
-      <div className="container py-8 max-w-3xl">
+      <div className="container py-8 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate('/host')} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </Button>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-display text-2xl">Add New Property</CardTitle>
-            <CardDescription>Fill in the details below to list your farm or property</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Basic Info Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display text-2xl">Add New Property</CardTitle>
+              <CardDescription>Fill in the details below to list your farm or property</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
               {/* Basic Info Section */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Basic Information</h3>
@@ -233,37 +264,6 @@ export default function NewProperty() {
                 </div>
               </div>
 
-              {/* Image Section */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2 flex items-center gap-2">
-                  <Upload className="h-5 w-5" /> Cover Image
-                </h3>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input 
-                    id="imageUrl" 
-                    placeholder="https://example.com/image.jpg" 
-                    value={imageUrl} 
-                    onChange={(e) => setImageUrl(e.target.value)} 
-                  />
-                  <p className="text-xs text-muted-foreground">Paste a direct link to your property image</p>
-                </div>
-
-                {imageUrl && (
-                  <div className="mt-2">
-                    <img 
-                      src={imageUrl} 
-                      alt="Preview" 
-                      className="w-full max-w-md h-48 object-cover rounded-lg border"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
               {/* Amenities Section */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Amenities</h3>
@@ -284,20 +284,44 @@ export default function NewProperty() {
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Submit */}
-              <div className="pt-4 border-t">
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Property
-                </Button>
-                <p className="text-xs text-center text-muted-foreground mt-2">
-                  Your property will be saved as a draft. You can publish it from the dashboard.
-                </p>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          {/* Images Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Property Photos
+              </CardTitle>
+              <CardDescription>
+                Upload photos of your property organized by room/area. 
+                The first image will be your cover photo.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ImageUploader
+                userId={user.id}
+                images={uploadedImages}
+                onChange={setUploadedImages}
+                maxImages={20}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Submit */}
+          <Card>
+            <CardContent className="py-6">
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Property
+              </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Your property will be saved as a draft. You can publish it from the dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        </form>
       </div>
     </Layout>
   );
