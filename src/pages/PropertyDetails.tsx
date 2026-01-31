@@ -223,6 +223,7 @@ export default function PropertyDetails() {
             check_out: format(dateRange.to, 'yyyy-MM-dd'),
             guests_count: guestCount,
             total_price: totalPrice,
+            status: 'confirmed', // Auto-confirm for test mode (no payment gateway)
           })
           .select()
           .single();
