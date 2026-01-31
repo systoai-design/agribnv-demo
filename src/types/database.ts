@@ -2,12 +2,16 @@
 
 // Database enum - must match DB exactly
 export type PropertyCategory = 
-  | 'fruit_picking' 
-  | 'livestock' 
-  | 'wellness' 
-  | 'farm_to_table' 
-  | 'eco_trail' 
-  | 'organic_farm';
+  | 'farmstay'
+  | 'agri_tourism_farm'
+  | 'integrated_farm'
+  | 'working_farm'
+  | 'nature_farm'
+  | 'homestead_farm'
+  | 'crop_farm'
+  | 'livestock_farm'
+  | 'mixed_farm'
+  | 'educational_farm';
 
 // Image category enum - must match DB exactly
 // Cancellation policy enum - must match DB exactly
@@ -155,21 +159,29 @@ export interface Wishlist {
 
 // Category display helpers
 export const CATEGORY_LABELS: Record<PropertyCategory, string> = {
-  fruit_picking: 'Fruit Picking',
-  livestock: 'Livestock Farm',
-  wellness: 'Wellness Retreat',
-  farm_to_table: 'Farm-to-Table',
-  eco_trail: 'Eco Trail',
-  organic_farm: 'Organic Farm',
+  farmstay: 'Farmstay',
+  agri_tourism_farm: 'Agri-Tourism Farm',
+  integrated_farm: 'Integrated Farm',
+  working_farm: 'Working Farm',
+  nature_farm: 'Nature Farm',
+  homestead_farm: 'Homestead Farm',
+  crop_farm: 'Crop Farm',
+  livestock_farm: 'Livestock Farm',
+  mixed_farm: 'Mixed Farm',
+  educational_farm: 'Educational Farm',
 };
 
 export const CATEGORY_ICONS: Record<PropertyCategory, string> = {
-  fruit_picking: '🍎',
-  livestock: '🐄',
-  wellness: '🧘',
-  farm_to_table: '🍽️',
-  eco_trail: '🥾',
-  organic_farm: '🌱',
+  farmstay: '🏡',
+  agri_tourism_farm: '🌾',
+  integrated_farm: '🔄',
+  working_farm: '🚜',
+  nature_farm: '🌿',
+  homestead_farm: '🏠',
+  crop_farm: '🌽',
+  livestock_farm: '🐄',
+  mixed_farm: '🌻',
+  educational_farm: '📚',
 };
 
 // Image category labels and icons

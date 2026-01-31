@@ -27,12 +27,16 @@ interface SearchFiltersProps {
 }
 
 const ALL_CATEGORIES: PropertyCategory[] = [
-  'fruit_picking',
-  'livestock',
-  'wellness',
-  'farm_to_table',
-  'eco_trail',
-  'organic_farm',
+  'farmstay',
+  'agri_tourism_farm',
+  'integrated_farm',
+  'working_farm',
+  'nature_farm',
+  'homestead_farm',
+  'crop_farm',
+  'livestock_farm',
+  'mixed_farm',
+  'educational_farm',
 ];
 
 export function SearchFilters({
