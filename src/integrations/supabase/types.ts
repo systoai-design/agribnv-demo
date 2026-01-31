@@ -318,6 +318,8 @@ export type Database = {
       }
       property_images: {
         Row: {
+          caption: string | null
+          category: Database["public"]["Enums"]["image_category"] | null
           created_at: string
           display_order: number
           id: string
@@ -326,6 +328,8 @@ export type Database = {
           property_id: string
         }
         Insert: {
+          caption?: string | null
+          category?: Database["public"]["Enums"]["image_category"] | null
           created_at?: string
           display_order?: number
           id?: string
@@ -334,6 +338,8 @@ export type Database = {
           property_id: string
         }
         Update: {
+          caption?: string | null
+          category?: Database["public"]["Enums"]["image_category"] | null
           created_at?: string
           display_order?: number
           id?: string
@@ -418,6 +424,15 @@ export type Database = {
     Enums: {
       app_role: "guest" | "host"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      image_category:
+        | "exterior"
+        | "living_area"
+        | "bedroom"
+        | "bathroom"
+        | "kitchen"
+        | "outdoor"
+        | "amenities"
+        | "farm_animals"
       property_category:
         | "fruit_picking"
         | "livestock"
@@ -554,6 +569,16 @@ export const Constants = {
     Enums: {
       app_role: ["guest", "host"],
       booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      image_category: [
+        "exterior",
+        "living_area",
+        "bedroom",
+        "bathroom",
+        "kitchen",
+        "outdoor",
+        "amenities",
+        "farm_animals",
+      ],
       property_category: [
         "fruit_picking",
         "livestock",
