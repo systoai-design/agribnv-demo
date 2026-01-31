@@ -4,7 +4,8 @@ import { Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
-import { CategoryFilter } from '@/components/properties/CategoryFilter';
+import { ListingTypeTabs } from '@/components/properties/ListingTypeTabs';
+import { FarmstayCategories } from '@/components/properties/FarmstayCategories';
 import LocationCarousel from '@/components/properties/LocationCarousel';
 import { FloatingMapButton } from '@/components/properties/FloatingMapButton';
 import { WelcomeHeader } from '@/components/home/WelcomeHeader';
@@ -21,14 +22,15 @@ import { MobileSearchModal } from '@/components/search/MobileSearchModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
-import { Property, PropertyCategory } from '@/types/database';
+import { Property, ListingType, FarmstaySubcategory, GUIMARAS_MUNICIPALITIES } from '@/types/database';
 
 export default function Index() {
   const { user, profile } = useAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<PropertyCategory[]>([]);
+  const [selectedListingType, setSelectedListingType] = useState<ListingType>('farm_stay');
+  const [selectedCategories, setSelectedCategories] = useState<FarmstaySubcategory[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [guestCount, setGuestCount] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -68,10 +70,10 @@ export default function Index() {
     const matchesSearch = !searchTerm || 
       property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(property.category);
+    // For now, show all properties regardless of subcategory filter (UI-only subcategories)
     const matchesPrice = property.price_per_night >= priceRange[0] && property.price_per_night <= priceRange[1];
     const matchesGuests = property.max_guests >= Math.max(guestCount, searchGuestCount);
-    return matchesSearch && matchesCategory && matchesPrice && matchesGuests;
+    return matchesSearch && matchesPrice && matchesGuests;
   });
 
   const clearFilters = () => {
@@ -86,7 +88,7 @@ export default function Index() {
 
   const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000 || guestCount > 1 || searchLocation || searchDateRange.from;
 
-  // Group properties by location for carousels
+  // Group properties by location for carousels - prioritize Guimaras municipalities
   const propertiesByLocation = useMemo(() => {
     const groups: Record<string, Property[]> = {};
     properties.forEach((property) => {
@@ -94,7 +96,27 @@ export default function Index() {
       if (!groups[city]) groups[city] = [];
       groups[city].push(property);
     });
-    return groups;
+    
+    // Sort to prioritize Guimaras municipalities first
+    const sortedEntries = Object.entries(groups).sort((a, b) => {
+      const aIsGuimaras = GUIMARAS_MUNICIPALITIES.some(m => a[0].includes(m));
+      const bIsGuimaras = GUIMARAS_MUNICIPALITIES.some(m => b[0].includes(m));
+      
+      if (aIsGuimaras && !bIsGuimaras) return -1;
+      if (!aIsGuimaras && bIsGuimaras) return 1;
+      
+      // Within Guimaras, sort by municipality order
+      if (aIsGuimaras && bIsGuimaras) {
+        const aIdx = GUIMARAS_MUNICIPALITIES.findIndex(m => a[0].includes(m));
+        const bIdx = GUIMARAS_MUNICIPALITIES.findIndex(m => b[0].includes(m));
+        return aIdx - bIdx;
+      }
+      
+      // For non-Guimaras, sort by number of properties
+      return b[1].length - a[1].length;
+    });
+    
+    return Object.fromEntries(sortedEntries);
   }, [properties]);
 
   // ESC key to close filters sheet
@@ -155,9 +177,17 @@ export default function Index() {
         onSearch={handleSearch}
       />
 
-      {/* Category Filter */}
-      <div className="px-4 md:px-0">
-        <CategoryFilter
+      {/* Listing Type Tabs - 3-tab segment */}
+      <div className="px-4 md:px-0 md:container py-2">
+        <ListingTypeTabs 
+          selectedType={selectedListingType} 
+          onTypeChange={setSelectedListingType} 
+        />
+      </div>
+
+      {/* Farmstay Categories - subcategory filter */}
+      <div className="md:px-0">
+        <FarmstayCategories
           selectedCategories={selectedCategories}
           onCategoryChange={setSelectedCategories}
           onFiltersClick={() => setIsFiltersOpen(true)}
