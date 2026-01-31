@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useGeocoding } from '@/hooks/useGeocoding';
 import { 
   Property,
   PropertyCategory, 
@@ -30,7 +31,7 @@ import {
 import { ImageUploader, UploadedImage } from '@/components/properties/ImageUploader';
 import { 
   Loader2, ArrowLeft, MapPin, Bed, Bath, Users, DollarSign, Camera, 
-  Clock, Shield, FileText, AlertTriangle, Settings 
+  Clock, Shield, FileText, AlertTriangle, Settings, MapPinned, Check 
 } from 'lucide-react';
 
 const AMENITIES = [
@@ -71,10 +72,34 @@ export default function EditProperty() {
   const [selectedHouseRules, setSelectedHouseRules] = useState<string[]>([]);
   const [selectedSafetyFeatures, setSelectedSafetyFeatures] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const { geocode, isLoading: isGeocoding } = useGeocoding();
 
-  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<PropertyForm>({
+  const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<PropertyForm>({
     resolver: zodResolver(propertySchema),
   });
+
+  const locationValue = watch('location');
+  const addressValue = watch('address');
+
+  // Auto-geocode when location or address changes
+  useEffect(() => {
+    const geocodeLocation = async () => {
+      const searchAddress = addressValue 
+        ? `${addressValue}, ${locationValue}` 
+        : locationValue;
+      
+      if (searchAddress && searchAddress.length >= 3) {
+        const result = await geocode(searchAddress);
+        if (result) {
+          setCoordinates({ lat: result.latitude, lng: result.longitude });
+        }
+      }
+    };
+
+    const debounce = setTimeout(geocodeLocation, 1000);
+    return () => clearTimeout(debounce);
+  }, [locationValue, addressValue, geocode]);
 
   useEffect(() => {
     if (id && user) {
@@ -140,7 +165,7 @@ export default function EditProperty() {
 
     setIsSaving(true);
     try {
-      // Update property
+      // Update property with coordinates
       const { error } = await supabase
         .from('properties')
         .update({
@@ -160,6 +185,8 @@ export default function EditProperty() {
           safety_features: selectedSafetyFeatures,
           cancellation_policy: data.cancellation_policy as CancellationPolicy,
           additional_rules: data.additional_rules || null,
+          latitude: coordinates?.lat || null,
+          longitude: coordinates?.lng || null,
         })
         .eq('id', id)
         .eq('host_id', user.id);
@@ -305,6 +332,26 @@ export default function EditProperty() {
                       <Label htmlFor="address">Full Address</Label>
                       <Input id="address" {...register('address')} />
                     </div>
+                  </div>
+
+                  {/* Geocoding Status */}
+                  <div className="flex items-center gap-2 text-sm">
+                    {isGeocoding ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <span className="text-muted-foreground">Finding coordinates...</span>
+                      </>
+                    ) : coordinates ? (
+                      <>
+                        <MapPinned className="h-4 w-4 text-green-600" />
+                        <span className="text-green-600 flex items-center gap-1">
+                          <Check className="h-3 w-3" />
+                          Location found ({coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)})
+                        </span>
+                      </>
+                    ) : locationValue && locationValue.length >= 3 ? (
+                      <span className="text-muted-foreground">Enter location to auto-detect coordinates</span>
+                    ) : null}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
