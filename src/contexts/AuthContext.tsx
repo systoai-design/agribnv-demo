@@ -10,17 +10,21 @@ interface Profile {
   phone: string | null;
 }
 
+type ViewMode = 'guest' | 'host';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   isHost: boolean;
+  viewMode: ViewMode;
   isLoading: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   becomeHost: () => Promise<{ error: Error | null }>;
   refreshProfile: () => Promise<void>;
+  switchViewMode: (mode: ViewMode) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isHost, setIsHost] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('guest');
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -52,7 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('role', 'host')
       .single();
     
-    setIsHost(!!data);
+    const hostStatus = !!data;
+    setIsHost(hostStatus);
+    // Auto-set view mode to host if user is a host (can be changed later)
+    if (hostStatus) {
+      setViewMode('host');
+    }
+  };
+
+  const switchViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
   };
 
   const refreshProfile = async () => {
@@ -129,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setIsHost(false);
+    setViewMode('guest');
   };
 
   const becomeHost = async () => {
@@ -154,12 +169,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         isHost,
+        viewMode,
         isLoading,
         signUp,
         signIn,
         signOut,
         becomeHost,
         refreshProfile,
+        switchViewMode,
       }}
     >
       {children}
