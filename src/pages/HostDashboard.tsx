@@ -61,6 +61,26 @@ export default function HostDashboard() {
     setIsBecomingHost(false);
   };
 
+  const handleBookingStatusChange = async (bookingId: string, newStatus: Booking['status']) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: newStatus })
+      .eq('id', bookingId);
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+      const statusMessages: Record<Booking['status'], string> = {
+        confirmed: 'Booking approved!',
+        cancelled: 'Booking cancelled',
+        completed: 'Booking marked as complete',
+        pending: 'Status updated',
+      };
+      toast({ title: statusMessages[newStatus] });
+    }
+  };
+
   const togglePublish = async (propertyId: string, currentStatus: boolean) => {
     const { error } = await supabase
       .from('properties')
@@ -219,7 +239,7 @@ export default function HostDashboard() {
             ) : (
               <div className="grid gap-4">
                 {bookings.map((booking) => (
-                  <BookingRow key={booking.id} booking={booking} />
+                  <BookingRow key={booking.id} booking={booking} onStatusChange={handleBookingStatusChange} />
                 ))}
               </div>
             )}
@@ -284,7 +304,9 @@ function PropertyRow({ property, onTogglePublish }: { property: Property; onTogg
   );
 }
 
-function BookingRow({ booking }: { booking: Booking }) {
+function BookingRow({ booking, onStatusChange }: { booking: Booking; onStatusChange: (id: string, status: Booking['status']) => void }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   const getStatusColor = (status: Booking['status']) => {
     switch (status) {
       case 'confirmed': return 'bg-success text-white';
@@ -294,6 +316,26 @@ function BookingRow({ booking }: { booking: Booking }) {
       default: return 'bg-muted';
     }
   };
+
+  const handleApprove = async () => {
+    setIsUpdating(true);
+    await onStatusChange(booking.id, 'confirmed');
+    setIsUpdating(false);
+  };
+
+  const handleCancel = async () => {
+    setIsUpdating(true);
+    await onStatusChange(booking.id, 'cancelled');
+    setIsUpdating(false);
+  };
+
+  const handleComplete = async () => {
+    setIsUpdating(true);
+    await onStatusChange(booking.id, 'completed');
+    setIsUpdating(false);
+  };
+
+  const isPast = new Date(booking.check_out) < new Date();
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -317,6 +359,51 @@ function BookingRow({ booking }: { booking: Booking }) {
           </div>
           <div className="text-right">
             <p className="font-bold text-lg">₱{Number(booking.total_price).toLocaleString()}</p>
+          </div>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            {booking.status === 'pending' && (
+              <>
+                <Button
+                  size="sm"
+                  onClick={handleApprove}
+                  disabled={isUpdating}
+                  className="bg-success hover:bg-success/90"
+                >
+                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Approve'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isUpdating}
+                  className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                >
+                  Decline
+                </Button>
+              </>
+            )}
+            {booking.status === 'confirmed' && isPast && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleComplete}
+                disabled={isUpdating}
+              >
+                {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mark Complete'}
+              </Button>
+            )}
+            {booking.status === 'confirmed' && !isPast && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isUpdating}
+                className="text-destructive border-destructive/50 hover:bg-destructive/10"
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
