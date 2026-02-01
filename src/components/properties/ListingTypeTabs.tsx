@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { Home, Sparkles, MapPin } from 'lucide-react';
 import { ListingType, LISTING_TYPE_LABELS } from '@/types/database';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,15 @@ const LISTING_TYPES: { id: ListingType; icon: React.ElementType }[] = [
 ];
 
 export function ListingTypeTabs({ selectedType, onTypeChange }: ListingTypeTabsProps) {
+  // Prevent animation flash on initial mount
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    // Small delay to ensure proper hydration before enabling animations
+    const timer = setTimeout(() => setIsMounted(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex items-center justify-center gap-1 p-1 bg-muted/50 rounded-xl">
       {LISTING_TYPES.map((type) => {
@@ -39,8 +49,10 @@ export function ListingTypeTabs({ selectedType, onTypeChange }: ListingTypeTabsP
           >
             {isSelected && (
               <motion.div
-                layoutId="activeTab"
+                layoutId={isMounted ? "activeTab" : undefined}
                 className="absolute inset-0 bg-primary rounded-lg"
+                initial={!isMounted ? { opacity: 1 } : false}
+                animate={{ opacity: 1 }}
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
               />
             )}
