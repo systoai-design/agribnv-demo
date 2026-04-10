@@ -40,65 +40,6 @@ const amenityIcons: Record<string, any> = {
   'Washer': Warehouse,
 };
 
-// Mock host data (since profiles require auth users)
-const mockHosts: Record<string, { full_name: string; avatar_url: string; bio: string }> = {
-  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa': {
-    full_name: 'Maria Santos',
-    avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-    bio: 'Passionate organic farmer with 15 years of experience. I love sharing the joy of farm life!',
-  },
-  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb': {
-    full_name: 'Juan dela Cruz',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    bio: 'Third-generation organic farmer. Our family has been cultivating sustainable crops for decades.',
-  },
-  'cccccccc-cccc-cccc-cccc-cccccccccccc': {
-    full_name: 'Elena Reyes',
-    avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-    bio: 'Wellness advocate and nature lover. I created this retreat to help people reconnect with nature.',
-  },
-  'dddddddd-dddd-dddd-dddd-dddddddddddd': {
-    full_name: 'Roberto Gonzales',
-    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-    bio: 'Sustainable livestock farmer committed to ethical farming practices.',
-  },
-  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee': {
-    full_name: 'Ana Villanueva',
-    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
-    bio: 'Environmental scientist turned eco-tourism guide. Every trail tells a story!',
-  },
-  'ffffffff-ffff-ffff-ffff-ffffffffffff': {
-    full_name: 'Pedro Aquino',
-    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-    bio: 'Island native and seafood expert. Join me for the freshest farm-to-table experience.',
-  },
-};
-
-// Default host for properties without specific mock data
-const defaultHost = {
-  full_name: 'Farm Host',
-  avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200',
-  bio: 'Experienced agritourism host passionate about sustainable farming.',
-};
-
-// Mock reviews data
-const mockReviews = [
-  { id: 1, name: 'Blessed Fernsby', date: '5 months ago', avatar: null, rating: 5, text: "Wonderful! I admire how the hosts made this property a reality. It's full of love and thoughtfulness. We really appreciate how Bing answered and..."  },
-  { id: 2, name: 'Cynthia', date: '6 months ago', avatar: null, rating: 5, text: 'Thank you kuya Bing for being so helpful and nice. A place so...' },
-  { id: 3, name: 'Aisa Lyne', date: '7 months ago', avatar: null, rating: 5, text: 'Comfortable and fun. Friendly staff. I will come back again. The place was clean and the atmosphere relaxed. We enjoyed every...' },
-  { id: 4, name: 'Ryan Mark Tinio', date: '7 months ago', avatar: null, rating: 5, text: 'Super ganda ng view at very accomodating si kuya Bing! Too bad we only had 2 nights here. Will definitely book again!...' },
-  { id: 5, name: 'Wea Shei', date: '8 months ago', avatar: null, rating: 5, text: 'Everyone was so nice! super nice nila! Will come back again...' },
-  { id: 6, name: 'Christine', date: '9 months ago', avatar: null, rating: 5, text: 'Lovely what a nice surrounding and the host is very helpful. Wonderful about this place. The view was worth it and peaceful environment...' },
-];
-
-const ratingCategories = [
-  { label: 'Cleanliness', rating: 4.9, icon: '🧹' },
-  { label: 'Accuracy', rating: 4.9, icon: '✓' },
-  { label: 'Check-in', rating: 5.0, icon: '🔑' },
-  { label: 'Communication', rating: 5.0, icon: '💬' },
-  { label: 'Location', rating: 5.0, icon: '📍' },
-  { label: 'Value', rating: 5.0, icon: '💰' },
-];
 
 // Helper to format time (e.g., "14:00" -> "2:00 PM")
 const formatTime = (time: string) => {
@@ -182,7 +123,7 @@ export default function PropertyDetails() {
       return;
     }
     
-    // Query without FK hint - fetch property with images and experiences only
+    // Fetch property with images, experiences
     const { data, error } = await supabase
       .from('properties')
       .select(`*, images:property_images(*), experiences(*)`)
@@ -190,11 +131,16 @@ export default function PropertyDetails() {
       .maybeSingle();
 
     if (!error && data) {
-      // Add mock host data based on property ID
-      const mockHost = mockHosts[id] || defaultHost;
+      // Fetch real host profile
+      const { data: hostProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.host_id)
+        .single();
+
       const propertyWithHost = {
         ...data,
-        host: mockHost,
+        host: hostProfile || { full_name: 'Host', avatar_url: null, bio: null },
       };
       setProperty(propertyWithHost as unknown as Property);
     }
@@ -213,51 +159,52 @@ export default function PropertyDetails() {
   const handleBooking = async () => {
     if (!dateRange.from || !dateRange.to || !property) return;
 
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in or create an account to book.',
+      });
+      navigate('/auth');
+      return;
+    }
+
     setIsBooking(true);
     try {
-      if (user) {
-        const { data: booking, error } = await supabase
-          .from('bookings')
-          .insert({
-            guest_id: user.id,
-            property_id: property.id,
-            check_in: format(dateRange.from, 'yyyy-MM-dd'),
-            check_out: format(dateRange.to, 'yyyy-MM-dd'),
-            guests_count: guestCount,
-            total_price: totalPrice,
-            status: 'confirmed', // Auto-confirm for test mode (no payment gateway)
-          })
-          .select()
-          .single();
+      const { data: booking, error } = await supabase
+        .from('bookings')
+        .insert({
+          guest_id: user.id,
+          property_id: property.id,
+          check_in: format(dateRange.from, 'yyyy-MM-dd'),
+          check_out: format(dateRange.to, 'yyyy-MM-dd'),
+          guests_count: guestCount,
+          total_price: totalPrice,
+          status: 'pending',
+        })
+        .select()
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        if (selectedExperiences.length > 0 && booking) {
-          const expInserts = selectedExperiences.map(expId => {
-            const exp = property.experiences?.find(e => e.id === expId);
-            return {
-              booking_id: booking.id,
-              experience_id: expId,
-              scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
-              participants: guestCount,
-              price_at_booking: exp?.price || 0,
-            };
-          });
-          await supabase.from('booking_experiences').insert(expInserts);
-        }
-
-        toast({ 
-          title: 'Booking confirmed! 🎉', 
-          description: 'Check your trips for details.' 
+      if (selectedExperiences.length > 0 && booking) {
+        const expInserts = selectedExperiences.map(expId => {
+          const exp = property.experiences?.find(e => e.id === expId);
+          return {
+            booking_id: booking.id,
+            experience_id: expId,
+            scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
+            participants: guestCount,
+            price_at_booking: exp?.price || 0,
+          };
         });
-        navigate('/bookings');
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast({ 
-          title: 'Demo booking successful! 🎉', 
-          description: `${property.name} reserved for ${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}. Sign up to save your bookings!` 
-        });
+        await supabase.from('booking_experiences').insert(expInserts);
       }
+
+      toast({ 
+        title: 'Booking request sent! 🎉', 
+        description: 'The host will review your booking. Check your trips for updates.' 
+      });
+      navigate('/bookings');
     } catch (error: any) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
     } finally {
@@ -377,14 +324,9 @@ export default function PropertyDetails() {
           <p className="text-sm text-muted-foreground">{CATEGORY_LABELS[property.category]} · {property.location}</p>
         </div>
 
-        {/* Rating & Reviews summary */}
-        <div className="flex items-center gap-4 py-3 border-b border-border/50">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-foreground" />
-            <span className="font-semibold">4.89</span>
-          </div>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-sm underline cursor-pointer">{mockReviews.length} reviews</span>
+        {/* Property category badge */}
+        <div className="flex items-center gap-2 py-3 border-b border-border/50">
+          <span className="text-sm text-muted-foreground">{CATEGORY_LABELS[property.category]}</span>
         </div>
 
         {/* Host Info */}
@@ -397,7 +339,7 @@ export default function PropertyDetails() {
           </Avatar>
           <div className="flex-1">
             <p className="font-medium">Hosted by {property.host?.full_name}</p>
-            <p className="text-sm text-muted-foreground">Superhost · 2 years hosting</p>
+            <p className="text-sm text-muted-foreground">Host</p>
           </div>
         </div>
 
@@ -419,8 +361,8 @@ export default function PropertyDetails() {
           <div className="flex gap-4">
             <Award className="h-6 w-6 shrink-0" />
             <div>
-              <p className="font-medium">{property.host?.full_name} is a Superhost</p>
-              <p className="text-sm text-muted-foreground">Superhosts are experienced, highly rated hosts</p>
+              <p className="font-medium">Hosted by {property.host?.full_name}</p>
+              <p className="text-sm text-muted-foreground">Your host for this property</p>
             </div>
           </div>
         </div>
@@ -491,35 +433,10 @@ export default function PropertyDetails() {
         {/* Farm Calendar Section - NEW */}
         <FarmCalendar />
 
-        {/* Reviews Section */}
+        {/* Reviews section - placeholder for future real reviews */}
         <div className="py-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="h-5 w-5 fill-foreground" />
-            <span className="text-lg font-semibold">4.89</span>
-            <span className="text-muted-foreground">· {mockReviews.length} reviews</span>
-          </div>
-          {/* Sample reviews */}
-          <div className="space-y-4">
-            {mockReviews.slice(0, 2).map((review) => (
-              <div key={review.id} className="bg-muted/30 rounded-xl p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-gray-300 text-gray-600 text-sm">
-                      {review.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-sm">{review.name}</p>
-                    <p className="text-xs text-muted-foreground">{review.date}</p>
-                  </div>
-                </div>
-                <p className="text-sm line-clamp-3">{review.text}</p>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="w-full mt-4 rounded-lg border-foreground">
-            Show all {mockReviews.length} reviews
-          </Button>
+          <h3 className="font-semibold mb-2">Reviews</h3>
+          <p className="text-sm text-muted-foreground">No reviews yet. Be the first to leave a review after your stay!</p>
         </div>
       </div>
 
@@ -664,8 +581,8 @@ export default function PropertyDetails() {
                   <Award className="h-6 w-6 text-foreground" />
                 </div>
                 <div>
-                  <p className="font-semibold">{property.host?.full_name} is a Superhost</p>
-                  <p className="text-muted-foreground text-sm">Superhosts are experienced, highly rated hosts.</p>
+                  <p className="font-semibold">Hosted by {property.host?.full_name}</p>
+                  <p className="text-muted-foreground text-sm">Your host for this property.</p>
                 </div>
               </div>
               <div className="flex gap-6 items-start">
@@ -788,73 +705,18 @@ export default function PropertyDetails() {
               </Button>
             </motion.div>
 
-            {/* Rating Section */}
+            {/* Reviews - placeholder for future implementation */}
             <Separator />
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
+              className="py-8"
             >
-              <div className="flex flex-col items-center text-center py-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-7xl font-semibold">4.9</span>
-                </div>
-                <div className="flex items-center gap-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-4 w-4 fill-foreground text-foreground" />
-                  ))}
-                </div>
-                <p className="text-lg font-semibold">Guest favorite</p>
-                <p className="text-muted-foreground text-sm max-w-md">
-                  One of the most loved homes on Agribnv based on ratings, reviews, and reliability.
-                </p>
+              <h3 className="text-xl font-semibold mb-4">Reviews</h3>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No reviews yet. Be the first guest to review this property!</p>
               </div>
-
-              {/* Rating Categories */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 border-y py-6">
-                {ratingCategories.map((cat) => (
-                  <div key={cat.label} className="text-center border-r last:border-r-0 px-2">
-                    <p className="text-sm text-muted-foreground mb-1">{cat.label}</p>
-                    <p className="font-semibold">{cat.rating}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Reviews */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="pt-4"
-            >
-              <div className="grid md:grid-cols-2 gap-8">
-                {mockReviews.map((review) => (
-                  <div key={review.id}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-foreground text-background text-sm font-medium">
-                          {review.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-sm">{review.name}</p>
-                        <p className="text-muted-foreground text-xs">{review.date}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm leading-relaxed">{review.text}</p>
-                    <Button variant="link" className="px-0 text-sm underline text-foreground font-semibold">
-                      Show more
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button 
-                variant="outline" 
-                className="mt-8 rounded-lg border-foreground"
-              >
-                Show all 128 reviews
-              </Button>
             </motion.div>
 
             {/* Map Section */}
@@ -902,40 +764,16 @@ export default function PropertyDetails() {
                     </AvatarFallback>
                   </Avatar>
                   <p className="text-xl font-semibold">{property.host?.full_name}</p>
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    <Star className="h-3 w-3 fill-foreground" />
-                    <span className="text-sm font-medium">Superhost</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mt-6 text-sm">
-                    <div className="border-r pr-4">
-                      <p className="font-bold text-lg">203</p>
-                      <p className="text-muted-foreground text-xs">Reviews</p>
-                    </div>
-                    <div className="border-r pr-4">
-                      <p className="font-bold text-lg">4.88</p>
-                      <p className="text-muted-foreground text-xs">Rating</p>
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg">3</p>
-                      <p className="text-muted-foreground text-xs">Years</p>
-                    </div>
-                  </div>
+                  {property.host?.bio && (
+                    <p className="text-sm text-muted-foreground mt-2">{property.host.bio}</p>
+                  )}
                 </Card>
                 <div className="flex-1 space-y-4">
                   <div>
-                    <p className="font-semibold">Superhost</p>
-                    <p className="text-sm text-muted-foreground">Superhosts are experienced, highly rated hosts who are committed to providing great stays.</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Co-hosts</p>
-                    <ul className="text-sm text-muted-foreground">
-                      <li>• Guest Service</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Host details</p>
-                    <p className="text-sm text-muted-foreground">Response rate: 100%</p>
-                    <p className="text-sm text-muted-foreground">Responds within an hour</p>
+                    <p className="font-semibold">About your host</p>
+                    <p className="text-sm text-muted-foreground">
+                      {property.host?.bio || 'Your host is looking forward to welcoming you!'}
+                    </p>
                   </div>
                   <Button 
                     className="rounded-lg bg-foreground text-background hover:bg-foreground/90 mt-4"
