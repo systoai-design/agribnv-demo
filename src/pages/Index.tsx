@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
@@ -207,18 +206,15 @@ export default function Index() {
 
       {/* Mobile Simple Search Bar */}
       <div className="md:hidden px-4 pb-3">
-        <motion.button
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full bg-card border border-border/50 shadow-soft"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full bg-card border border-border/50 shadow-soft animate-fade-in active:scale-[0.98] transition-transform"
         >
           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <Search className="h-4 w-4 text-primary" />
           </div>
           <span className="text-sm text-muted-foreground">Search your destination...</span>
-        </motion.button>
+        </button>
       </div>
 
       {/* Mobile Search Modal */}
@@ -254,11 +250,7 @@ export default function Index() {
       {/* Main Content */}
       <section id="search-section" className="container py-3 md:py-6">
         {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-3 md:mb-6"
-        >
+        <div className="flex items-center justify-between mb-3 md:mb-6 animate-fade-in">
           <div>
             <h2 className="font-serif text-lg md:text-2xl font-bold text-foreground">
               {hasActiveFilters ? 'Search Results' : 'Featured Farms'}
@@ -280,7 +272,7 @@ export default function Index() {
               <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           )}
-        </motion.div>
+        </div>
 
         {/* Show location carousels when no filters, otherwise show grid */}
         {!hasActiveFilters ? (
