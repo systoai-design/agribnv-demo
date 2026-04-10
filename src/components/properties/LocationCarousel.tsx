@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Property } from '@/types/database';
 import { PropertyCard } from './PropertyCard';
@@ -53,12 +52,7 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
   if (properties.length === 0) return null;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="relative"
-    >
+    <section className="relative animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 px-4 md:px-0">
         <h2 className="text-lg md:text-xl font-semibold text-foreground">{title}</h2>
@@ -74,7 +68,6 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
 
       {/* Carousel */}
       <div className="relative group">
-        {/* Left scroll button - desktop only */}
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
@@ -85,7 +78,6 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
           </button>
         )}
 
-        {/* Right scroll button - desktop only */}
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
@@ -96,42 +88,30 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
           </button>
         )}
 
-        {/* Gradient fade - left */}
         {canScrollLeft && (
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-[5] pointer-events-none md:hidden" />
         )}
 
-        {/* Gradient fade - right */}
         {canScrollRight && (
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-[5] pointer-events-none md:hidden" />
         )}
 
-        {/* Scrollable container */}
         <div
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth px-4 md:px-0 pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {displayedProperties.map((property, index) => (
-            <motion.div
+            <div
               key={property.id}
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.03, duration: 0.2 }}
               className="snap-start shrink-0 w-[calc(48%-6px)] sm:w-[calc(33.333%-8px)] md:w-[calc(25%-9px)] lg:w-[calc(20%-10px)] xl:w-[calc(16.666%-10px)]"
             >
               <PropertyCard property={property} index={index} />
-            </motion.div>
+            </div>
           ))}
 
-          {/* Show All card - appears after 8th property when there are more */}
           {hasMore && onShowAll && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: MAX_VISIBLE * 0.03, duration: 0.2 }}
-              className="snap-start shrink-0 w-[calc(48%-6px)] sm:w-[calc(33.333%-8px)] md:w-[calc(25%-9px)] lg:w-[calc(20%-10px)] xl:w-[calc(16.666%-10px)]"
-            >
+            <div className="snap-start shrink-0 w-[calc(48%-6px)] sm:w-[calc(33.333%-8px)] md:w-[calc(25%-9px)] lg:w-[calc(20%-10px)] xl:w-[calc(16.666%-10px)]">
               <button
                 onClick={onShowAll}
                 className="w-full aspect-[4/3] rounded-xl border-2 border-dashed border-muted-foreground/25 
@@ -147,11 +127,11 @@ const LocationCarousel = ({ title, properties, onShowAll }: LocationCarouselProp
                   <p className="text-xs text-muted-foreground">{remainingCount}+ stays</p>
                 </div>
               </button>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

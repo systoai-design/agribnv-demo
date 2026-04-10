@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,11 +14,7 @@ export function WelcomeHeader() {
     .toUpperCase() || 'U';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between px-4 py-2.5 border-b border-border/30"
-    >
+    <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/30 animate-fade-in">
       <div className="flex items-center gap-2.5">
         <Link to={user ? '/profile' : '/auth'}>
           <Avatar className="h-10 w-10 border-2 border-primary/20">
@@ -35,13 +30,12 @@ export function WelcomeHeader() {
         </div>
       </div>
 
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        className="relative p-2 rounded-full bg-card border border-border/50 shadow-sm"
+      <button
+        className="relative p-2 rounded-full bg-card border border-border/50 shadow-sm active:scale-90 transition-transform duration-150"
       >
         <Bell className="h-4 w-4 text-foreground" />
         <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full" />
-      </motion.button>
-    </motion.div>
+      </button>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
