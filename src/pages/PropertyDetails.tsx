@@ -123,7 +123,7 @@ export default function PropertyDetails() {
       return;
     }
     
-    // Query without FK hint - fetch property with images and experiences only
+    // Fetch property with images, experiences
     const { data, error } = await supabase
       .from('properties')
       .select(`*, images:property_images(*), experiences(*)`)
@@ -131,11 +131,16 @@ export default function PropertyDetails() {
       .maybeSingle();
 
     if (!error && data) {
-      // Add mock host data based on property ID
-      const mockHost = mockHosts[id] || defaultHost;
+      // Fetch real host profile
+      const { data: hostProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.host_id)
+        .single();
+
       const propertyWithHost = {
         ...data,
-        host: mockHost,
+        host: hostProfile || { full_name: 'Host', avatar_url: null, bio: null },
       };
       setProperty(propertyWithHost as unknown as Property);
     }
