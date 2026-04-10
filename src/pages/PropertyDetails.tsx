@@ -205,7 +205,6 @@ export default function PropertyDetails() {
         description: 'The host will review your booking. Check your trips for updates.' 
       });
       navigate('/bookings');
-      }
     } catch (error: any) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
     } finally {
