@@ -43,16 +43,6 @@ const amenityIcons: Record<string, any> = {
 
 // Helper to format time (e.g., "14:00" -> "2:00 PM")
 const formatTime = (time: string) => {
-  { label: 'Cleanliness', rating: 4.9, icon: '🧹' },
-  { label: 'Accuracy', rating: 4.9, icon: '✓' },
-  { label: 'Check-in', rating: 5.0, icon: '🔑' },
-  { label: 'Communication', rating: 5.0, icon: '💬' },
-  { label: 'Location', rating: 5.0, icon: '📍' },
-  { label: 'Value', rating: 5.0, icon: '💰' },
-];
-
-// Helper to format time (e.g., "14:00" -> "2:00 PM")
-const formatTime = (time: string) => {
   try {
     const [hours, minutes] = time.split(':').map(Number);
     const period = hours >= 12 ? 'PM' : 'AM';
