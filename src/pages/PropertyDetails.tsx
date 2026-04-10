@@ -339,7 +339,7 @@ export default function PropertyDetails() {
           </Avatar>
           <div className="flex-1">
             <p className="font-medium">Hosted by {property.host?.full_name}</p>
-            <p className="text-sm text-muted-foreground">Superhost · 2 years hosting</p>
+            <p className="text-sm text-muted-foreground">Host</p>
           </div>
         </div>
 
