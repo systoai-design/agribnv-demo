@@ -705,73 +705,18 @@ export default function PropertyDetails() {
               </Button>
             </motion.div>
 
-            {/* Rating Section */}
+            {/* Reviews - placeholder for future implementation */}
             <Separator />
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
+              className="py-8"
             >
-              <div className="flex flex-col items-center text-center py-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-7xl font-semibold">4.9</span>
-                </div>
-                <div className="flex items-center gap-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-4 w-4 fill-foreground text-foreground" />
-                  ))}
-                </div>
-                <p className="text-lg font-semibold">Guest favorite</p>
-                <p className="text-muted-foreground text-sm max-w-md">
-                  One of the most loved homes on Agribnv based on ratings, reviews, and reliability.
-                </p>
+              <h3 className="text-xl font-semibold mb-4">Reviews</h3>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No reviews yet. Be the first guest to review this property!</p>
               </div>
-
-              {/* Rating Categories */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 border-y py-6">
-                {ratingCategories.map((cat) => (
-                  <div key={cat.label} className="text-center border-r last:border-r-0 px-2">
-                    <p className="text-sm text-muted-foreground mb-1">{cat.label}</p>
-                    <p className="font-semibold">{cat.rating}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Reviews */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="pt-4"
-            >
-              <div className="grid md:grid-cols-2 gap-8">
-                {mockReviews.map((review) => (
-                  <div key={review.id}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-foreground text-background text-sm font-medium">
-                          {review.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-sm">{review.name}</p>
-                        <p className="text-muted-foreground text-xs">{review.date}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm leading-relaxed">{review.text}</p>
-                    <Button variant="link" className="px-0 text-sm underline text-foreground font-semibold">
-                      Show more
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button 
-                variant="outline" 
-                className="mt-8 rounded-lg border-foreground"
-              >
-                Show all 128 reviews
-              </Button>
             </motion.div>
 
             {/* Map Section */}
