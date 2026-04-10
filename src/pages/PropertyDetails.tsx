@@ -581,8 +581,8 @@ export default function PropertyDetails() {
                   <Award className="h-6 w-6 text-foreground" />
                 </div>
                 <div>
-                  <p className="font-semibold">{property.host?.full_name} is a Superhost</p>
-                  <p className="text-muted-foreground text-sm">Superhosts are experienced, highly rated hosts.</p>
+                  <p className="font-semibold">Hosted by {property.host?.full_name}</p>
+                  <p className="text-muted-foreground text-sm">Your host for this property.</p>
                 </div>
               </div>
               <div className="flex gap-6 items-start">
