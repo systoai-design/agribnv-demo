@@ -41,17 +41,8 @@ const amenityIcons: Record<string, any> = {
 };
 
 
-// Mock reviews data
-const mockReviews = [
-  { id: 1, name: 'Blessed Fernsby', date: '5 months ago', avatar: null, rating: 5, text: "Wonderful! I admire how the hosts made this property a reality. It's full of love and thoughtfulness. We really appreciate how Bing answered and..."  },
-  { id: 2, name: 'Cynthia', date: '6 months ago', avatar: null, rating: 5, text: 'Thank you kuya Bing for being so helpful and nice. A place so...' },
-  { id: 3, name: 'Aisa Lyne', date: '7 months ago', avatar: null, rating: 5, text: 'Comfortable and fun. Friendly staff. I will come back again. The place was clean and the atmosphere relaxed. We enjoyed every...' },
-  { id: 4, name: 'Ryan Mark Tinio', date: '7 months ago', avatar: null, rating: 5, text: 'Super ganda ng view at very accomodating si kuya Bing! Too bad we only had 2 nights here. Will definitely book again!...' },
-  { id: 5, name: 'Wea Shei', date: '8 months ago', avatar: null, rating: 5, text: 'Everyone was so nice! super nice nila! Will come back again...' },
-  { id: 6, name: 'Christine', date: '9 months ago', avatar: null, rating: 5, text: 'Lovely what a nice surrounding and the host is very helpful. Wonderful about this place. The view was worth it and peaceful environment...' },
-];
-
-const ratingCategories = [
+// Helper to format time (e.g., "14:00" -> "2:00 PM")
+const formatTime = (time: string) => {
   { label: 'Cleanliness', rating: 4.9, icon: '🧹' },
   { label: 'Accuracy', rating: 4.9, icon: '✓' },
   { label: 'Check-in', rating: 5.0, icon: '🔑' },
