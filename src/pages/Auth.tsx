@@ -259,23 +259,7 @@ export default function AuthPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
-            <Separator />
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-sm text-muted-foreground">
-              or
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full h-12 rounded-xl border-2 font-medium justify-start gap-4"
-              disabled
-            >
-              <Mail className="h-5 w-5" />
-              Continue with Google
-            </Button>
-          </div>
+          {/* Social login can be added later */}
 
           <div className="mt-6 text-center">
             <button

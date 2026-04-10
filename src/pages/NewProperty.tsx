@@ -68,7 +68,7 @@ export default function NewProperty() {
       max_guests: 2,
       bedrooms: 1,
       bathrooms: 1,
-      category: 'organic_farm',
+      category: 'farmstay',
     },
   });
 
@@ -219,7 +219,7 @@ export default function NewProperty() {
 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
-                  <Select defaultValue="organic_farm" onValueChange={(val) => setValue('category', val)}>
+                  <Select defaultValue="farmstay" onValueChange={(val) => setValue('category', val)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
