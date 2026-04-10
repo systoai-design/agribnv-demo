@@ -159,50 +159,52 @@ export default function PropertyDetails() {
   const handleBooking = async () => {
     if (!dateRange.from || !dateRange.to || !property) return;
 
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in or create an account to book.',
+      });
+      navigate('/auth');
+      return;
+    }
+
     setIsBooking(true);
     try {
-      if (user) {
-        const { data: booking, error } = await supabase
-          .from('bookings')
-          .insert({
-            guest_id: user.id,
-            property_id: property.id,
-            check_in: format(dateRange.from, 'yyyy-MM-dd'),
-            check_out: format(dateRange.to, 'yyyy-MM-dd'),
-            guests_count: guestCount,
-            total_price: totalPrice,
-            status: 'confirmed', // Auto-confirm for test mode (no payment gateway)
-          })
-          .select()
-          .single();
+      const { data: booking, error } = await supabase
+        .from('bookings')
+        .insert({
+          guest_id: user.id,
+          property_id: property.id,
+          check_in: format(dateRange.from, 'yyyy-MM-dd'),
+          check_out: format(dateRange.to, 'yyyy-MM-dd'),
+          guests_count: guestCount,
+          total_price: totalPrice,
+          status: 'pending',
+        })
+        .select()
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        if (selectedExperiences.length > 0 && booking) {
-          const expInserts = selectedExperiences.map(expId => {
-            const exp = property.experiences?.find(e => e.id === expId);
-            return {
-              booking_id: booking.id,
-              experience_id: expId,
-              scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
-              participants: guestCount,
-              price_at_booking: exp?.price || 0,
-            };
-          });
-          await supabase.from('booking_experiences').insert(expInserts);
-        }
-
-        toast({ 
-          title: 'Booking confirmed! 🎉', 
-          description: 'Check your trips for details.' 
+      if (selectedExperiences.length > 0 && booking) {
+        const expInserts = selectedExperiences.map(expId => {
+          const exp = property.experiences?.find(e => e.id === expId);
+          return {
+            booking_id: booking.id,
+            experience_id: expId,
+            scheduled_date: format(dateRange.from!, 'yyyy-MM-dd'),
+            participants: guestCount,
+            price_at_booking: exp?.price || 0,
+          };
         });
-        navigate('/bookings');
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast({ 
-          title: 'Demo booking successful! 🎉', 
-          description: `${property.name} reserved for ${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}. Sign up to save your bookings!` 
-        });
+        await supabase.from('booking_experiences').insert(expInserts);
+      }
+
+      toast({ 
+        title: 'Booking request sent! 🎉', 
+        description: 'The host will review your booking. Check your trips for updates.' 
+      });
+      navigate('/bookings');
       }
     } catch (error: any) {
       toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
@@ -323,14 +325,9 @@ export default function PropertyDetails() {
           <p className="text-sm text-muted-foreground">{CATEGORY_LABELS[property.category]} · {property.location}</p>
         </div>
 
-        {/* Rating & Reviews summary */}
-        <div className="flex items-center gap-4 py-3 border-b border-border/50">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-foreground" />
-            <span className="font-semibold">4.89</span>
-          </div>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-sm underline cursor-pointer">{mockReviews.length} reviews</span>
+        {/* Property category badge */}
+        <div className="flex items-center gap-2 py-3 border-b border-border/50">
+          <span className="text-sm text-muted-foreground">{CATEGORY_LABELS[property.category]}</span>
         </div>
 
         {/* Host Info */}
@@ -437,35 +434,10 @@ export default function PropertyDetails() {
         {/* Farm Calendar Section - NEW */}
         <FarmCalendar />
 
-        {/* Reviews Section */}
+        {/* Reviews section - placeholder for future real reviews */}
         <div className="py-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="h-5 w-5 fill-foreground" />
-            <span className="text-lg font-semibold">4.89</span>
-            <span className="text-muted-foreground">· {mockReviews.length} reviews</span>
-          </div>
-          {/* Sample reviews */}
-          <div className="space-y-4">
-            {mockReviews.slice(0, 2).map((review) => (
-              <div key={review.id} className="bg-muted/30 rounded-xl p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-gray-300 text-gray-600 text-sm">
-                      {review.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-sm">{review.name}</p>
-                    <p className="text-xs text-muted-foreground">{review.date}</p>
-                  </div>
-                </div>
-                <p className="text-sm line-clamp-3">{review.text}</p>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="w-full mt-4 rounded-lg border-foreground">
-            Show all {mockReviews.length} reviews
-          </Button>
+          <h3 className="font-semibold mb-2">Reviews</h3>
+          <p className="text-sm text-muted-foreground">No reviews yet. Be the first to leave a review after your stay!</p>
         </div>
       </div>
 
