@@ -764,40 +764,16 @@ export default function PropertyDetails() {
                     </AvatarFallback>
                   </Avatar>
                   <p className="text-xl font-semibold">{property.host?.full_name}</p>
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    <Star className="h-3 w-3 fill-foreground" />
-                    <span className="text-sm font-medium">Superhost</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 mt-6 text-sm">
-                    <div className="border-r pr-4">
-                      <p className="font-bold text-lg">203</p>
-                      <p className="text-muted-foreground text-xs">Reviews</p>
-                    </div>
-                    <div className="border-r pr-4">
-                      <p className="font-bold text-lg">4.88</p>
-                      <p className="text-muted-foreground text-xs">Rating</p>
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg">3</p>
-                      <p className="text-muted-foreground text-xs">Years</p>
-                    </div>
-                  </div>
+                  {property.host?.bio && (
+                    <p className="text-sm text-muted-foreground mt-2">{property.host.bio}</p>
+                  )}
                 </Card>
                 <div className="flex-1 space-y-4">
                   <div>
-                    <p className="font-semibold">Superhost</p>
-                    <p className="text-sm text-muted-foreground">Superhosts are experienced, highly rated hosts who are committed to providing great stays.</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Co-hosts</p>
-                    <ul className="text-sm text-muted-foreground">
-                      <li>• Guest Service</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Host details</p>
-                    <p className="text-sm text-muted-foreground">Response rate: 100%</p>
-                    <p className="text-sm text-muted-foreground">Responds within an hour</p>
+                    <p className="font-semibold">About your host</p>
+                    <p className="text-sm text-muted-foreground">
+                      {property.host?.bio || 'Your host is looking forward to welcoming you!'}
+                    </p>
                   </div>
                   <Button 
                     className="rounded-lg bg-foreground text-background hover:bg-foreground/90 mt-4"
