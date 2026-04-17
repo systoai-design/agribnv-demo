@@ -11,7 +11,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PhotoGalleryModal } from '@/components/properties/PhotoGalleryModal';
 import { FarmExperiences } from '@/components/properties/FarmExperiences';
-import { FarmCalendar } from '@/components/properties/FarmCalendar';
 import { AmenitiesModal } from '@/components/properties/AmenitiesModal';
 import PropertyMap from '@/components/map/PropertyMap';
 import { Layout } from '@/components/layout/Layout';
@@ -20,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useShare } from '@/hooks/useShare';
 import { useConversations } from '@/hooks/useConversations';
+import { useAvailability } from '@/hooks/useAvailability';
 import { Property, Experience, CATEGORY_LABELS, CANCELLATION_POLICY_LABELS, CANCELLATION_POLICY_DESCRIPTIONS } from '@/types/database';
 import {
   MapPin, Users, BedDouble, Bath, Wifi, Car, Utensils, TreePine, Tv, Wind,
@@ -62,6 +62,7 @@ export default function PropertyDetails() {
   const { getOrCreateConversation } = useConversations();
   
   const [property, setProperty] = useState<Property | null>(null);
+  const { blockedRanges } = useAvailability(property?.id);
   const [isLoading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
@@ -148,6 +149,12 @@ export default function PropertyDetails() {
   };
 
   const nights = dateRange.from && dateRange.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
+
+  // Calendar disabled matchers: past dates + already-booked ranges
+  const disabledDates = [
+    { before: new Date() },
+    ...blockedRanges.map((r) => ({ from: r.from, to: r.to })),
+  ];
   const accommodationTotal = nights * (property?.price_per_night || 0);
   const experiencesTotal = selectedExperiences.reduce((sum, expId) => {
     const exp = property?.experiences?.find(e => e.id === expId);
@@ -170,13 +177,37 @@ export default function PropertyDetails() {
 
     setIsBooking(true);
     try {
+      const checkIn = format(dateRange.from, 'yyyy-MM-dd');
+      const checkOut = format(dateRange.to, 'yyyy-MM-dd');
+
+      // Pre-check for overlap so the user sees a friendly error instead of
+      // a raw constraint violation. The DB-level EXCLUDE constraint is the
+      // real safety net if a concurrent booking sneaks in between.
+      const { data: conflicts } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('property_id', property.id)
+        .in('status', ['pending', 'confirmed'])
+        .lt('check_in', checkOut)
+        .gt('check_out', checkIn)
+        .limit(1);
+
+      if (conflicts && conflicts.length > 0) {
+        toast({
+          title: 'Dates not available',
+          description: 'Someone already booked these dates. Please pick different ones.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { data: booking, error } = await supabase
         .from('bookings')
         .insert({
           guest_id: user.id,
           property_id: property.id,
-          check_in: format(dateRange.from, 'yyyy-MM-dd'),
-          check_out: format(dateRange.to, 'yyyy-MM-dd'),
+          check_in: checkIn,
+          check_out: checkOut,
           guests_count: guestCount,
           total_price: totalPrice,
           status: 'pending',
@@ -184,7 +215,17 @@ export default function PropertyDetails() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23P01' || error.message?.includes('no_overlapping_bookings')) {
+          toast({
+            title: 'Dates not available',
+            description: 'These dates were just booked. Please pick different ones.',
+            variant: 'destructive',
+          });
+          return;
+        }
+        throw error;
+      }
 
       if (selectedExperiences.length > 0 && booking) {
         const expInserts = selectedExperiences.map(expId => {
@@ -200,9 +241,9 @@ export default function PropertyDetails() {
         await supabase.from('booking_experiences').insert(expInserts);
       }
 
-      toast({ 
-        title: 'Booking request sent! 🎉', 
-        description: 'The host will review your booking. Check your trips for updates.' 
+      toast({
+        title: 'Booking request sent! 🎉',
+        description: 'The host will review your booking. Check your trips for updates.',
       });
       navigate('/bookings');
     } catch (error: any) {
@@ -429,9 +470,6 @@ export default function PropertyDetails() {
             }
           }}
         />
-
-        {/* Farm Calendar Section - NEW */}
-        <FarmCalendar />
 
         {/* Reviews section - placeholder for future real reviews */}
         <div className="py-4">
@@ -691,7 +729,7 @@ export default function PropertyDetails() {
                   mode="range"
                   selected={dateRange}
                   onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
-                  disabled={{ before: new Date() }}
+                  disabled={disabledDates}
                   className="rounded-xl p-3 pointer-events-auto"
                   numberOfMonths={2}
                 />
@@ -906,7 +944,7 @@ export default function PropertyDetails() {
                             mode="range"
                             selected={dateRange}
                             onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
-                            disabled={{ before: new Date() }}
+                            disabled={disabledDates}
                             numberOfMonths={2}
                             className="p-3 pointer-events-auto"
                           />
@@ -926,7 +964,10 @@ export default function PropertyDetails() {
                             mode="range"
                             selected={dateRange}
                             onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
-                            disabled={{ before: dateRange.from || new Date() }}
+                            disabled={[
+                              { before: dateRange.from || new Date() },
+                              ...blockedRanges.map((r) => ({ from: r.from, to: r.to })),
+                            ]}
                             numberOfMonths={2}
                             className="p-3 pointer-events-auto"
                           />

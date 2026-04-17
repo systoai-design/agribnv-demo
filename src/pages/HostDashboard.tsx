@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { useToast } from '@/hooks/use-toast';
 import { Property, Booking, CATEGORY_LABELS, CATEGORY_ICONS, BOOKING_STATUS_LABELS } from '@/types/database';
-import { Plus, Home, Calendar, Users, MapPin, Eye, Edit, ToggleLeft, ToggleRight, Loader2, TrendingUp, DollarSign, Building2 } from 'lucide-react';
+import { Plus, Home, Calendar, Users, MapPin, Eye, Edit, ToggleLeft, ToggleRight, Loader2, TrendingUp, DollarSign, Building2, Mail } from 'lucide-react';
 
 export default function HostDashboard() {
   const { user, isHost, becomeHost } = useAuth();
+  const { unreadMessageCount } = useNotifications();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -136,13 +138,48 @@ export default function HostDashboard() {
             <h1 className="font-display text-3xl font-bold">Host Dashboard</h1>
             <p className="text-muted-foreground">Manage your properties and bookings</p>
           </div>
-          <Button asChild className="bg-primary hover:bg-primary/90">
-            <Link to="/host/properties/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Property
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" className="relative">
+              <Link to="/inbox">
+                <Mail className="h-4 w-4 mr-2" />
+                Messages
+                {unreadMessageCount > 0 && (
+                  <span className="ml-2 min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center">
+                    {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                  </span>
+                )}
+              </Link>
+            </Button>
+            <Button asChild className="bg-primary hover:bg-primary/90">
+              <Link to="/host/properties/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Property
+              </Link>
+            </Button>
+          </div>
         </div>
+
+        {/* Unread messages banner */}
+        {unreadMessageCount > 0 && (
+          <Card className="mb-6 border-primary/30 bg-primary/5">
+            <CardContent className="py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <Mail className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">
+                    You have {unreadMessageCount} unread message{unreadMessageCount === 1 ? '' : 's'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Keep guests happy with timely replies.</p>
+                </div>
+              </div>
+              <Button asChild size="sm">
+                <Link to="/inbox">View messages</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

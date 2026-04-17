@@ -2,11 +2,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Compass, Bookmark, Home, Mail, User, Building2, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { cn } from '@/lib/utils';
 import haptics from '@/utils/haptics';
 
 export function MobileNav() {
   const { user, isHost, viewMode } = useAuth();
+  const { unreadMessageCount } = useNotifications();
   const location = useLocation();
 
   // Different navigation for hosts vs guests based on viewMode
@@ -65,6 +67,8 @@ export function MobileNav() {
             );
           }
           
+          const showInboxBadge = item.label === 'Inbox' && unreadMessageCount > 0;
+
           return (
             <Link
               key={`${item.href}-${item.label}`}
@@ -75,17 +79,23 @@ export function MobileNav() {
               <motion.div
                 whileTap={{ scale: 0.85 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                className="relative"
               >
-                <Icon 
+                <Icon
                   className={cn(
                     'h-5 w-5 transition-colors',
-                    active 
-                      ? 'text-secondary' 
+                    active
+                      ? 'text-secondary'
                       : 'text-primary-foreground/70'
                   )}
                   strokeWidth={active ? 2.5 : 1.5}
                   fill={active && item.icon === Bookmark ? 'currentColor' : 'none'}
                 />
+                {showInboxBadge && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center ring-2 ring-primary">
+                    {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                  </span>
+                )}
               </motion.div>
               <span className={cn(
                 'text-[10px] font-medium transition-colors',

@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Navigation } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,8 +29,8 @@ interface SearchBarProps {
 
 // Airbnb-style grid icon component
 const GridIcon = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 32 32" 
+  <svg
+    viewBox="0 0 32 32"
     className={className}
     fill="currentColor"
   >
@@ -39,36 +39,11 @@ const GridIcon = ({ className }: { className?: string }) => (
 );
 
 const SUGGESTED_DESTINATIONS = [
-  { 
-    name: 'Nearby', 
-    description: "Find what's around you",
-    iconType: 'navigation' as const,
-  },
-  { 
-    name: 'Tagaytay, Philippines', 
-    description: 'Cool highland farms',
-    iconType: 'grid' as const,
-  },
-  { 
-    name: 'Batangas, Philippines', 
-    description: 'Beachside retreats',
-    iconType: 'grid' as const,
-  },
-  { 
-    name: 'La Union, Philippines', 
-    description: 'Surf and farm',
-    iconType: 'grid' as const,
-  },
-  { 
-    name: 'Baguio, Philippines', 
-    description: 'Mountain fresh',
-    iconType: 'grid' as const,
-  },
-  { 
-    name: 'Guimaras, Philippines', 
-    description: 'Mango paradise',
-    iconType: 'grid' as const,
-  },
+  { name: 'Tagaytay, Philippines', description: 'Cool highland farms' },
+  { name: 'Batangas, Philippines', description: 'Beachside retreats' },
+  { name: 'La Union, Philippines', description: 'Surf and farm' },
+  { name: 'Baguio, Philippines', description: 'Mountain fresh' },
+  { name: 'Guimaras, Philippines', description: 'Mango paradise' },
 ];
 
 const springTransition = {
@@ -94,11 +69,9 @@ export function SearchBar({
   const [internalExpanded, setInternalExpanded] = useState(false);
   const [activeSection, setActiveSection] = useState<'location' | 'dates' | 'guests' | null>(null);
 
-  // Use external state if provided, otherwise use internal
   const isExpanded = externalExpanded ?? internalExpanded;
   const setIsExpanded = onExpandedChange ?? setInternalExpanded;
 
-  // ESC key to collapse expanded search
   const collapseSearch = useCallback(() => {
     setIsExpanded(false);
     setActiveSection(null);
@@ -150,7 +123,7 @@ export function SearchBar({
     <motion.div
       layout
       initial={false}
-      animate={{ 
+      animate={{
         width: isExpanded ? 850 : 420,
       }}
       transition={springTransition}
@@ -254,21 +227,12 @@ export function SearchBar({
                           transition={{ delay: index * 0.05 }}
                           className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/60 transition-colors text-left group"
                           onClick={() => {
-                            onLocationChange(loc.name === 'Nearby' ? '' : loc.name.split(',')[0]);
+                            onLocationChange(loc.name.split(',')[0]);
                             setActiveSection('dates');
                           }}
                         >
-                          <div className={cn(
-                            "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
-                            loc.iconType === 'navigation' 
-                              ? "bg-muted" 
-                              : "bg-gradient-to-br from-rose-400 to-rose-500"
-                          )}>
-                            {loc.iconType === 'navigation' ? (
-                              <Navigation className="h-5 w-5 text-foreground" />
-                            ) : (
-                              <GridIcon className="h-5 w-5 text-white" />
-                            )}
+                          <div className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 bg-gradient-to-br from-rose-400 to-rose-500">
+                            <GridIcon className="h-5 w-5 text-white" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-foreground truncate">{loc.name}</p>
@@ -388,187 +352,5 @@ export function SearchBar({
         )}
       </motion.div>
     </motion.div>
-  );
-
-  // Expanded search bar - shown when expanded
-  return (
-    <div className={cn('relative w-[850px] max-w-full', className)}>
-      <motion.div
-        layout
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={springTransition}
-        className="bg-background rounded-full border border-border/60 shadow-lg shadow-black/[0.08] flex items-center"
-      >
-        {/* Location */}
-        <Popover open={activeSection === 'location'} onOpenChange={(open) => setActiveSection(open ? 'location' : null)}>
-          <PopoverTrigger asChild>
-            <button
-              className={cn(
-                'flex-1 px-6 py-4 text-left rounded-full transition-colors',
-                activeSection === 'location' ? 'bg-background shadow-soft' : 'hover:bg-muted/50'
-              )}
-              onClick={() => handleSectionClick('location')}
-            >
-              <p className="text-xs font-semibold">Where</p>
-              <p className={cn('text-sm', location ? 'text-foreground' : 'text-muted-foreground')}>
-                {location || 'Search destinations'}
-              </p>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px] max-w-[calc(100vw-2rem)] p-6 rounded-3xl shadow-card border-0" align="center" sideOffset={12}>
-            <div className="space-y-5">
-              <Input
-                placeholder="Search destinations"
-                value={location}
-                onChange={(e) => onLocationChange(e.target.value)}
-                className="rounded-xl border-muted-foreground/20 focus:border-foreground"
-                autoFocus
-              />
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground px-1">
-                  Suggested destinations
-                </p>
-                <div className="space-y-1">
-                  {SUGGESTED_DESTINATIONS.map((loc, index) => (
-                    <motion.button
-                      key={loc.name}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/60 transition-colors text-left group"
-                      onClick={() => {
-                        onLocationChange(loc.name === 'Nearby' ? '' : loc.name.split(',')[0]);
-                        setActiveSection('dates');
-                      }}
-                    >
-                      <div className={cn(
-                        "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
-                        loc.iconType === 'navigation' 
-                          ? "bg-muted" 
-                          : "bg-gradient-to-br from-rose-400 to-rose-500"
-                      )}>
-                        {loc.iconType === 'navigation' ? (
-                          <Navigation className="h-5 w-5 text-foreground" />
-                        ) : (
-                          <GridIcon className="h-5 w-5 text-white" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground truncate">{loc.name}</p>
-                        <p className="text-sm text-muted-foreground truncate">{loc.description}</p>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <div className="h-8 w-px bg-border/70" />
-
-        {/* Dates */}
-        <Popover open={activeSection === 'dates'} onOpenChange={(open) => setActiveSection(open ? 'dates' : null)}>
-          <PopoverTrigger asChild>
-            <button
-              className={cn(
-                'flex-1 px-6 py-4 text-left rounded-full transition-colors',
-                activeSection === 'dates' ? 'bg-background shadow-soft' : 'hover:bg-muted/50'
-              )}
-              onClick={() => handleSectionClick('dates')}
-            >
-              <p className="text-xs font-semibold">Check in - Check out</p>
-              <p className={cn('text-sm', dateRange.from ? 'text-foreground' : 'text-muted-foreground')}>
-                {formatDateRange()}
-              </p>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-4 rounded-3xl shadow-card overflow-x-auto" align="center">
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => onDateRangeChange({ from: undefined, to: undefined })}
-                >
-                  Clear dates
-                </Button>
-              </div>
-              <CalendarComponent
-                mode="range"
-                selected={dateRange}
-                onSelect={(range) => onDateRangeChange({ from: range?.from, to: range?.to })}
-                disabled={{ before: new Date() }}
-                numberOfMonths={2}
-                className="rounded-xl"
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <div className="h-8 w-px bg-border/70" />
-
-        {/* Guests */}
-        <Popover open={activeSection === 'guests'} onOpenChange={(open) => setActiveSection(open ? 'guests' : null)}>
-          <PopoverTrigger asChild>
-            <button
-              className={cn(
-                'flex-1 px-6 py-4 text-left rounded-full transition-colors',
-                activeSection === 'guests' ? 'bg-background shadow-soft' : 'hover:bg-muted/50'
-              )}
-              onClick={() => handleSectionClick('guests')}
-            >
-              <p className="text-xs font-semibold">Who</p>
-              <p className={cn('text-sm', guestCount > 1 ? 'text-foreground' : 'text-muted-foreground')}>
-                {guestCount > 1 ? `${guestCount} guests` : 'Add guests'}
-              </p>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[320px] p-6 rounded-3xl shadow-card" align="end">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold">Guests</p>
-                <p className="text-sm text-muted-foreground">How many guests?</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full h-8 w-8"
-                  onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
-                  disabled={guestCount <= 1}
-                >
-                  -
-                </Button>
-                <span className="w-6 text-center font-semibold">{guestCount}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full h-8 w-8"
-                  onClick={() => onGuestCountChange(guestCount + 1)}
-                >
-                  +
-                </Button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        {/* Search Button */}
-        <div className="pr-2 shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSearch}
-            className="h-12 px-5 rounded-full bg-gradient-to-r from-primary to-primary/90 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-shadow"
-          >
-            <Search className="h-4 w-4 text-primary-foreground" />
-            <span className="text-primary-foreground font-medium hidden sm:inline">Search</span>
-          </motion.button>
-        </div>
-      </motion.div>
-    </div>
   );
 }

@@ -31,11 +31,11 @@ export type ImageCategory =
   | 'amenities'
   | 'farm_animals';
 
-// UI-only listing type for top-level tabs
+// Listing type for top-level tabs (mirrors property_listing_type enum in DB)
 export type ListingType = 'farm_stay' | 'farm_experience' | 'farm_tour';
 
-// UI-only farmstay subcategory for display
-export type FarmstaySubcategory = 
+// Farmstay subcategory (mirrors farmstay_subcategory enum in DB)
+export type FarmstaySubcategory =
   | 'agrifarm'
   | 'aquafarm'
   | 'homestay'
@@ -72,6 +72,8 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   category: PropertyCategory;
+  listing_type: ListingType;
+  subcategory: FarmstaySubcategory;
   amenities: string[];
   is_published: boolean;
   // Property settings

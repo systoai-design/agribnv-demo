@@ -6,32 +6,43 @@ import { Property } from '@/types/database';
 interface PropertyMapProps {
   properties: Property[];
   onPropertySelect?: (property: Property) => void;
+  onPropertyNavigate?: (propertyId: string) => void;
   selectedPropertyId?: string;
   className?: string;
 }
 
-// Free OpenStreetMap-based style
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[c] || c));
 
 const PropertyMap = ({
   properties,
   onPropertySelect,
+  onPropertyNavigate,
   selectedPropertyId,
   className = '',
 }: PropertyMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const popupRef = useRef<maplibregl.Popup | null>(null);
+  const hideTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Calculate center from properties with coordinates
     const propertiesWithCoords = properties.filter(
       (p) => p.latitude && p.longitude
     );
 
-    const defaultCenter: [number, number] = [121.0, 14.5]; // Philippines center
+    const defaultCenter: [number, number] = [121.0, 14.5];
     let center = defaultCenter;
 
     if (propertiesWithCoords.length > 0) {
@@ -52,7 +63,6 @@ const PropertyMap = ({
       pitch: 0,
     });
 
-    // Add navigation controls
     map.current.addControl(
       new maplibregl.NavigationControl({
         visualizePitch: false,
@@ -60,35 +70,91 @@ const PropertyMap = ({
       'top-right'
     );
 
-    // Add geolocate control
     map.current.addControl(
       new maplibregl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
+        positionOptions: { enableHighAccuracy: true },
         trackUserLocation: true,
       }),
       'top-right'
     );
 
     return () => {
+      if (hideTimerRef.current) {
+        window.clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+      popupRef.current?.remove();
+      popupRef.current = null;
       map.current?.remove();
     };
   }, []);
 
-  // Add markers when properties or map changes
   useEffect(() => {
     if (!map.current) return;
 
-    // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Add markers for properties with coordinates
+    const cancelHide = () => {
+      if (hideTimerRef.current) {
+        window.clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    };
+
+    const scheduleHide = () => {
+      cancelHide();
+      hideTimerRef.current = window.setTimeout(() => {
+        popupRef.current?.remove();
+        popupRef.current = null;
+      }, 250);
+    };
+
+    const showHoverPopup = (property: Property) => {
+      if (!map.current || !property.latitude || !property.longitude) return;
+      cancelHide();
+
+      const primaryImage = property.images?.find((img) => img.is_primary) || property.images?.[0];
+      const imageUrl = primaryImage?.image_url || '/placeholder.svg';
+
+      const html = `
+        <div class="property-hover-card">
+          <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(property.name)}" loading="lazy" />
+          <div class="body">
+            <p class="name">${escapeHtml(property.name)}</p>
+            <p class="loc">${escapeHtml(property.location)}</p>
+            <p class="price"><span>₱${property.price_per_night.toLocaleString()}</span> / night</p>
+          </div>
+        </div>
+      `;
+
+      popupRef.current?.remove();
+      popupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 20,
+        anchor: 'bottom',
+        className: 'property-hover-popup',
+      })
+        .setLngLat([property.longitude, property.latitude])
+        .setHTML(html)
+        .addTo(map.current);
+
+      const popupEl = popupRef.current.getElement();
+      if (popupEl) {
+        popupEl.style.cursor = 'pointer';
+        popupEl.addEventListener('mouseenter', cancelHide);
+        popupEl.addEventListener('mouseleave', scheduleHide);
+        popupEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          onPropertyNavigate?.(property.id);
+        });
+      }
+    };
+
     properties.forEach((property) => {
       if (!property.latitude || !property.longitude) return;
 
-      // Create custom marker element
       const el = document.createElement('div');
       el.className = 'property-marker';
       el.innerHTML = `
@@ -107,8 +173,6 @@ const PropertyMap = ({
 
       el.addEventListener('click', () => {
         onPropertySelect?.(property);
-
-        // Fly to property
         map.current?.flyTo({
           center: [property.longitude!, property.latitude!],
           zoom: 12,
@@ -117,15 +181,17 @@ const PropertyMap = ({
         });
       });
 
+      el.addEventListener('mouseenter', () => showHoverPopup(property));
+      el.addEventListener('mouseleave', scheduleHide);
+
       const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([property.longitude, property.latitude])
         .addTo(map.current!);
 
       markersRef.current.push(marker);
     });
-  }, [properties, selectedPropertyId, onPropertySelect]);
+  }, [properties, selectedPropertyId, onPropertySelect, onPropertyNavigate]);
 
-  // Fly to selected property
   useEffect(() => {
     if (!map.current || !selectedPropertyId) return;
 

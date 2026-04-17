@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, User, LogOut, Calendar, Plus, LayoutDashboard, Globe } from 'lucide-react';
+import { Menu, User, LogOut, Calendar, Plus, LayoutDashboard, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { SearchBar } from '@/components/search/SearchBar';
 import { cn } from '@/lib/utils';
 import agribnvLogo from '@/assets/agribnv-logo.png';
@@ -56,8 +57,8 @@ export function Navbar({
   showSearch = true,
 }: NavbarProps) {
   const { user, profile, isHost, viewMode, switchViewMode, signOut } = useAuth();
+  const { unreadMessageCount } = useNotifications();
   const navigate = useNavigate();
-  const location = useLocation();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   const handleSignOut = async () => {
@@ -109,15 +110,32 @@ export function Navbar({
           )}
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0 w-[100px] md:w-[140px] justify-end">
+          <div className="flex items-center gap-2 flex-shrink-0 w-[100px] md:w-[180px] justify-end">
             {isHost && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="hidden lg:flex rounded-full font-medium text-primary hover:bg-sage/20"
                 onClick={handleSwitchMode}
               >
                 {viewMode === 'host' ? 'Switch to traveling' : 'Switch to hosting'}
               </Button>
+            )}
+
+            {user && (
+              <Link to="/inbox" className="relative hidden md:inline-flex" aria-label="Messages">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full h-10 w-10 hover:bg-sage/20"
+                >
+                  <Mail className="h-5 w-5 text-foreground" />
+                </Button>
+                {unreadMessageCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center ring-2 ring-card">
+                    {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                  </span>
+                )}
+              </Link>
             )}
 
             <DropdownMenu>
@@ -149,6 +167,17 @@ export function Navbar({
                         <p className="font-semibold text-foreground">{profile?.full_name || 'Welcome!'}</p>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
                       </div>
+                      <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
+                        <Link to="/inbox" className="flex items-center gap-3">
+                          <Mail className="h-4 w-4 text-primary" />
+                          <span>Messages</span>
+                          {unreadMessageCount > 0 && (
+                            <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center">
+                              {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                            </span>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild className="py-3 px-4 cursor-pointer">
                         <Link to="/bookings" className="flex items-center gap-3">
                           <Calendar className="h-4 w-4 text-primary" />
@@ -213,7 +242,7 @@ export function Navbar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/20 z-40"
+            className="fixed inset-0 bg-black/45 backdrop-blur-[2px] z-40"
             style={{ top: 80 }}
             onClick={() => setIsSearchExpanded(false)}
           />

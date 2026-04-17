@@ -2,6 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Map marker hover popup */
+.property-hover-popup .maplibregl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px hsl(0 0% 0% / 0.18);
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+}
+.property-hover-popup .maplibregl-popup-tip {
+  border-top-color: hsl(var(--background)) !important;
+  border-bottom-color: hsl(var(--background)) !important;
+}
+.property-hover-popup .property-hover-card {
+  width: 220px;
+  background: hsl(var(--background));
+}
+.property-hover-popup .property-hover-card img {
+  display: block;
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  background: hsl(var(--muted));
+}
+.property-hover-popup .property-hover-card .body {
+  padding: 10px 12px 12px;
+}
+.property-hover-popup .property-hover-card .name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: hsl(var(--foreground));
+}
+.property-hover-popup .property-hover-card .loc {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.property-hover-popup .property-hover-card .price {
+  font-size: 0.875rem;
+  margin-top: 6px;
+  color: hsl(var(--foreground));
+}
+.property-hover-popup .property-hover-card .price span {
+  font-weight: 600;
+}
+
 /* Agribnv Design System - Modern Agricultural Theme
    Brand Colors from guide:
    - Primary Green: #156530 (HSL: 146 65% 14%)

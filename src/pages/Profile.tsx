@@ -18,9 +18,8 @@ import {
   Camera, 
   ArrowLeft, 
   ChevronRight, 
-  Lock, 
-  Globe, 
-  Info, 
+  Lock,
+  Info,
   FileText, 
   Shield, 
   Share2,
@@ -61,7 +60,7 @@ export default function Profile() {
     share({
       title: 'Agribnv - Farm Stay Experiences',
       text: 'Discover authentic farm stays and agricultural experiences across the Philippines! 🌿',
-      url: 'https://agribnv-demo.lovable.app',
+      url: window.location.origin,
     });
   };
 
@@ -157,7 +156,6 @@ export default function Profile() {
 
   const settingsItems = [
     { icon: Lock, label: 'Change Password', href: '/change-password' },
-    { icon: Globe, label: 'Language', href: '#', value: 'English' },
   ];
 
   const infoItems = [
@@ -308,10 +306,7 @@ export default function Profile() {
                   <item.icon className="h-5 w-5 text-muted-foreground" />
                   <span className="text-foreground">{item.label}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {item.value && <span className="text-sm text-muted-foreground">{item.value}</span>}
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             ))}
           </div>

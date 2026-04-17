@@ -36,7 +36,7 @@ const Wishlists = () => {
 
         if (error) throw error;
 
-        setProperties(data || []);
+        setProperties((data || []) as unknown as Property[]);
       } catch (error) {
         console.error('Error fetching wishlist properties:', error);
       } finally {

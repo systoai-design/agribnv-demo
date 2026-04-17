@@ -1,11 +1,12 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, MapPin, ChevronRight, Home, Compass, Sparkles } from 'lucide-react';
+import { Search, X, ChevronRight, Home, Compass, Tractor } from 'lucide-react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import type { ListingType } from '@/types/database';
 
 interface MobileSearchModalProps {
   isOpen: boolean;
@@ -17,15 +18,22 @@ interface MobileSearchModalProps {
   guestCount: number;
   onGuestCountChange: (count: number) => void;
   onSearch?: () => void;
+  listingType?: ListingType;
+  onListingTypeChange?: (type: ListingType) => void;
 }
 
 const SUGGESTED_DESTINATIONS = [
-  { name: 'Nearby', description: 'Find what\'s around you', emoji: '📍' },
   { name: 'Tagaytay', description: 'Because your wishlist has stays', emoji: '🏔️' },
   { name: 'Baguio', description: 'Great for a weekend getaway', emoji: '🌲' },
   { name: 'Batangas', description: 'For sights like Taal Volcano', emoji: '🌋' },
   { name: 'La Union', description: 'Surf and farm adventures', emoji: '🏄' },
   { name: 'Guimaras', description: 'Mango paradise', emoji: '🥭' },
+];
+
+const TABS: { id: ListingType; label: string; icon: typeof Home }[] = [
+  { id: 'farm_stay', label: 'Homes', icon: Home },
+  { id: 'farm_experience', label: 'Experiences', icon: Compass },
+  { id: 'farm_tour', label: 'Tours', icon: Tractor },
 ];
 
 type ActiveStep = 'where' | 'when' | 'who' | null;
@@ -43,9 +51,10 @@ export function MobileSearchModal({
   guestCount,
   onGuestCountChange,
   onSearch,
+  listingType = 'farm_stay',
+  onListingTypeChange,
 }: MobileSearchModalProps) {
   const [activeStep, setActiveStep] = useState<ActiveStep>('where');
-  const [activeTab, setActiveTab] = useState<'homes' | 'experiences' | 'services'>('homes');
 
   const formatDateRange = () => {
     if (!dateRange.from && !dateRange.to) return 'Add dates';
@@ -66,12 +75,6 @@ export function MobileSearchModal({
     onDateRangeChange({ from: undefined, to: undefined });
     onGuestCountChange(1);
   };
-
-  const tabs = [
-    { id: 'homes' as const, label: 'Homes', icon: Home },
-    { id: 'experiences' as const, label: 'Experiences', icon: Compass },
-    { id: 'services' as const, label: 'Services', icon: Sparkles },
-  ];
 
   return (
     <AnimatePresence>
@@ -106,13 +109,13 @@ export function MobileSearchModal({
 
               {/* Tabs with Icons */}
               <div className="flex justify-center gap-8 pt-10 pb-2">
-                {tabs.map((tab) => {
+                {TABS.map((tab) => {
                   const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
+                  const isActive = listingType === tab.id;
                   return (
                     <motion.button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => onListingTypeChange?.(tab.id)}
                       whileTap={{ scale: 0.95 }}
                       className="flex flex-col items-center gap-1"
                     >
@@ -150,8 +153,8 @@ export function MobileSearchModal({
                 layout
                 className={cn(
                   'bg-card border rounded-3xl overflow-hidden transition-all',
-                  activeStep === 'where' 
-                    ? 'border-border shadow-lg' 
+                  activeStep === 'where'
+                    ? 'border-border shadow-lg'
                     : 'border-border/30'
                 )}
               >
@@ -183,9 +186,8 @@ export function MobileSearchModal({
                       className="overflow-hidden"
                     >
                       <div className="px-5 pb-5 space-y-5">
-                        {/* Large Header */}
                         <h2 className="text-2xl font-bold text-foreground">Where to?</h2>
-                        
+
                         {/* Search Input */}
                         <div className="relative">
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -208,7 +210,7 @@ export function MobileSearchModal({
                               key={dest.name}
                               className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/50 transition-colors text-left"
                               onClick={() => {
-                                onLocationChange(dest.name === 'Nearby' ? '' : dest.name);
+                                onLocationChange(dest.name);
                                 setActiveStep('when');
                               }}
                               whileTap={{ scale: 0.98 }}
@@ -235,8 +237,8 @@ export function MobileSearchModal({
                 layout
                 className={cn(
                   'bg-card border rounded-3xl overflow-hidden transition-all',
-                  activeStep === 'when' 
-                    ? 'border-border shadow-lg' 
+                  activeStep === 'when'
+                    ? 'border-border shadow-lg'
                     : 'border-border/30'
                 )}
               >
@@ -267,22 +269,7 @@ export function MobileSearchModal({
                     >
                       <div className="px-5 pb-5 space-y-4">
                         <h2 className="text-2xl font-bold text-foreground">When's your trip?</h2>
-                        
-                        {/* Quick Options */}
-                        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-                          {['Any week', 'Weekend', 'This month', 'Flexible'].map((option) => (
-                            <Button
-                              key={option}
-                              variant="outline"
-                              size="sm"
-                              className="rounded-full whitespace-nowrap border-border/50 text-foreground hover:border-primary"
-                              onClick={() => onDateRangeChange({ from: undefined, to: undefined })}
-                            >
-                              {option}
-                            </Button>
-                          ))}
-                        </div>
-                        
+
                         <CalendarComponent
                           mode="range"
                           selected={dateRange}
@@ -291,6 +278,17 @@ export function MobileSearchModal({
                           numberOfMonths={1}
                           className="rounded-xl mx-auto"
                         />
+
+                        {dateRange.from && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full"
+                            onClick={() => onDateRangeChange({ from: undefined, to: undefined })}
+                          >
+                            Clear dates
+                          </Button>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -302,8 +300,8 @@ export function MobileSearchModal({
                 layout
                 className={cn(
                   'bg-card border rounded-3xl overflow-hidden transition-all',
-                  activeStep === 'who' 
-                    ? 'border-border shadow-lg' 
+                  activeStep === 'who'
+                    ? 'border-border shadow-lg'
                     : 'border-border/30'
                 )}
               >
@@ -336,62 +334,34 @@ export function MobileSearchModal({
                     >
                       <div className="px-5 pb-5 space-y-4">
                         <h2 className="text-2xl font-bold text-foreground">Who's coming?</h2>
-                        
-                        {/* Guest Types */}
-                        <div className="space-y-4">
-                          {/* Adults */}
-                          <div className="flex items-center justify-between py-4 border-b border-border/30">
-                            <div>
-                              <p className="font-semibold text-foreground">Adults</p>
-                              <p className="text-sm text-muted-foreground">Ages 13 or above</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                className={cn(
-                                  'h-9 w-9 rounded-full border flex items-center justify-center transition-colors',
-                                  guestCount <= 1 
-                                    ? 'border-border/30 text-muted-foreground/50 cursor-not-allowed' 
-                                    : 'border-border text-foreground hover:border-foreground'
-                                )}
-                                onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
-                                disabled={guestCount <= 1}
-                              >
-                                <span className="text-xl leading-none">−</span>
-                              </motion.button>
-                              <span className="w-8 text-center font-semibold text-foreground">{guestCount}</span>
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                className="h-9 w-9 rounded-full border border-border text-foreground hover:border-foreground flex items-center justify-center transition-colors"
-                                onClick={() => onGuestCountChange(guestCount + 1)}
-                              >
-                                <span className="text-xl leading-none">+</span>
-                              </motion.button>
-                            </div>
+
+                        <div className="flex items-center justify-between py-4">
+                          <div>
+                            <p className="font-semibold text-foreground">Guests</p>
+                            <p className="text-sm text-muted-foreground">Ages 13 or above</p>
                           </div>
-                          
-                          {/* Pets Option */}
-                          <div className="flex items-center justify-between py-2">
-                            <div>
-                              <p className="font-semibold text-foreground">Pets</p>
-                              <p className="text-sm text-muted-foreground underline">Bringing a service animal?</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                className="h-9 w-9 rounded-full border border-border/30 text-muted-foreground/50 cursor-not-allowed flex items-center justify-center"
-                                disabled
-                              >
-                                <span className="text-xl leading-none">−</span>
-                              </motion.button>
-                              <span className="w-8 text-center font-semibold text-muted-foreground">0</span>
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                className="h-9 w-9 rounded-full border border-border text-foreground hover:border-foreground flex items-center justify-center transition-colors"
-                              >
-                                <span className="text-xl leading-none">+</span>
-                              </motion.button>
-                            </div>
+                          <div className="flex items-center gap-4">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              className={cn(
+                                'h-9 w-9 rounded-full border flex items-center justify-center transition-colors',
+                                guestCount <= 1
+                                  ? 'border-border/30 text-muted-foreground/50 cursor-not-allowed'
+                                  : 'border-border text-foreground hover:border-foreground'
+                              )}
+                              onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
+                              disabled={guestCount <= 1}
+                            >
+                              <span className="text-xl leading-none">−</span>
+                            </motion.button>
+                            <span className="w-8 text-center font-semibold text-foreground">{guestCount}</span>
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              className="h-9 w-9 rounded-full border border-border text-foreground hover:border-foreground flex items-center justify-center transition-colors"
+                              onClick={() => onGuestCountChange(guestCount + 1)}
+                            >
+                              <span className="text-xl leading-none">+</span>
+                            </motion.button>
                           </div>
                         </div>
                       </div>
@@ -402,7 +372,7 @@ export function MobileSearchModal({
             </div>
 
             {/* Footer */}
-            <motion.div 
+            <motion.div
               className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border/30 safe-area-pb"
               initial={{ y: 100 }}
               animate={{ y: 0 }}
