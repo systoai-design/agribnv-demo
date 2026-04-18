@@ -81,9 +81,9 @@ export function Navbar({
       <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur-sm border-b border-border/50">
         <div className="container h-16 md:h-20 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex-shrink-0 w-[100px] md:w-[140px]">
+          <div className="flex-shrink-0">
             <Link to="/" className="flex items-center group">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -110,11 +110,11 @@ export function Navbar({
           )}
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0 w-[100px] md:w-[180px] justify-end">
+          <div className="flex items-center gap-2 flex-shrink-0 justify-end">
             {isHost && (
               <Button
                 variant="ghost"
-                className="hidden lg:flex rounded-full font-medium text-primary hover:bg-sage/20"
+                className="hidden lg:flex rounded-full font-medium text-primary hover:bg-sage/20 whitespace-nowrap"
                 onClick={handleSwitchMode}
               >
                 {viewMode === 'host' ? 'Switch to traveling' : 'Switch to hosting'}
