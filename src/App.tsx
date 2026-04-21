@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Wishlists from "./pages/Wishlists";
 import MapView from "./pages/MapView";
 import Inbox from "./pages/Inbox";
+import Products from "./pages/Products";
 import About from "./pages/About";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/wishlists" element={<Wishlists />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/inbox" element={<Inbox />} />
+              <Route path="/products" element={<Products />} />
               <Route path="/about" element={<About />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />

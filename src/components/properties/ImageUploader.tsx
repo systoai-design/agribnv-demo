@@ -253,45 +253,44 @@ export function ImageUploader({ userId, images, onChange, maxImages = 20 }: Imag
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {categoryImages.map((image) => (
-                <div key={image.id} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden border bg-muted">
+                <div key={image.id}>
+                  <div className="relative aspect-square rounded-lg overflow-hidden border bg-muted">
                     <img
                       src={image.url}
                       alt={image.caption || IMAGE_CATEGORY_LABELS[image.category]}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
-                  </div>
 
-                  {/* Primary Badge */}
-                  {image.isPrimary && (
-                    <Badge className="absolute top-2 left-2 bg-primary">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      Cover
-                    </Badge>
-                  )}
-
-                  {/* Hover Actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                    {!image.isPrimary && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setPrimaryImage(image.id)}
-                      >
-                        <Star className="h-3 w-3 mr-1" />
-                        Set Cover
-                      </Button>
+                    {/* Primary Badge */}
+                    {image.isPrimary && (
+                      <Badge className="absolute top-2 left-2 bg-primary pointer-events-none">
+                        <Star className="h-3 w-3 mr-1 fill-current" />
+                        Cover
+                      </Badge>
                     )}
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeImage(image.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+
+                    {/* Always-visible action buttons */}
+                    <div className="absolute top-2 right-2 flex items-center gap-1">
+                      {!image.isPrimary && (
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryImage(image.id)}
+                          className="w-7 h-7 rounded-full bg-background/90 backdrop-blur-sm shadow-md hover:bg-background flex items-center justify-center transition-colors"
+                          aria-label="Set as cover"
+                        >
+                          <Star className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(image.id)}
+                        className="w-7 h-7 rounded-full bg-destructive/95 backdrop-blur-sm shadow-md hover:bg-destructive text-destructive-foreground flex items-center justify-center transition-colors"
+                        aria-label="Remove image"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Caption Input */}

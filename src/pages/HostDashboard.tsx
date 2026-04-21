@@ -228,7 +228,7 @@ export default function HostDashboard() {
               <DollarSign className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm font-medium">Commission Rates</p>
-                <p className="text-xs text-muted-foreground">15% on accommodations • 10% on farm experiences</p>
+                <p className="text-xs text-muted-foreground">15% on both farm stays and farm experiences</p>
               </div>
             </div>
           </CardContent>

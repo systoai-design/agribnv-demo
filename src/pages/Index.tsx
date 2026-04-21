@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, SlidersHorizontal, Map } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Layout } from '@/components/layout/Layout';
 import { PropertyGrid } from '@/components/properties/PropertyGrid';
@@ -24,6 +25,7 @@ import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { Property, ListingType, FarmstaySubcategory, GUIMARAS_MUNICIPALITIES } from '@/types/database';
 
 export default function Index() {
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [selectedListingType, setSelectedListingType] = useState<ListingType>('farm_stay');
   const [selectedCategories, setSelectedCategories] = useState<FarmstaySubcategory[]>([]);
@@ -145,15 +147,31 @@ export default function Index() {
       </div>
 
       {/* Mobile Simple Search Bar */}
-      <div className="md:hidden px-4 pb-3">
+      <div className="md:hidden px-4 pb-3 flex items-center gap-2 animate-fade-in">
         <button
           onClick={() => setIsMobileSearchOpen(true)}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full bg-card border border-border/50 shadow-soft animate-fade-in active:scale-[0.98] transition-transform"
+          className="flex-1 flex items-center gap-3 px-3.5 py-2.5 rounded-full bg-card border border-border/50 shadow-soft active:scale-[0.98] transition-transform"
         >
           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <Search className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-sm text-muted-foreground">Search your destination...</span>
+          <span className="text-sm text-muted-foreground truncate">Search your destination...</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsFiltersOpen(true)}
+          aria-label="Filters"
+          className="w-11 h-11 rounded-full bg-card border border-border/50 shadow-soft flex items-center justify-center active:scale-95 transition-transform shrink-0"
+        >
+          <SlidersHorizontal className="h-4 w-4 text-foreground" />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/map')}
+          aria-label="View on map"
+          className="w-11 h-11 rounded-full bg-card border border-border/50 shadow-soft flex items-center justify-center active:scale-95 transition-transform shrink-0"
+        >
+          <Map className="h-4 w-4 text-foreground" />
         </button>
       </div>
 
@@ -185,7 +203,6 @@ export default function Index() {
         <FarmstayCategories
           selectedCategories={selectedCategories}
           onCategoryChange={setSelectedCategories}
-          onFiltersClick={() => setIsFiltersOpen(true)}
         />
       </div>
 

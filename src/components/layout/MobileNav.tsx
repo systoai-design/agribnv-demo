@@ -43,11 +43,11 @@ export function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-pb px-4 pb-2">
-      <div className="flex items-end justify-around py-2 px-2 bg-primary rounded-[28px] shadow-lg">
+      <div className="flex items-end py-2 px-2 bg-primary rounded-[28px] shadow-lg">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href, item.label);
-          
+
           // Center home button - elevated
           if (item.isCenter) {
             return (
@@ -55,7 +55,7 @@ export function MobileNav() {
                 key={`${item.href}-${item.label}`}
                 to={item.href}
                 onClick={() => haptics.medium()}
-                className="relative -mt-6"
+                className="flex-1 flex justify-center -mt-6"
               >
                 <motion.div
                   whileTap={{ scale: 0.9 }}
@@ -66,7 +66,7 @@ export function MobileNav() {
               </Link>
             );
           }
-          
+
           const showInboxBadge = item.label === 'Inbox' && unreadMessageCount > 0;
 
           return (
@@ -74,7 +74,7 @@ export function MobileNav() {
               key={`${item.href}-${item.label}`}
               to={item.href}
               onClick={() => haptics.selection()}
-              className="flex flex-col items-center gap-0.5 py-1.5 px-3"
+              className="flex-1 flex flex-col items-center gap-0.5 py-1.5"
             >
               <motion.div
                 whileTap={{ scale: 0.85 }}
