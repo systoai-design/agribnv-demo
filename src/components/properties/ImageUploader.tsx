@@ -295,10 +295,13 @@ export function ImageUploader({ userId, images, onChange, maxImages = 20 }: Imag
 
                   {/* Caption Input */}
                   <Input
+                    type="text"
+                    inputMode="text"
+                    enterKeyHint="done"
                     placeholder="Add caption..."
                     value={image.caption}
                     onChange={(e) => updateImageCaption(image.id, e.target.value)}
-                    className="mt-2 text-xs h-8"
+                    className="mt-2 h-10 text-base md:text-sm"
                   />
                 </div>
               ))}
