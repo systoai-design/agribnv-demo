@@ -86,9 +86,17 @@ The user requested brainstorming and specifying three upcoming core features:
      - `Explore` (Search, Date Filter, Categories, and Map)
      - `Reels` (Dedicated vertical video tab in bottom nav)
    * This respects both users: those seeking inspiration (social feed) and those ready to book (search engine).
-3. **Desktop vs. Mobile Experience:**
-   * *Mobile:* Full-bleed immersive 9:16 vertical scroll with touch gestures.
-   * *Desktop:* 3-column layout (Left: Navigation & Filters; Center: High-density 9:16 framed video card with comment panel; Right: Sticky Farm Stay & Product Booking Card).
+3. **Desktop Website Experience vs. Mobile:**
+   * *Mobile Form Factor:* Full-bleed 9:16 vertical video player with touch gestures, bottom navigation, and compact bottom sheets.
+   * *Desktop Website (Evergreen Web Browsers):*
+     - **3-Column Canvas:** Left persistent sidebar navigation (Logo, Home, Explore, Reels, Saved, Messages, Creator Studio), center content stream (max-width 640px for feed, 420px for 9:16 video frame), right contextual discovery rail (Trending Farms, Seasonal Crop Alerts, Weather Widget, Sticky Booking Card).
+     - **AgriReels Desktop Theater Mode:** When navigating to `/reels` on desktop, render a 2-column theater view: 
+       - Left: 9:16 framed player with ambient frosted-glass background glow, progress bar scrubber, volume slider, and Picture-in-Picture (PiP) trigger.
+       - Right: Persistent farmer info panel with follow button, full caption, real-time scrolling comments, and an instant booking widget with date-picker and price breakdown.
+     - **Keyboard First Navigation:** Full desktop keyboard shortcut matrix (`Space` = Play/Pause, `J`/`Down` = Next, `K`/`Up` = Prev, `M` = Mute, `L` = Like, `C` = Comment, `B` = Quick Book).
+     - **Split-Screen Explore Mode:** In `Explore`, desktop renders an interactive dual-pane view (left: property/tour card grid with filters; right: interactive MapLibre GL map with custom farm pins).
+     - **Desktop Creator Studio:** Dedicated web workspace for hosts to drag-and-drop 4K/1080p clips, scrub video frames to select a custom thumbnail, tag stays and products, and inspect analytics.
+     - **SEO & Deep-Linking:** Direct URLs for all profiles (`/@farm_handle`), posts (`/p/:id`), and reels (`/reels/:id`) equipped with OpenGraph video/image tags and schema.org `LodgingBusiness` / `VideoObject` structured data for search engine discovery.
 
 ---
 
@@ -100,8 +108,9 @@ The user requested brainstorming and specifying three upcoming core features:
 | :--- | :--- | :--- |
 | **Cold Start / Inactive Farmers** | **ACCEPTED** | Introduce **"Collaborator/Visitor Stories"**: Verified guests who book stays can tag the farm in their own visitor reels (subject to farmer approval), generating organic content without burdening the farmer. |
 | **Video Delivery Cost & OOM** | **ACCEPTED** | Mandate a 3-slot virtualized window in the React video component and implement Cloudflare Stream or HLS CDN with strict 60s/30MB caps. |
-| **Feed vs. Search Collision** | **ACCEPTED** | Do not replace the search engine entirely. Split the primary view into **"Feed"** and **"Explore"** tabs at the top of the Home screen, with a dedicated **"Reels"** button on the bottom nav. |
+| **Feed vs. Search Collision** | **ACCEPTED** | Do not replace the search engine entirely. Split the primary view into **"Feed"** and **"Explore"** tabs at the top of the Home screen, with a dedicated **"Reels"** button on the bottom nav (mobile) or left sidebar (desktop). |
 | **Content Moderation** | **ACCEPTED** | Automated basic file inspection + Supabase Edge Function with Google Cloud Vision / Gemini Flash moderation check for NSFW/spam before post activation. |
+| **Desktop Website Parity** | **ACCEPTED** | Desktop is not an afterthought or scaled-up phone screen. Desktop web shall feature an ergonomic 3-column layout, theater-mode reel player with split booking/comment panel, keyboard shortcuts, split-screen map explore, and desktop creator studio. |
 
 ---
 
@@ -109,8 +118,10 @@ The user requested brainstorming and specifying three upcoming core features:
 
 * **DEC-001:** Farmers receive verified creator profiles containing social feeds, follower counters, crop badges, and direct links to stays/products.
 * **DEC-002:** The App Home screen features a dual-mode header: `[ Feed | Explore ]`. When in `Feed`, users see updates, harvest stories, and embedded video previews. When in `Explore`, users access date pickers, price sliders, and map view.
-* **DEC-003:** A dedicated `Reels` bottom-bar tab provides an immersive vertical short-form video experience. Every reel MUST include a clickable bottom card linking to the host's farm stay or product.
+* **DEC-003:** A dedicated `Reels` tab (bottom nav on mobile, left sidebar on desktop) provides an immersive short-form video experience with sticky commerce booking integration.
 * **DEC-004:** Video playback engine enforces strict 3-element DOM virtualization and cleanup to prevent mobile WebView crashes.
 * **DEC-005:** Database schema expands with `farm_posts`, `post_media`, `post_likes`, `post_comments`, and `farm_follows` protected by Supabase RLS.
+* **DEC-006 (Desktop Website Experience):** Desktop web implements a 3-column layout, 2-column theater mode for reels with keyboard shortcuts (`Space`, `J/K`, `M`, `L`, `B`), inline video hover previews in feed, and split-screen map view in Explore mode.
+* **DEC-007 (Desktop Creator Studio & Web SEO):** Desktop web includes a creator studio with drag-and-drop uploads, frame thumbnail selector, and SSR/OpenGraph meta tags for all public creator, post, and reel URLs.
 
-**Disposition:** **APPROVED** (Ready for SRS and PRD integration).
+**Disposition:** **APPROVED** (Ready for SRS, PRD, and SPEC integration).

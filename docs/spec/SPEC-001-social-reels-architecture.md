@@ -205,14 +205,203 @@ export const socialKeys = {
 
 ---
 
-## 4. Mobile & Desktop Layout Adapter
+## 4. Cross-Platform Responsive Layout Architecture
 
-| Component | Mobile (Capacitor / Touch) | Desktop Web |
+### 4.1 Component Tree & Breakpoints
+
+Agribnv leverages a responsive adaptive layout system cleanly separated between Mobile (Capacitor/Touch) and Desktop Web:
+
+```
+                                  AppShell
+                                     │
+           ┌─────────────────────────┴─────────────────────────┐
+           ▼ (Screen < 1024px)                                 ▼ (Screen >= 1024px)
+      MobileShell                                         DesktopShell
+ ┌─────────────────────┐                     ┌─────────────┬─────────────────┬─────────────┐
+ │ TopHeader (Feed/Nav)│                     │ SidebarNav  │  Main Stage     │ ContextRail │
+ │ MainFeed / Reels    │                     │  (240px)    │   (640px/Auto)  │   (340px)   │
+ │ BottomNavBar (5-tab)│                     └─────────────┴─────────────────┴─────────────┘
+ └─────────────────────┘
+```
+
+| Component | Mobile (< 1024px / Touch) | Desktop Web (>= 1024px) |
 | :--- | :--- | :--- |
-| **Reels View** | Fullscreen 9:16 scroll-snap; overlay action bar right-aligned; bottom booking drawer. | Centered phone frame with right-hand details/comments column and sticky booking card. |
-| **Feed Cards** | Single-column edge-to-edge cards with micro-padded action bar. | Centered 600px cards flanked by left navigation and right suggested farms. |
-| **Creator Profile** | Compact header, 2-line bio with "more" toggle, 4 icon tabs. | Wide banner layout, rich stats bar, multi-column tabbed grid with preview cards. |
-| **Media Upload** | Native Camera Picker via `@capacitor/camera` with direct thumbnail preview. | Drag-and-drop file dropzone with progress bar and thumbnail cropper. |
+| **Reels View** | Fullscreen 9:16 scroll-snap; overlay action rail right-aligned; bottom booking drawer. | 2-Column Theater: 9:16 player on left with ambient canvas glow; right panel with comments, audio, and sticky booking card. |
+| **Feed Stream** | Single-column edge-to-edge cards with micro-padded action bar. | Centered 640px feed container flanked by left navigation and right suggested farms/seasonal alerts. |
+| **Creator Profile** | Compact header, 2-line bio with "more" toggle, 3-column reels grid. | Wide 16:5 panoramic banner, side-by-side farm terroir stats, 4-column reels grid with hover-preview, sticky booking widget. |
+| **Explore View** | Card list with floating "Map" pill toggle button. | Split-screen dual-pane: Left 55% listing cards; Right 45% sticky MapLibre GL vector map. |
+| **Media Upload** | Native Camera Picker via `@capacitor/camera` with direct thumbnail preview. | Desktop dropzone supporting drag-and-drop, client-side canvas frame thumbnail scrubber, and tagging dropdown. |
+
+---
+
+### 4.2 Desktop AgriReels Keyboard Navigation Hook
+
+To deliver an ergonomic desktop experience matching premier video platforms, `useReelsKeyboardNav` binds global hotkeys with strict input focus protection:
+
+```ts
+// src/features/reels/hooks/useReelsKeyboardNav.ts
+import { useEffect } from 'react';
+
+interface ReelsKeyNavActions {
+  onNext: () => void;
+  onPrev: () => void;
+  onTogglePlay: () => void;
+  onToggleMute: () => void;
+  onToggleLike: () => void;
+  onFocusComment: () => void;
+  onOpenBooking: () => void;
+  onClose?: () => void;
+}
+
+export function useReelsKeyboardNav({
+  onNext,
+  onPrev,
+  onTogglePlay,
+  onToggleMute,
+  onToggleLike,
+  onFocusComment,
+  onOpenBooking,
+  onClose,
+}: ReelsKeyNavActions) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Guard: Ignore hotkeys if user is typing in an input, textarea, or contentEditable
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+        case 'k':
+        case 'K':
+          e.preventDefault();
+          onTogglePlay();
+          break;
+        case 'ArrowDown':
+        case 'j':
+        case 'J':
+          e.preventDefault();
+          onNext();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          onPrev();
+          break;
+        case 'm':
+        case 'M':
+          e.preventDefault();
+          onToggleMute();
+          break;
+        case 'l':
+        case 'L':
+          e.preventDefault();
+          onToggleLike();
+          break;
+        case 'c':
+        case 'C':
+          e.preventDefault();
+          onFocusComment();
+          break;
+        case 'b':
+        case 'B':
+          e.preventDefault();
+          onOpenBooking();
+          break;
+        case 'Escape':
+          if (onClose) {
+            e.preventDefault();
+            onClose();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNext, onPrev, onTogglePlay, onToggleMute, onToggleLike, onFocusComment, onOpenBooking, onClose]);
+}
+```
+
+---
+
+### 4.3 Desktop Client-Side Frame Thumbnail Extractor
+
+To eliminate heavy server processing for thumbnail extraction on desktop uploads, video thumbnails are captured directly in the browser using an off-screen HTML5 `<canvas>`:
+
+```ts
+// src/features/creator/utils/extractVideoThumbnail.ts
+export async function extractVideoThumbnail(
+  file: File,
+  timeInSeconds: number = 1.0
+): Promise<{ blob: Blob; previewUrl: string }> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    video.playsInline = true;
+
+    video.onloadedmetadata = () => {
+      video.currentTime = Math.min(timeInSeconds, video.duration);
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas 2D context unavailable'));
+        return;
+      }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const previewUrl = URL.createObjectURL(blob);
+            resolve({ blob, previewUrl });
+          } else {
+            reject(new Error('Failed to generate thumbnail blob'));
+          }
+          URL.revokeObjectURL(video.src);
+        },
+        'image/jpeg',
+        0.85
+      );
+    };
+
+    video.onerror = (e) => reject(e);
+  });
+}
+```
+
+---
+
+### 4.4 Desktop OpenGraph & SEO Head Specification
+
+For public viral sharing of Farmer Profiles and AgriReels across desktop web platforms:
+
+```html
+<!-- Example Head metadata emitted for /reels/:id -->
+<meta property="og:type" content="video.other" />
+<meta property="og:title" content="Harvesting Carabao Mangoes in Guimaras | Tatay Roman" />
+<meta property="og:description" content="Watch how we pick fresh organic mangoes at Guimaras Organic Farmstead. Book a stay at our Sunset View Kubo." />
+<meta property="og:url" content="https://agribnv.com/reels/c4a7e8b2-..." />
+<meta property="og:image" content="https://cdn.agribnv.com/thumbnails/c4a7e8b2.jpg" />
+<meta property="og:video" content="https://cdn.agribnv.com/reels/c4a7e8b2.mp4" />
+<meta property="og:video:type" content="video/mp4" />
+<meta property="og:video:width" content="720" />
+<meta property="og:video:height" content="1280" />
+<meta name="twitter:card" content="player" />
+<meta name="twitter:player" content="https://agribnv.com/embed/reels/c4a7e8b2" />
+<meta name="twitter:player:width" content="360" />
+<meta name="twitter:player:height" content="640" />
+```
 
 ---
 
@@ -221,3 +410,4 @@ export const socialKeys = {
 * **Upload Quota:** Enforced at Supabase Edge Function: Max 5 videos/24h per verified host.
 * **SQL Injection & XSS Defense:** All captions and comments sanitized through Zod schema validation (`z.string().trim().min(1).max(500)`).
 * **Storage Access:** Uploads write to private staging bucket before automated moderation; published videos migrate to the public CDN bucket.
+* **Content Moderation:** Background trigger invokes Vision/Safety API before setting `farm_reels.status = 'published'`.
