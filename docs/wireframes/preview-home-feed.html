@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agribnv - Home Feed Wireframe Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8F6F0;
+      --card-bg: #FFFFFF;
+      --border: #E8E5DD;
+      --canopy: #1B382B;
+      --sage: #758E7D;
+      --sage-light: #EBF1ED;
+      --terracotta: #D96543;
+      --terracotta-light: #FDF1ED;
+      --text: #19201D;
+      --text-muted: #667069;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 16px rgba(27,56,43,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Mode Bar for Prototype */
+    .prototype-bar {
+      background: var(--canopy);
+      color: #fff;
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .prototype-bar span { font-weight: 600; opacity: 0.9; }
+    .device-toggles { display: flex; gap: 8px; }
+    .device-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .device-btn.active, .device-btn:hover {
+      background: #fff;
+      color: var(--canopy);
+    }
+
+    /* Layout Wrapper */
+    .viewport-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      display: grid;
+      grid-template-columns: 240px 1fr 340px;
+      gap: 32px;
+      transition: all 0.3s ease;
+    }
+
+    /* Mobile Emulation Mode */
+    .viewport-container.mobile-mode {
+      max-width: 440px;
+      grid-template-columns: 1fr;
+      padding: 16px 12px;
+    }
+    .viewport-container.mobile-mode .left-nav,
+    .viewport-container.mobile-mode .right-rail {
+      display: none;
+    }
+    .viewport-container.mobile-mode .mobile-header,
+    .viewport-container.mobile-mode .mobile-bottom-nav {
+      display: flex;
+    }
+
+    /* Left Sidebar Navigation */
+    .left-nav {
+      position: sticky;
+      top: 60px;
+      height: fit-content;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding-left: 8px;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--canopy);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .logo-text h2 { font-size: 20px; font-weight: 700; color: var(--canopy); letter-spacing: -0.5px; }
+    .logo-text p { font-size: 11px; color: var(--sage); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .nav-item.active a, .nav-item a:hover {
+      background: var(--sage-light);
+      color: var(--canopy);
+    }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--terracotta);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .creator-hub-card {
+      margin-top: 32px;
+      background: linear-gradient(135deg, var(--canopy), #29523F);
+      color: #fff;
+      padding: 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+    .creator-hub-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .creator-hub-card p { font-size: 12px; opacity: 0.85; margin-bottom: 14px; }
+    .creator-btn {
+      width: 100%;
+      background: #fff;
+      color: var(--canopy);
+      border: none;
+      padding: 9px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Center Feed Stage */
+    .feed-stage {
+      max-width: 640px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Segment Controller Header */
+    .feed-header-tabs {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .feed-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .feed-tab.active {
+      background: var(--canopy);
+      color: #fff;
+    }
+
+    /* Harvest Stories Carousel */
+    .stories-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stories-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--sage);
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .stories-scroll {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .story-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      min-width: 64px;
+    }
+    .story-ring {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--sage), var(--terracotta));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .story-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #eee;
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .story-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      max-width: 64px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Feed Card */
+    .feed-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .feed-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .card-header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--sage-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .card-author-info { flex: 1; }
+    .card-author-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .verified-badge {
+      color: #0284C7;
+      font-size: 14px;
+    }
+    .card-author-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .follow-btn {
+      background: transparent;
+      border: 1px solid var(--canopy);
+      color: var(--canopy);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .follow-btn:hover {
+      background: var(--canopy);
+      color: #fff;
+    }
+
+    /* Media Mockup */
+    .card-media-mockup {
+      width: 100%;
+      height: 380px;
+      background: linear-gradient(180deg, #E2E8E4, #C6D6CB);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--canopy);
+      padding: 20px;
+      text-align: center;
+    }
+    .media-icon { font-size: 48px; margin-bottom: 8px; }
+    .media-label { font-size: 15px; font-weight: 700; }
+    .media-sub { font-size: 12px; opacity: 0.8; }
+    .media-badge {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(0,0,0,0.65);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Tagged Commerce Pill */
+    .card-commerce-pill {
+      margin: 14px 16px 8px 16px;
+      background: var(--sage-light);
+      border: 1px solid rgba(117,142,125,0.3);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .card-commerce-pill:hover {
+      transform: translateY(-1px);
+    }
+    .pill-icon { font-size: 24px; }
+    .pill-info { flex: 1; }
+    .pill-title { font-size: 13px; font-weight: 700; color: var(--canopy); }
+    .pill-price { font-size: 12px; color: var(--text-muted); }
+    .pill-action-btn {
+      background: var(--canopy);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Social Actions */
+    .card-actions {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .action-btn.liked { color: var(--terracotta); }
+    .action-btn.bookmark { margin-left: auto; }
+
+    /* Caption */
+    .card-caption {
+      padding: 0 16px 16px 16px;
+      font-size: 13.5px;
+    }
+    .card-caption strong { font-weight: 700; margin-right: 6px; }
+    .caption-tags { color: var(--sage); font-weight: 600; margin-top: 6px; }
+    .comments-count-link { font-size: 12px; color: var(--text-muted); margin-top: 8px; cursor: pointer; }
+
+    /* Right Discovery Rail */
+    .right-rail {
+      position: sticky;
+      top: 60px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .rail-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .rail-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--canopy);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .harvest-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .harvest-item:last-child { border-bottom: none; }
+    .harvest-name { font-weight: 600; }
+    .harvest-status {
+      background: var(--terracotta-light);
+      color: var(--terracotta);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .rec-farm-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rec-farm-item:last-child { border-bottom: none; }
+    .rec-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--sage-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .rec-info { flex: 1; }
+    .rec-name { font-size: 13px; font-weight: 700; }
+    .rec-loc { font-size: 11px; color: var(--text-muted); }
+
+    /* Mobile Only Headers/Bottom Bar */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border-radius: var(--radius-sm);
+    }
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 10px 24px;
+      justify-content: space-between;
+      z-index: 999;
+    }
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .mobile-nav-btn.active { color: var(--canopy); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Controls for User Preview -->
+  <div class="prototype-bar">
+    <span>🌿 Agribnv v2.0 · Home Feed Wireframe Prototype</span>
+    <div class="device-toggles">
+      <button class="device-btn active" id="btn-desktop" onclick="setDesktop()">🖥️ Desktop (3-Col)</button>
+      <button class="device-btn" id="btn-mobile" onclick="setMobile()">📱 Mobile (1-Col)</button>
+    </div>
+  </div>
+
+  <!-- Interactive Layout Viewport -->
+  <div class="viewport-container" id="viewport">
+
+    <!-- LEFT SIDEBAR NAVIGATION (Desktop) -->
+    <aside class="left-nav">
+      <div class="logo">
+        <div class="logo-icon">🌿</div>
+        <div class="logo-text">
+          <h2>Agribnv</h2>
+          <p>bed & venture</p>
+        </div>
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item active"><a href="#"><span>🏠</span> Home Feed</a></li>
+        <li class="nav-item"><a href="#"><span>🧭</span> Explore & Map</a></li>
+        <li class="nav-item"><a href="#"><span>🎬</span> AgriReels</a></li>
+        <li class="nav-item"><a href="#"><span>🔖</span> Saved Stays</a></li>
+        <li class="nav-item"><a href="#"><span>💬</span> Messages <span class="nav-badge">3</span></a></li>
+        <li class="nav-item"><a href="#"><span>🛒</span> Farm Market</a></li>
+      </ul>
+
+      <div class="creator-hub-card">
+        <h4>🧑‍🌾 Host Creator Hub</h4>
+        <p>Share daily harvests & open bookings to thousands of travelers.</p>
+        <button class="creator-btn">+ Create Reel or Post</button>
+      </div>
+    </aside>
+
+    <!-- CENTER FEED STAGE -->
+    <main class="feed-stage">
+
+      <!-- Mobile Top Bar (Only visible in mobile mode) -->
+      <div class="mobile-header">
+        <strong style="color: var(--canopy); font-size: 18px;">🌿 Agribnv</strong>
+        <div style="font-size: 13px; font-weight: 700; color: var(--sage);">bed & venture</div>
+      </div>
+
+      <!-- Segment Controller -->
+      <div class="feed-header-tabs">
+        <div class="feed-tab active">🌿 Community Feed</div>
+        <div class="feed-tab">🧭 Explore Stays & Maps</div>
+      </div>
+
+      <!-- Harvest Stories Tray -->
+      <div class="stories-container">
+        <div class="stories-title">🌾 Active Harvest Stories</div>
+        <div class="stories-scroll">
+          <div class="story-item">
+            <div class="story-ring"><div class="story-avatar">🥭</div></div>
+            <span class="story-name">Tatay Roman</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring"><div class="story-avatar">🍓</div></div>
+            <span class="story-name">GreenHills</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring"><div class="story-avatar">☕</div></div>
+            <span class="story-name">BenguetCoffee</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring"><div class="story-avatar">🐝</div></div>
+            <span class="story-name">BoholBees</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring"><div class="story-avatar">🌾</div></div>
+            <span class="story-name">BatadRice</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed Card #1 -->
+      <article class="feed-card">
+        <div class="card-header">
+          <div class="card-avatar">🥭</div>
+          <div class="card-author-info">
+            <div class="card-author-title">
+              Tatay Roman · Guimaras Mango Farm
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="card-author-subtitle">Jordan, Guimaras · 2 hours ago</div>
+          </div>
+          <button class="follow-btn" onclick="toggleFollow(this)">+ Follow</button>
+        </div>
+
+        <!-- Media Viewport -->
+        <div class="card-media-mockup">
+          <div class="media-icon">🌳🥭</div>
+          <div class="media-label">Harvesting Sweet Carabao Mangoes</div>
+          <div class="media-sub">High-Resolution Photo Gallery (4:5 Aspect Ratio)</div>
+          <div class="media-badge">📷 1 / 3</div>
+        </div>
+
+        <!-- Tagged Commerce Pill -->
+        <div class="card-commerce-pill" onclick="alert('Opening Instant Booking Drawer for Sunset View Kubo!')">
+          <div class="pill-icon">🏡</div>
+          <div class="pill-info">
+            <div class="pill-title">Sunset View Kubo · Mango Orchard</div>
+            <div class="pill-price">₱1,800 / night · ⭐ 4.98 (42 reviews)</div>
+          </div>
+          <button class="pill-action-btn">Instant Book</button>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="action-btn liked" onclick="toggleLike(this)">❤️ <span>1,248</span></button>
+          <button class="action-btn">💬 <span>64</span></button>
+          <button class="action-btn">↗️ Share</button>
+          <button class="action-btn bookmark">🔖 Save</button>
+        </div>
+
+        <!-- Caption -->
+        <div class="card-caption">
+          <p><strong>tatay_roman</strong> Our golden mangoes are finally ripe for harvesting! 🥭 Book your stay this weekend to join our fruit-picking tour and taste fresh organic mango jam made straight from our orchard.</p>
+          <p class="caption-tags">#GuimarasMangoes #AgritourismPH #HarvestSeason #KuboStay</p>
+          <p class="comments-count-link">View all 64 comments</p>
+        </div>
+      </article>
+
+      <!-- Feed Card #2 -->
+      <article class="feed-card">
+        <div class="card-header">
+          <div class="card-avatar">🐝</div>
+          <div class="card-author-info">
+            <div class="card-author-title">
+              Bohol Bee Sanctuary
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="card-author-subtitle">Dauis, Bohol · 5 hours ago</div>
+          </div>
+          <button class="follow-btn" onclick="toggleFollow(this)">+ Follow</button>
+        </div>
+
+        <div class="card-media-mockup" style="background: linear-gradient(180deg, #FDE68A, #F59E0B);">
+          <div class="media-icon">🍯🐝</div>
+          <div class="media-label">Wild Stingless Honey Extraction</div>
+          <div class="media-sub">Embedded Auto-looping Silent Video (HLS Stream)</div>
+          <div class="media-badge">▶ Auto-playing (Muted)</div>
+        </div>
+
+        <div class="card-commerce-pill" onclick="alert('Adding Pure Wild Honey to Bag!')">
+          <div class="pill-icon">🍯</div>
+          <div class="pill-info">
+            <div class="pill-title">Pure Organic Wild Forest Honey (350ml)</div>
+            <div class="pill-price">₱350 / jar · In Stock (Harvest: Aug 2026)</div>
+          </div>
+          <button class="pill-action-btn" style="background: #B45309;">Add to Bag</button>
+        </div>
+
+        <div class="card-actions">
+          <button class="action-btn" onclick="toggleLike(this)">🤍 <span>892</span></button>
+          <button class="action-btn">💬 <span>32</span></button>
+          <button class="action-btn">↗️ Share</button>
+          <button class="action-btn bookmark">🔖 Save</button>
+        </div>
+
+        <div class="card-caption">
+          <p><strong>bohol_bees</strong> Fresh batch of wild honey bottled today. Zero preservatives, harvested sustainably with our local beekeeping community.</p>
+          <p class="caption-tags">#OrganicHoney #BoholBees #FarmToTable</p>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- RIGHT DISCOVERY RAIL (Desktop) -->
+    <aside class="right-rail">
+
+      <!-- Seasonal Harvest Calendar -->
+      <div class="rail-card">
+        <h3>🌱 Seasonal Harvest Calendar</h3>
+        <div class="harvest-item">
+          <span class="harvest-name">🥭 Guimaras Mangoes</span>
+          <span class="harvest-status">Peak Season</span>
+        </div>
+        <div class="harvest-item">
+          <span class="harvest-name">☕ Benguet Arabica</span>
+          <span class="harvest-status" style="background: #EBF1ED; color: var(--sage);">Ripening</span>
+        </div>
+        <div class="harvest-item">
+          <span class="harvest-name">🍓 Sagada Strawberries</span>
+          <span class="harvest-status">Starting</span>
+        </div>
+        <div class="harvest-item">
+          <span class="harvest-name">🌾 Batad Heirloom Rice</span>
+          <span class="harvest-status" style="background: #FEF3C7; color: #92400E;">Planting</span>
+        </div>
+      </div>
+
+      <!-- Recommended Farms -->
+      <div class="rail-card">
+        <h3>🧑‍🌾 Recommended Farms</h3>
+        <div class="rec-farm-item">
+          <div class="rec-avatar">🧀</div>
+          <div class="rec-info">
+            <div class="rec-name">Lipa Dairy & Chevre</div>
+            <div class="rec-loc">Batangas · Artisan Cheese</div>
+          </div>
+          <button class="follow-btn">+ Follow</button>
+        </div>
+        <div class="rec-farm-item">
+          <div class="rec-avatar">🌺</div>
+          <div class="rec-info">
+            <div class="rec-name">Bukidnon Highland Herbs</div>
+            <div class="rec-loc">Malaybalay · Lavender Farm</div>
+          </div>
+          <button class="follow-btn">+ Follow</button>
+        </div>
+      </div>
+
+      <!-- Weather Terroir -->
+      <div class="rail-card">
+        <h3>⛅ Agritourism Hub Weather</h3>
+        <div style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span>📍 Guimaras Island</span>
+            <strong>29°C · Sunny</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>📍 Benguet Highlands</span>
+            <strong>19°C · Mild Mist</strong>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Mobile Fixed Bottom Navigation (Only visible in mobile mode) -->
+  <nav class="mobile-bottom-nav">
+    <div class="mobile-nav-btn active"><span>🏠</span><span>Feed</span></div>
+    <div class="mobile-nav-btn"><span>🧭</span><span>Explore</span></div>
+    <div class="mobile-nav-btn"><span>🎬</span><span>Reels</span></div>
+    <div class="mobile-nav-btn"><span>💬</span><span>Inbox</span></div>
+    <div class="mobile-nav-btn"><span>👤</span><span>Profile</span></div>
+  </nav>
+
+  <script>
+    function setDesktop() {
+      document.getElementById('viewport').classList.remove('mobile-mode');
+      document.getElementById('btn-desktop').classList.add('active');
+      document.getElementById('btn-mobile').classList.remove('active');
+    }
+
+    function setMobile() {
+      document.getElementById('viewport').classList.add('mobile-mode');
+      document.getElementById('btn-mobile').classList.add('active');
+      document.getElementById('btn-desktop').classList.remove('active');
+    }
+
+    function toggleFollow(btn) {
+      if (btn.innerText === '+ Follow') {
+        btn.innerText = 'Following';
+        btn.style.background = 'var(--canopy)';
+        btn.style.color = '#fff';
+      } else {
+        btn.innerText = '+ Follow';
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--canopy)';
+      }
+    }
+
+    function toggleLike(btn) {
+      btn.classList.toggle('liked');
+      const span = btn.querySelector('span');
+      let count = parseInt(span.innerText.replace(',', ''));
+      if (btn.classList.contains('liked')) {
+        btn.innerHTML = `❤️ <span>${(count + 1).toLocaleString()}</span>`;
+      } else {
+        btn.innerHTML = `🤍 <span>${(count - 1).toLocaleString()}</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
